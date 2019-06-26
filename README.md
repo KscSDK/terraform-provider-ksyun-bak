@@ -64,25 +64,10 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 $ make testacc
 ```
 
-## Acceptance Testing
-
-Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the `ksyun/*_test.go` files).
-
-You can run them by entering the following instructions in a terminal:
-
-```
-cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ksyun
-export KSYUN_ACCESS_KEY=xxx
-export KSYUN_SECRET_KEY=xxx
-export KSYUN_REGION=xxx
-export TF_LOG=DEBUG
-export TF_LOG_PATH=/var/log/terraform.log
-export OS_DEBUG=1
-```
 ## 快速安装
 
 
-  获取相应操作系统的terraform-provider-ksyun编译文件(bin-os/)，将其直接拷贝至terraform的plugins默认目录。
+  若不想安装go环境和编译文件，可直接安装terraform。然后获取相应操作系统的terraform-provider-ksyun编译文件(bin-os/)，将其直接拷贝至terraform的plugins默认目录。
 不同系统默认目录：(https://www.terraform.io/docs/configuration/providers.html#third-party-plugins)。
 >注意：首次拷贝，需手动创建plugins文件夹。
 
@@ -97,6 +82,17 @@ export OS_DEBUG=1
      }
  	
   可以在配置文件中指定，也可以在环境变量中配置，若两处都配置，以配置文件为主。
+  在环境变量中配置：
+  
+```sh
+$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ksyun
+$ export KSYUN_ACCESS_KEY=xxx
+$ export KSYUN_SECRET_KEY=xxx
+$ export KSYUN_REGION=xxx
+$ export TF_LOG=DEBUG
+$ export TF_LOG_PATH=/var/log/terraform.log
+$ export OS_DEBUG=1
+```
 #### 2、data-source使用
   以data+产品线命名的文件夹，代表不同资源，可根据配置条件导出全部符合的资源。若配置条件为空，导出全部。
   以dataEips下的main.tf为例：
