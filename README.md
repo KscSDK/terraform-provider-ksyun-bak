@@ -67,8 +67,8 @@ $ make testacc
 ## 快速安装
 
 
-  若不想安装go环境和编译文件，可直接安装terraform。然后获取相应操作系统的terraform-provider-ksyun编译文件(bin-os/)，将其直接拷贝至terraform的plugins默认目录。
-不同系统默认目录：(https://www.terraform.io/docs/configuration/providers.html#third-party-plugins)。
+  若用户只是利用插件，不对插件进行二次开发，且不想安装go环境和编译代码，可直接安装编译好的插件。不同操作系统的插件（terraform-provider-ksyun）位于目录bin-os/下，将其直接拷贝至terraform的plugins默认目录即可。
+不同操作系统terraform的plugins默认目录：(https://www.terraform.io/docs/configuration/providers.html#third-party-plugins)。
 >注意：首次拷贝，需手动创建plugins文件夹。
 
 ### Terraform-provider-ksyun 文件配置：
@@ -134,7 +134,8 @@ $ terraform plan
   在该目录下执行：
 ```sh
 $ terraform init
-$ terraform plan
+$ terraform plan //获取操作类型（新建，修改或重建）
+$ terraform apply //执行操作
 $ terraform destroy //删除eip
 $ terraform import ksyun_eip.default1 eipId //导入该eipId的eip信息，一般用于对已有实例的修改
 ```
