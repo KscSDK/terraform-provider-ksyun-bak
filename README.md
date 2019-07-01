@@ -176,3 +176,9 @@ $ eip_id=‘e9587b84-0da7-4fd7-a26d-bc56df63b01e’
 
   3、定义了多个资源配置，包括创建vpc、子网、安全组、安全组规则、主机及绑定eip
 
+### Terraform-provider-ksyun 版本升级：
+  terraform v0.12 版本的配置文件与v0.11 版本的配置文件格式不同。该example下的配置文件是基于v0.11.13开发的。若想使用v0.12版本的terraform需对配置文件进行修改，该修改不需手动修改，terraform支持自动修改。可在配置文件目录下直接执行：
+```sh
+$ terraform 0.12upgrade
+```
+  terraform会询问是否确认修改，输入yes即可。
