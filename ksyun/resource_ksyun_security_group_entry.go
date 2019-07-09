@@ -87,7 +87,7 @@ func resourceKsyunSecurityGroupEntryCreate(d *schema.ResourceData, meta interfac
 	for _, v := range creates {
 		if v1, ok := d.GetOk(v); ok {
 			vv := Downline2Hump(v)
-			createSecurityGroupEntry[vv] = v1
+			createSecurityGroupEntry[vv] = fmt.Sprintf("%v", v1)
 		}
 	}
 	var resp *map[string]interface{}
