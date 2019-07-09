@@ -77,7 +77,7 @@ func resourceKsyunLoadBalancerAclCreate(d *schema.ResourceData, m interface{}) e
 	for _, v := range creates {
 		if v1, ok := d.GetOk(v); ok {
 			vv := Downline2Hump(v)
-			req[vv] = fmt.Sprintf("%v",v1)
+			req[vv] = fmt.Sprintf("%v", v1)
 		}
 	}
 	action := "CreateLoadBalancerAcl"
@@ -160,7 +160,7 @@ func resourceKsyunLoadBalancerAclUpdate(d *schema.ResourceData, m interface{}) e
 	//创建修改请求
 	for _, v := range allAttributes {
 		if v1, ok := d.GetOk(v); ok {
-			req[Downline2Hump(v)] =fmt.Sprintf("%v",v1)
+			req[Downline2Hump(v)] = fmt.Sprintf("%v", v1)
 		}
 	}
 	// 开启 允许部分属性修改 功能
