@@ -10,7 +10,8 @@ resource "ksyun_instance" "default" {
     disk_type="SSD3.0"
     disk_size=30
   }
-  data_disk_gb=100
+  data_disk_gb=0
+  #only support part type
   data_disk =[
    {
       type="SSD3.0"
@@ -18,8 +19,6 @@ resource "ksyun_instance" "default" {
       delete_with_instance=true
    }
  ]
-  max_count=1
-  min_count=1
   subnet_id="9a9ac083-cd22-4e75-af56-593a91463972"
   instance_password="Xuan663222"
   keep_image_login=false

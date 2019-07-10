@@ -64,36 +64,33 @@ func resourceKsyunInstance() *schema.Resource {
 			"data_disk": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 						},
 						"size": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							Computed: true,
 						},
 						"delete_with_instance": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Computed: true,
 						},
 					},
 				},
 			},
-
-			"max_count": {
-				Type:     schema.TypeInt,
-				Required: true,
-			},
-			"min_count": {
-				Type:     schema.TypeInt,
-				Required: true,
-			},
+			/*
+				"max_count": {
+					Type:     schema.TypeInt,
+					Required: true,
+				},
+				"min_count": {
+					Type:     schema.TypeInt,
+					Required: true,
+				},
+			*/
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -349,8 +346,8 @@ func resourceKsyunInstanceCreate(d *schema.ResourceData, meta interface{}) error
 		//	"system_disk",
 		"data_disk_gb",
 		//	"data_disk",
-		"max_count",
-		"min_count",
+		//"max_count",=1
+		//"min_count",=1
 		"subnet_id",
 		"instance_password",
 		"keep_image_login",
@@ -375,6 +372,8 @@ func resourceKsyunInstanceCreate(d *schema.ResourceData, meta interface{}) error
 			createReq[vv] = fmt.Sprintf("%v", v1)
 		}
 	}
+	createReq["MaxCount"] = "1"
+	createReq["MinCount"] = "1"
 	createStructs := []string{
 		"system_disk",
 	}
