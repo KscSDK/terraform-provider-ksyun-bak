@@ -570,7 +570,7 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	*/
 	var initState string
-	//TODO判断初始开机状态
+	//TODO judge init state of the instance
 	readReq := make(map[string]interface{})
 	readReq["InstanceId.1"] = d.Id()
 	action := "DescribeInstances"
@@ -612,7 +612,7 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("error on waiting for starting instance when stopping %q, %s", d.Id(), err)
 		}
 	}
-	//不支持单独修改密码
+	//not support modify password only ,because can't judge modify status.
 	updateReq["InstancePassword"] = fmt.Sprintf("%v", d.Get("instance_password"))
 	action = "ModifyInstanceImage"
 	logger.Debug(logger.ReqFormat, action, updateReq)
@@ -648,7 +648,7 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		d.SetPartial(v)
 	}
 
-	//ModifyInstanceType //需要重启
+	//ModifyInstanceType //need reboot
 	/*	typeUpdate := false
 			updateInstanceTypes := []string{
 				"instance_type",
@@ -676,7 +676,7 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 			}
 
 
-		//后续修改需要关机
+		//need shutdown later
 		//StopInstances
 		  if d.HasChange("force_stop") && !d.IsNewResource() {
 		  	if d.Get("force_stop").(bool) {
@@ -702,10 +702,10 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 				}
 
 			if initState == "active" {
-				//判断初始开机状态,若开机则开机
+				//judge init state,and need start if active
 				action := "RebootInstances"
 				logger.Debug(logger.ReqFormat, action, updateReq1)
-				resp, err := conn.RebootInstances(&updateReq1) //同步
+				resp, err := conn.RebootInstances(&updateReq1) //sync
 				if err != nil {
 					return fmt.Errorf("error on updating instance type, %s", err)
 				}
@@ -765,7 +765,7 @@ func resourceKsyunInstanceDelete(d *schema.ResourceData, meta interface{}) error
 		if strings.ToLower(initState) != "stopped" && strings.ToLower(initState) != "error" {
 			action = "StopInstances"
 			logger.Debug(logger.ReqFormat, action, readReq)
-			resp, err := conn.StopInstances(&readReq) //同步
+			resp, err := conn.StopInstances(&readReq) //sync
 			logger.Debug(logger.AllFormat, action, readReq, *resp, err)
 			if err1 != nil && notFoundError(err1) {
 				return nil
@@ -796,7 +796,7 @@ func resourceKsyunInstanceDelete(d *schema.ResourceData, meta interface{}) error
 		if err2 != nil && inUseError(err2) {
 			return resource.RetryableError(err2)
 		}
-		//查询验证
+		//check
 		readReq = make(map[string]interface{})
 		readReq["InstanceId.1"] = d.Id()
 		action = "DescribeInstances"

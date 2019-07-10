@@ -180,7 +180,7 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 	}
 	attributeUpdate := false
 	var updates []string
-	//获取修改属性
+	//Get the property that needs to be modified
 	for _, v := range allAttributes {
 		if d.HasChange(v) {
 			attributeUpdate = true
@@ -190,17 +190,17 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 	if !attributeUpdate {
 		return nil
 	}
-	//创建修改请求
+	//Create a modification request
 	for _, v := range allAttributes {
 		if v1, ok := d.GetOk(v); ok {
 			req[Downline2Hump(v)] = fmt.Sprintf("%v", v1)
 		}
 	}
-	//必填字端，未修改也要传
+	//Required word, though not modified
 	if _, ok := req["HealthCheckState"]; !ok {
 		req["HealthCheckState"] = d.Get("health_check_state")
 	}
-	// 开启 允许部分属性修改 功能
+	// Enable partial attribute modification
 	d.Partial(true)
 	action := "ModifyHealthCheck"
 	logger.Debug(logger.ReqFormat, action, req)
@@ -210,7 +210,7 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("update HealthCheck (%v)error:%v", req, err)
 	}
 	logger.Debug(logger.RespFormat, action, req, *resp)
-	// 设置部分修改属性
+	// Set partial modification properties
 	for _, v := range updates {
 		d.SetPartial(v)
 	}

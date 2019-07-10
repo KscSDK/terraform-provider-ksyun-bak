@@ -176,11 +176,10 @@ func resourceKsyunLbUpdate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		return fmt.Errorf("cann't change load_balancer_state to empty string")
 	}
-	// 开启 允许部分属性修改 功能
+	// Enable partial attribute modification
 	d.Partial(true)
-	// 标识是否有修改
+	// Whether the representative has any modifications
 	attributeUpdate := false
-	// 修改负载均衡的名称
 	if d.HasChange("load_balancer_name") {
 		attributeUpdate = true
 	}

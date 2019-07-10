@@ -184,7 +184,7 @@ func resourceKsyunSecurityGroupDelete(d *schema.ResourceData, meta interface{}) 
 			return resource.RetryableError(err)
 		}
 
-		//查询验证
+		//check
 		readSecurityGroup := make(map[string]interface{})
 		readSecurityGroup["SecurityGroupId.1"] = d.Id()
 		action = "DescribeSecurityGroups"

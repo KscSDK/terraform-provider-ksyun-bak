@@ -282,10 +282,10 @@ func resourceKsyunListenerUpdate(d *schema.ResourceData, m interface{}) error {
 			"cookie_name",
 		*/
 	}
-	// 标识是否有修改
+	// Whether the representative has any modifications
 	attributeUpdate := false
 	var updates []string
-	//获取修改属性
+	//Get the property that needs to be modified
 	for _, v := range allAttributes {
 		if d.HasChange(v) {
 			attributeUpdate = true
@@ -295,13 +295,13 @@ func resourceKsyunListenerUpdate(d *schema.ResourceData, m interface{}) error {
 	if !attributeUpdate {
 		return nil
 	}
-	//创建修改请求
+	//Create a modification request
 	for _, v := range allAttributes {
 		if v1, ok := d.GetOk(v); ok {
 			req[Downline2Hump(v)] = fmt.Sprintf("%v", v1)
 		}
 	}
-	// 开启 允许部分属性修改 功能
+	// Enable partial attribute modification
 	d.Partial(true)
 	action := "ModifyListeners"
 	logger.Debug(logger.ReqFormat, action, req)
