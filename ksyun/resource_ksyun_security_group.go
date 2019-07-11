@@ -150,7 +150,7 @@ func resourceKsyunSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 	modifySecurityGroup["SecurityGroupId"] = d.Id()
 
 	if d.HasChange("security_group_name") && !d.IsNewResource() {
-		modifySecurityGroup["SecurityGroupName"] = d.Get("security_group_name").(string)
+		modifySecurityGroup["SecurityGroupName"] = fmt.Sprintf("%v", d.Get("security_group_name"))
 		attributeUpdate = true
 	}
 	if attributeUpdate {

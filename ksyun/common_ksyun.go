@@ -88,8 +88,6 @@ func SetDByRespV1(d *schema.ResourceData, m interface{}, exclud map[string]bool)
 	return mre
 }
 
-//将得到的map[string]interface{}类型的值赋值给d。只支持[k,v]中的v为基本数据类型
-//Include 是已有字段，防止日后新加字段无法解析。exclude是排除字段，非基本类型字段需排除做特殊处理。
 //set sdk response (map[string]interface{}) to the terr`aform ([]map[string]interface).
 //params data limit ： [k,v]:the type of k must be string ,the type of v must be basic type.
 //include ：representing the key terraform has defined. terraform will panic if set the key that not defined.
@@ -165,6 +163,9 @@ func FlatternStruct(v interface{}, req *map[string]interface{}) {
 		if len(v1) > 0 {
 			vv := v1[0].(map[string]interface{})
 			for k2, v2 := range vv {
+				if len(fmt.Sprintf("%v", v2)) == 0 {
+					continue
+				}
 				vv := Downline2Hump(k2)
 				(*req)[vv] = fmt.Sprintf("%v", v2)
 			}
@@ -180,6 +181,9 @@ func FlatternStructPrefix(v interface{}, req *map[string]interface{}, prex strin
 		if len(v1) > 0 {
 			vv := v1[0].(map[string]interface{})
 			for k2, v2 := range vv {
+				if len(fmt.Sprintf("%v", v2)) == 0 {
+					continue
+				}
 				vv := Downline2Hump(k2)
 				(*req)[fmt.Sprintf("%s.%s", prex, vv)] = fmt.Sprintf("%v", v2)
 			}
@@ -192,11 +196,16 @@ func FlatternStructPrefix(v interface{}, req *map[string]interface{}, prex strin
 //prefix: the name of the slice
 func FlatternStructSlicePrefix(values interface{}, req *map[string]interface{}, prex string) {
 	v, _ := values.([]interface{})
-	for k1, v1 := range v {
+	k := 0
+	for _, v1 := range v {
 		vv := v1.(map[string]interface{})
 		for k2, v2 := range vv {
+			if len(fmt.Sprintf("%v", v2)) == 0 {
+				continue
+			}
+			k++
 			vv := Downline2Hump(k2)
-			(*req)[fmt.Sprintf("%s.%d.%s", prex, k1+1, vv)] = fmt.Sprintf("%v", v2)
+			(*req)[fmt.Sprintf("%s.%d.%s", prex, k, vv)] = fmt.Sprintf("%v", v2)
 		}
 	}
 }
@@ -208,12 +217,16 @@ func ConvertFilterStruct(v interface{}, req *map[string]interface{}) {
 		if len(v1) > 0 {
 			vv := v1[0].(map[string]interface{})
 			for k2, v2 := range vv {
+				if len(fmt.Sprintf("%v", v2)) == 0 {
+					continue
+				}
 				vv := strings.ReplaceAll(k2, "_", "-")
 				(*req)[vv] = fmt.Sprintf("%v", v2)
 			}
 		}
 	}
 }
+
 //Suitable for filter which need conver param with "_"(terraform) to "-"(sdk) when read.
 //convert input param struct to map when create(with prefix).
 //prefix:the name of the elemet from filter
@@ -225,6 +238,9 @@ func ConvertFilterStructPrefix(v interface{}, req *map[string]interface{}, prex 
 			}
 			vv := v1[0].(map[string]interface{})
 			for k2, v2 := range vv {
+				if len(fmt.Sprintf("%v", v2)) == 0 {
+					continue
+				}
 				vv := strings.ReplaceAll(k2, "_", "-")
 				(*req)[fmt.Sprintf("%s.%s", prex, vv)] = v2
 			}
@@ -282,4 +298,3 @@ func dataSourceKscSaveSlice(d *schema.ResourceData, dataKey string, ids []string
 
 	return nil
 }
-

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
+	"regexp"
 )
 
 func dataSourceKsyunImages() *schema.Resource {
@@ -21,18 +22,19 @@ func dataSourceKsyunImages() *schema.Resource {
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.ValidateRegexp,
 			},
 			"platform": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"is_public": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
+			},
+			"image_source": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"output_file": {
 				Type:     schema.TypeString,
@@ -139,6 +141,25 @@ func dataSourceKsyunImagesRead(d *schema.ResourceData, m interface{}) error {
 		var dataFilter []map[string]interface{}
 		for _, v := range datas {
 			if v["is_public"] == standard {
+				dataFilter = append(dataFilter, v)
+			}
+		}
+		datas = dataFilter
+	}
+	if imageSource, ok := d.GetOk("image_source"); ok {
+		var dataFilter []map[string]interface{}
+		for _, v := range datas {
+			if v["image_source"] == imageSource {
+				dataFilter = append(dataFilter, v)
+			}
+		}
+		datas = dataFilter
+	}
+	if nameRegex, ok := d.GetOk("name_regex"); ok {
+		var dataFilter []map[string]interface{}
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, v := range datas {
+			if r == nil || r.MatchString(v["name"].(string)) {
 				dataFilter = append(dataFilter, v)
 			}
 		}

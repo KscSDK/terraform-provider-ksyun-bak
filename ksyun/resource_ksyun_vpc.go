@@ -88,15 +88,12 @@ func resourceKsyunVPCRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error on reading vpc %q, %s", d.Id(), err)
 	}
 	if resp != nil {
-		l := (*resp)["VpcSet"].([]interface{})
-		if len(l) == 0 {
+		items, ok := (*resp)["VpcSet"].([]interface{})
+		if !ok || len(items) == 0 {
 			d.SetId("")
 			return nil
 		}
-		item := l[0].(map[string]interface{})
-		d.Set("vpc_name", item["VpcName"].(string))
-		d.Set("cidr_block", item["CidrBlock"].(string))
-		d.Set("is_default", item["IsDefault"].(bool))
+		SetDByResp(d, items[0], vpcKeys, map[string]bool{})
 	}
 	return nil
 }
@@ -110,7 +107,7 @@ func resourceKsyunVPCUpdate(d *schema.ResourceData, meta interface{}) error {
 	modifyVpc["VpcId"] = d.Id()
 
 	if d.HasChange("vpc_name") && !d.IsNewResource() {
-		modifyVpc["VpcName"] = d.Get("vpc_name").(string)
+		modifyVpc["VpcName"] = fmt.Sprintf("%v", d.Get("vpc_name"))
 		attributeUpdate = true
 	}
 	if attributeUpdate {

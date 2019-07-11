@@ -7,8 +7,9 @@ provider "ksyun" {
 data "ksyun_images" "default" {
   output_file="output_result"
   ids=[]
-  name_regex=""
+  name_regex="centos-7.0-20180927115228"
   is_public=true
+  image_source="system"
 }
 
 data "ksyun_images" "centos-7_5" {

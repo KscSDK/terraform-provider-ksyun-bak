@@ -176,7 +176,7 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 		"unhealthy_threshold",
 		"is_default_host_name",
 		"host_name",
-		"health_check_state",
+		"url_path",
 	}
 	attributeUpdate := false
 	var updates []string
