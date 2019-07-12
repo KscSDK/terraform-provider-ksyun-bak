@@ -238,3 +238,16 @@ var imageKeys = map[string]bool{
 	"Progress":     true,
 	"ImageSource":  true,
 }
+var networkInterfaceKeys = map[string]bool{
+	"NetworkInterfaceId":   true,
+	"NetworkInterfaceType": true,
+	"MacAddress":           true,
+	"SecurityGroupSet":     true,
+	"InstanceId":           true,
+	"InstanceType":         true,
+	"PrivateIpAddress":     true,
+	"SubnetId":             true,
+	"ProjectId":            true,
+	"DNS1":                 true,
+	"DNS2":                 true,
+}

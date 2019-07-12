@@ -67,6 +67,7 @@ func Provider() terraform.ResourceProvider {
 			"ksyun_security_group":            resourceKsyunSecurityGroup(),
 			"ksyun_security_group_entry":      resourceKsyunSecurityGroupEntry(),
 			"ksyun_instance":                  resourceKsyunInstance(),
+			"ksyun_network_interface":         resourceKsyunNetworkInterface(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
