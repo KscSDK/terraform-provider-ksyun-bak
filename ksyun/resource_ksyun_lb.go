@@ -191,7 +191,14 @@ func resourceKsyunLbUpdate(d *schema.ResourceData, m interface{}) error {
 		logger.Debug(logger.ReqFormat, action, req)
 		resp, err := Slbconn.ModifyLoadBalancer(&req)
 		if err != nil {
-			return fmt.Errorf("update Slb (%v)error:%v", req, err)
+			logger.Debug(logger.AllFormat, action+" first", req, *resp, err)
+			if strings.Contains(err.Error(), "400") {
+				time.Sleep(time.Second * 2)
+				resp, err = Slbconn.ModifyLoadBalancer(&req)
+				if err != nil {
+					return fmt.Errorf("update Slb (%v)error twice:%v", req, err)
+				}
+			}
 		}
 		logger.Debug(logger.RespFormat, action, req, *resp)
 		d.SetPartial("load_balancer_name")

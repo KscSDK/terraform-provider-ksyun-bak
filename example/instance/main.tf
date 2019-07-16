@@ -24,7 +24,7 @@ resource "ksyun_instance" "default" {
   keep_image_login=false
   charge_type="Daily"
   purchase_time=1
-  security_group_id="b8591529-2741-4f09-af3c-49a954e3e4fa"
+  security_group_id=["b8591529-2741-4f09-af3c-49a954e3e4fa"]
   private_ip_address=""
   instance_name="xuan-tf-update"
   instance_name_suffix=""
@@ -32,4 +32,7 @@ resource "ksyun_instance" "default" {
   project_id=0
   data_guard_id=""
   key_id=[]
+  "d_n_s1"=""
+  "d_n_s2"=""
+  "force_delete"=true
 }

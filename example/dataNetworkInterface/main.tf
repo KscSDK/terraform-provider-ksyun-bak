@@ -6,7 +6,6 @@ provider "ksyun" {
 # Get  network_interfaces
 data "ksyun_network_interfaces" "default" {
   output_file="output_result"
-
   ids=[]
   vpc_id=[]
   subnet_id=[]

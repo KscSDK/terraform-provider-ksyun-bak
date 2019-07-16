@@ -184,8 +184,8 @@ func FlatternStructPrefix(v interface{}, req *map[string]interface{}, prex strin
 				if len(fmt.Sprintf("%v", v2)) == 0 {
 					continue
 				}
-				vv := Downline2Hump(k2)
-				(*req)[fmt.Sprintf("%s.%s", prex, vv)] = fmt.Sprintf("%v", v2)
+				kk := Downline2Hump(k2)
+				(*req)[fmt.Sprintf("%s.%s", prex, kk)] = fmt.Sprintf("%v", v2)
 			}
 		}
 	}
@@ -199,13 +199,13 @@ func FlatternStructSlicePrefix(values interface{}, req *map[string]interface{}, 
 	k := 0
 	for _, v1 := range v {
 		vv := v1.(map[string]interface{})
+		if len(vv) == 0 {
+			continue
+		}
+		k++
 		for k2, v2 := range vv {
-			if len(fmt.Sprintf("%v", v2)) == 0 {
-				continue
-			}
-			k++
-			vv := Downline2Hump(k2)
-			(*req)[fmt.Sprintf("%s.%d.%s", prex, k, vv)] = fmt.Sprintf("%v", v2)
+			kk := Downline2Hump(k2)
+			(*req)[fmt.Sprintf("%s.%d.%s", prex, k, kk)] = fmt.Sprintf("%v", v2)
 		}
 	}
 }

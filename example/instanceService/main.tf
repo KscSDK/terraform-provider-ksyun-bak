@@ -38,8 +38,12 @@ resource "ksyun_security_group" "default" {
   vpc_id = "${ksyun_vpc.default.id}"
   security_group_name="${var.security_group_name}"
 }
+resource "ksyun_security_group" "default2" {
+  vpc_id = "${ksyun_vpc.default.id}"
+  security_group_name="${var.security_group_name}"
+}
 resource "ksyun_security_group_entry" "test1" {
-  description = "26231a41-4c6b-4a10-94ed-27088d5679df"
+  description = "test1"
   security_group_id="${ksyun_security_group.default.id}"
   cidr_block="10.0.1.1/32"
   direction="in"
@@ -50,7 +54,7 @@ resource "ksyun_security_group_entry" "test1" {
   port_range_to=0
 }
 resource "ksyun_security_group_entry" "test2" {
-  description = "26231a41-4c6b-4a10-94ed-27088d5679df"
+  description = "test2"
   security_group_id="${ksyun_security_group.default.id}"
   cidr_block="10.0.1.6/32"
   direction="out"
@@ -60,7 +64,17 @@ resource "ksyun_security_group_entry" "test2" {
   port_range_from=0
   port_range_to=0
 }
-
+resource "ksyun_security_group_entry" "test3" {
+  description = "test3"
+  security_group_id="${ksyun_security_group.default2.id}"
+  cidr_block="10.0.1.6/32"
+  direction="out"
+  protocol="ip"
+  icmp_type=0
+  icmp_code=0
+  port_range_from=0
+  port_range_to=0
+}
 resource "ksyun_instance" "default" {
   image_id="${data.ksyun_images.centos-7_5.images.0.image_id}"
   instance_type="N3.2B"
@@ -83,7 +97,7 @@ resource "ksyun_instance" "default" {
   keep_image_login=false
   charge_type="Daily"
   purchase_time=1
-  security_group_id="${ksyun_security_group.default.id}"
+  security_group_id=["${ksyun_security_group.default.id}","${ksyun_security_group.default2.id}"]
   private_ip_address=""
   instance_name="xuan-tf-combine"
   instance_name_suffix=""
@@ -91,6 +105,7 @@ resource "ksyun_instance" "default" {
   project_id=0
   data_guard_id=""
   key_id=[]
+  force_delete=true
 }
 
 resource "ksyun_eip" "default" {
@@ -104,5 +119,5 @@ resource "ksyun_eip_associate" "default" {
   allocation_id="${ksyun_eip.default.id}"
   instance_type="Ipfwd"
   instance_id="${ksyun_instance.default.id}"
-  network_interface_id="${ksyun_instance.default.network_interface_set.0.network_interface_id}"
+  network_interface_id="${ksyun_instance.default.network_interface_id}"
 }

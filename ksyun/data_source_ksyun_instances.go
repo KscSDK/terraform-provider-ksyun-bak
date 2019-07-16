@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksc/logger"
-	"log"
 )
 
 func dataSourceKsyunInstances() *schema.Resource {
@@ -395,7 +394,6 @@ func dataSourceKsyunInstancesRead(d *schema.ResourceData, m interface{}) error {
 			index++
 		}
 	}
-	log.Println("[DEBUG] netWorkreq.......:%v", netWorkreq)
 	statereq := make(map[string]interface{})
 	if v, ok := d.GetOk("instance_state"); ok {
 		ConvertFilterStructPrefix(v, &statereq, "instance-state")
@@ -426,7 +424,6 @@ func dataSourceKsyunInstancesRead(d *schema.ResourceData, m interface{}) error {
 			index++
 		}
 	}
-	log.Println("[DEBUG] req.......:%v", req)
 	var allinstances []interface{}
 	var limit int = 100
 	var nextToken string
@@ -500,7 +497,6 @@ func dealInstanceData(datas []map[string]interface{}) {
 						}
 					}
 				}
-				log.Println("[DEBUG] network_interface_set:%v", networkSet)
 				datas[k]["network_interface_set"] = networkSet
 			}
 		}

@@ -148,7 +148,7 @@ resource "ksyun_subnet" "foo" {
     gateway_ip = "10.0.5.1"
     dns1 = "198.18.254.40"
     dns2 = "198.18.254.41"
-    availability_zone = "cn-shanghai-2a"
+    availability_zone = "cn-beijing-6a"
 }
 `
 
@@ -163,6 +163,6 @@ resource "ksyun_subnet" "foo" {
     gateway_ip = "10.0.5.1"
     dns1 = "198.18.254.41"
     dns2 = "198.18.254.40"
-    availability_zone = "cn-shanghai-2a"
+    availability_zone = "cn-beijing-6a"
 }
 `

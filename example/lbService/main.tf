@@ -16,12 +16,12 @@ resource "ksyun_lb_listener" "default" {
   listener_name = "tf-xun-2",
   listener_port = "8080",
   listener_protocol = "HTTP",
-  listener_state = "stop",
+  listener_state = "start",
   load_balancer_id = "${ksyun_lb.default.id}",
   method = "RoundRobin"
   certificate_id = ""
   session {
-    session_state = "stop"
+    session_state = "start"
     session_persistence_period = 100
     cookie_type = "RewriteCookie"
     cookie_name = "cookiexunqq"
@@ -34,7 +34,7 @@ resource "ksyun_lb_listener_server" "default" {
   real_server_ip = "10.0.77.20"
   real_server_port = 8000
   real_server_type = "host"
-  instance_id = "3a520244-ddc1-41c8-9d2b-66b4cf3a2386"
+  instance_id = "dc746b15-2afc-481c-926d-eb9538b01f39"
   weight = 10
 }
 # Create Load Balancer Listener Acl
@@ -59,6 +59,7 @@ resource "ksyun_eip" "default" {
   band_width = 1
   charge_type = "PostPaidByDay"
   purchase_time = 1
+  project_id =0
 }
 
 # Bind eip to Load Balancer

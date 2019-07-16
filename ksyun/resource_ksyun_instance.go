@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/ksc/ksc-sdk-go/service/kec"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
+	"log"
 	"strings"
 	"time"
 )
@@ -91,10 +92,6 @@ func resourceKsyunInstance() *schema.Resource {
 					Required: true,
 				},
 			*/
-			"subnet_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"instance_password": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -114,13 +111,10 @@ func resourceKsyunInstance() *schema.Resource {
 				Required: true,
 			},
 			"security_group_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Required: true,
-			},
-			"private_ip_address": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Set:      schema.HashString,
 			},
 			"instance_name": {
 				Type:     schema.TypeString,
@@ -176,6 +170,11 @@ func resourceKsyunInstance() *schema.Resource {
 			},
 			"address_project_id": {
 				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"force_delete": {
+				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
 			},
@@ -240,68 +239,51 @@ func resourceKsyunInstance() *schema.Resource {
 					},
 				},
 			},
-			"network_interface_set": {
+
+			"network_interface_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"network_interface_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"mac_address": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"subnet_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"private_ip_address": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"group_set": {
 				Type:     schema.TypeList,
 				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"network_interface_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"network_interface_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"mac_address": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"subnet_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"private_ip_address": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"security_group_set": {
-							Type:     schema.TypeList,
-							Computed: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"security_group_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"group_set": {
-							Type:     schema.TypeList,
-							Computed: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"group_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"d_n_s1": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"d_n_s2": {
+						"group_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
 				},
+			},
+			"d_n_s1": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"d_n_s2": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"stopped_mode": {
 				Type:     schema.TypeString,
@@ -353,7 +335,7 @@ func resourceKsyunInstanceCreate(d *schema.ResourceData, meta interface{}) error
 		"keep_image_login",
 		"charge_type",
 		"purchase_time",
-		"security_group_id",
+		//"security_group_id",
 		"private_ip_address",
 		"instance_name",
 		"instance_name_suffix",
@@ -372,6 +354,15 @@ func resourceKsyunInstanceCreate(d *schema.ResourceData, meta interface{}) error
 			createReq[vv] = fmt.Sprintf("%v", v1)
 		}
 	}
+	securityGroupIds, ok := d.GetOk("security_group_id")
+	if !ok {
+		return fmt.Errorf("no SecurityGroupId get")
+	}
+	securityGroups := SchemaSetToStringSlice(securityGroupIds)
+	if len(securityGroups) == 0 {
+		return fmt.Errorf("no SecurityGroupId get")
+	}
+	createReq["SecurityGroupId"] = securityGroups[0]
 	createReq["MaxCount"] = "1"
 	createReq["MinCount"] = "1"
 	createStructs := []string{
@@ -420,6 +411,7 @@ func resourceKsyunInstanceCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceKsyunInstanceRead(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("read force_delete:%v", d.Get("force_delete"))
 	conn := meta.(*KsyunClient).kecconn
 	readReq := make(map[string]interface{})
 	readReq["InstanceId.1"] = d.Id()
@@ -468,30 +460,92 @@ func resourceKsyunInstanceRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set(Hump2Downline("Monitoring"), itemSet)
 	}
 	if excludes["NetworkInterfaceSet"] != nil {
-		itemSet := GetSubSliceDByRep(excludes["NetworkInterfaceSet"].([]interface{}), kecNetworkInterfaceKeys)
-		for k, v := range itemSet {
-			if nit, ok := v["network_interface_type"]; ok {
-				if nit == "primary" {
-					if snId, ok := v["subnet_id"]; ok {
-						d.Set("subnet_id", snId)
-					}
-				}
+		networkSet := excludes["NetworkInterfaceSet"]
+		networks, ok := networkSet.([]interface{})
+		if !ok {
+			return fmt.Errorf("no network interfaces on reading Instance %q", d.Id())
+		}
+		var networkInterfaceItem map[string]interface{}
+		for _, v := range networks {
+			value, ok := v.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("no network interface on reading Instance %q", d.Id())
 			}
-			if gs, ok := v["group_set"]; ok {
-				itemSetSub := GetSubSliceDByRep(gs.([]interface{}), groupSetKeys)
-				itemSet[k]["group_set"] = itemSetSub
+			nit, ok := value["NetworkInterfaceType"]
+			if !ok || nit != "primary" { //only get master network interface
+				continue
 			}
-			if sg, ok := v["security_group_set"]; ok {
-				itemSetSub := GetSubSliceDByRep(sg.([]interface{}), kecSecurityGroupKeys)
-				itemSet[k]["security_group_set"] = itemSetSub
-				if len(itemSetSub) == 1 {
-					if sgIdnew, ok := itemSetSub[0]["security_group_id"]; ok {
-						d.Set("security_group_id", sgIdnew)
-					}
+			networkInterfaceItem = value
+		}
+		excludeKeys := map[string]bool{
+			"SecurityGroupSet": true,
+			"GroupSet":         true,
+		}
+		SetDByResp(d, networkInterfaceItem, kecNetworkInterfaceKeys, excludeKeys)
+		if gs, ok := networkInterfaceItem["group_set"]; ok {
+			itemSetSub := GetSubSliceDByRep(gs.([]interface{}), groupSetKeys)
+			d.Set("group_set", itemSetSub)
+		}
+		//SecurityGroupSet instance interface only support one ,so should get from network interface.
+
+		/*if sg, ok := v["security_group_set"]; ok {
+			itemSetSub := GetSubSliceDByRep(sg.([]interface{}), kecSecurityGroupKeys)
+			itemSet[k]["security_group_set"] = itemSetSub
+			if len(itemSetSub) == 1 {
+				if sgIdnew, ok := itemSetSub[0]["security_group_id"]; ok {
+					d.Set("security_group_id", sgIdnew)
 				}
 			}
 		}
-		d.Set(Hump2Downline("NetworkInterfaceSet"), itemSet)
+		*/
+		vpcConn := meta.(*KsyunClient).vpcconn
+		readReq := make(map[string]interface{})
+		netId := d.Get("network_interface_id")
+		readReq["NetworkInterfaceId.1"] = netId
+		action := "DescribeNetworkInterfaces"
+		logger.Debug(logger.ReqFormat, action, readReq)
+		resp, err := vpcConn.DescribeNetworkInterfaces(&readReq)
+		if err != nil {
+			return fmt.Errorf("error on reading Instance %q, %s", d.Id(), err)
+		}
+		logger.Debug(logger.AllFormat, action, readReq, *resp, err)
+		itemset, ok := (*resp)["NetworkInterfaceSet"]
+		items, ok := itemset.([]interface{})
+		if !ok || len(items) == 0 {
+			return fmt.Errorf("no data on reading Instance (%q) networkInterfaceSet(%q)", d.Id(), netId)
+		}
+		/*
+			itemMap, _ := items[0].(map[string]interface{})
+			if len(itemMap) == 0 {
+				return fmt.Errorf("no data on reading Instance (%q) networkInterfaceSet(%q)", d.Id(), netId)
+			}
+			securityGroupSet, ok := itemMap["SecurityGroupSet"]
+			if !ok {
+				return fmt.Errorf("no data on reading networkInterfaceSet(%q)", netId)
+			}
+			securityGroupS, _ := securityGroupSet.([]interface{})
+			if len(securityGroupS) == 0 {
+				return fmt.Errorf("no group on reading networkInterfaceSet(%q)", netId)
+			}
+		*/
+		excludesKeys := map[string]bool{
+			"SecurityGroupSet": true,
+		}
+		excludes := SetDByResp(d, items[0], networkInterfaceKeys, excludesKeys)
+		if sg, ok := excludes["SecurityGroupSet"]; ok {
+			itemSetSub := GetSubSliceDByRep(sg.([]interface{}), kecSecurityGroupKeys)
+			if len(itemSetSub) != 0 {
+				var itemSetSlice []string
+				for _, v := range itemSetSub {
+					for k1, v1 := range v {
+						if k1 == "security_group_id" {
+							itemSetSlice = append(itemSetSlice, fmt.Sprintf("%v", v1))
+						}
+					}
+				}
+				d.Set("security_group_id", itemSetSlice)
+			}
+		}
 	}
 	if excludes["SystemDisk"] != nil {
 		itemSet := GetSubDByRep(excludes["SystemDisk"], systemDiskKeys, map[string]bool{})
@@ -551,103 +605,100 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		imageUpdate = true
 		imageUpdated = append(imageUpdated, "system_disk")
 	}
-	if !imageUpdate {
-		d.Partial(false)
-		return resourceKsyunInstanceRead(d, meta)
-	}
-	/*
-		passwordUpdate := false
-		updatePassword := []string{
-			"instance_password",
-		}
-		var updatedAttributePassword []string
-		for _, v := range updatePassword {
-			if d.HasChange(v) && !d.IsNewResource() && !imageUpdate {
-				updateReq3[Downline2Hump(v)] = fmt.Sprintf("%v", d.Get(v))
-				passwordUpdate = true
-				updatedAttributePassword = append(updatedAttributePassword, v)
+	if imageUpdate {
+		/*
+			passwordUpdate := false
+			updatePassword := []string{
+				"instance_password",
 			}
-		}
-	*/
-	var initState string
-	//TODO judge init state of the instance
-	readReq := make(map[string]interface{})
-	readReq["InstanceId.1"] = d.Id()
-	action := "DescribeInstances"
-	logger.Debug(logger.ReqFormat, action, readReq)
-	resp, err := conn.DescribeInstances(&readReq)
-	logger.Debug(logger.AllFormat, action, readReq, *resp, err)
-	if err != nil {
-		return fmt.Errorf("error on reading Instance %q, %s", d.Id(), err)
-	}
-
-	itemset, ok := (*resp)["InstancesSet"]
-	items, ok := itemset.([]interface{})
-	if !ok || len(items) == 0 {
-		return fmt.Errorf("error on reading Instance %q, %s", d.Id(), err)
-	}
-	state := items[0].(map[string]interface{})["InstanceState"]
-	initState = state.(map[string]interface{})["Name"].(string)
-	if initState == "error" {
-		return fmt.Errorf("instance with error state can't be modify image")
-	}
-	if initState != "stopped" {
-		action = "StopInstances"
+			var updatedAttributePassword []string
+			for _, v := range updatePassword {
+				if d.HasChange(v) && !d.IsNewResource() && !imageUpdate {
+					updateReq3[Downline2Hump(v)] = fmt.Sprintf("%v", d.Get(v))
+					passwordUpdate = true
+					updatedAttributePassword = append(updatedAttributePassword, v)
+				}
+			}
+		*/
+		var initState string
+		//TODO judge init state of the instance
+		readReq := make(map[string]interface{})
+		readReq["InstanceId.1"] = d.Id()
+		action := "DescribeInstances"
 		logger.Debug(logger.ReqFormat, action, readReq)
-		resp, err = conn.StopInstances(&readReq) //同步
+		resp, err := conn.DescribeInstances(&readReq)
 		logger.Debug(logger.AllFormat, action, readReq, *resp, err)
 		if err != nil {
-			return fmt.Errorf("error on stop  instance %s", err)
+			return fmt.Errorf("error on reading Instance %q, %s", d.Id(), err)
 		}
 
+		itemset, ok := (*resp)["InstancesSet"]
+		items, ok := itemset.([]interface{})
+		if !ok || len(items) == 0 {
+			return fmt.Errorf("error on reading Instance %q, %s", d.Id(), err)
+		}
+		state := items[0].(map[string]interface{})["InstanceState"]
+		initState = state.(map[string]interface{})["Name"].(string)
+		if initState == "error" {
+			return fmt.Errorf("instance with error state can't be modify image")
+		}
+		if initState != "stopped" {
+			action = "StopInstances"
+			logger.Debug(logger.ReqFormat, action, readReq)
+			resp, err = conn.StopInstances(&readReq) //同步
+			logger.Debug(logger.AllFormat, action, readReq, *resp, err)
+			if err != nil {
+				return fmt.Errorf("error on stop  instance %s", err)
+			}
+
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{statusPending},
+				Target:     []string{"stopped"},
+				Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"stopped"}),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      3 * time.Second,
+				MinTimeout: 2 * time.Second,
+			}
+			if _, err = stateConf.WaitForState(); err != nil {
+				return fmt.Errorf("error on waiting for starting instance when stopping %q, %s", d.Id(), err)
+			}
+		}
+		//not support modify password only ,because can't judge modify status.
+		updateReq["InstancePassword"] = fmt.Sprintf("%v", d.Get("instance_password"))
+		action = "ModifyInstanceImage"
+		logger.Debug(logger.ReqFormat, action, updateReq)
+		resp, err = conn.ModifyInstanceImage(&updateReq)
+		logger.Debug(logger.AllFormat, action, updateReq, *resp, err)
+		if err != nil {
+			return fmt.Errorf("error on updating instance image, %s", err)
+		}
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{statusPending},
-			Target:     []string{"stopped"},
-			Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"stopped"}),
+			Target:     []string{"rebuilding", "overriding"},
+			Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"rebuilding", "overriding"}),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      3 * time.Second,
 			MinTimeout: 2 * time.Second,
 		}
 		if _, err = stateConf.WaitForState(); err != nil {
-			return fmt.Errorf("error on waiting for starting instance when stopping %q, %s", d.Id(), err)
+			return fmt.Errorf("error on waiting for reinstalling instance when ModifyInstanceImage %q, %s", d.Id(), err)
+		}
+		stateConf = &resource.StateChangeConf{
+			Pending: []string{statusPending},
+			Target:  []string{"active"},
+			//final state may be "stopped" ,need to return error
+			Refresh:    instanceStateRefreshForReinstallFunc(conn, d.Id(), []string{"active"}),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      3 * time.Second,
+			MinTimeout: 2 * time.Second,
+		}
+		if _, err = stateConf.WaitForState(); err != nil {
+			return fmt.Errorf("error on waiting for starting instance when ModifyInstanceImage %q, %s", d.Id(), err)
+		}
+		for _, v := range imageUpdated {
+			d.SetPartial(v)
 		}
 	}
-	//not support modify password only ,because can't judge modify status.
-	updateReq["InstancePassword"] = fmt.Sprintf("%v", d.Get("instance_password"))
-	action = "ModifyInstanceImage"
-	logger.Debug(logger.ReqFormat, action, updateReq)
-	resp, err = conn.ModifyInstanceImage(&updateReq)
-	logger.Debug(logger.AllFormat, action, updateReq, *resp, err)
-	if err != nil {
-		return fmt.Errorf("error on updating instance image, %s", err)
-	}
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{statusPending},
-		Target:     []string{"rebuilding", "overriding"},
-		Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"rebuilding", "overriding"}),
-		Timeout:    d.Timeout(schema.TimeoutUpdate),
-		Delay:      3 * time.Second,
-		MinTimeout: 2 * time.Second,
-	}
-	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("error on waiting for reinstalling instance when ModifyInstanceImage %q, %s", d.Id(), err)
-	}
-	stateConf = &resource.StateChangeConf{
-		Pending: []string{statusPending},
-		Target:  []string{"active"},
-		//final state may be "stopped" ,need to return error
-		Refresh:    instanceStateRefreshForReinstallFunc(conn, d.Id(), []string{"active"}),
-		Timeout:    d.Timeout(schema.TimeoutUpdate),
-		Delay:      3 * time.Second,
-		MinTimeout: 2 * time.Second,
-	}
-	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("error on waiting for starting instance when ModifyInstanceImage %q, %s", d.Id(), err)
-	}
-	for _, v := range imageUpdated {
-		d.SetPartial(v)
-	}
-
 	//ModifyInstanceType //need reboot
 	/*	typeUpdate := false
 			updateInstanceTypes := []string{
@@ -712,6 +763,64 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 				logger.Debug(logger.RespFormat, action, updateReq1, *resp)
 			}
 	*/
+	//modify network interface information
+	var networkUpdate bool
+	updateNetworkReq := make(map[string]interface{})
+	updateNetworkReq["InstanceId"] = d.Id()
+	updateNetworkReq["NetworkInterfaceId"] = fmt.Sprintf("%v", d.Get("network_interface_id"))
+	updateNetworkReq["SubnetId"] = fmt.Sprintf("%v", d.Get("subnet_id"))
+	allAttributes := []string{
+		"private_ip_address",
+		"d_n_s1",
+		"d_n_s2",
+	}
+	var updates []string
+	for _, v := range allAttributes {
+		if d.HasChange(v) {
+			networkUpdate = true
+			updates = append(updates, v)
+		}
+	}
+	if d.HasChange("subnet_id") && !d.IsNewResource() {
+		networkUpdate = true
+	}
+	log.Printf("security_group_id :%v", d.Get("security_group_id"))
+	log.Printf("d.HasChange:%v", d.HasChange("security_group_id"))
+	log.Printf("d.IsNewResource():%v", d.IsNewResource())
+	if d.HasChange("security_group_id") && !d.IsNewResource() {
+		networkUpdate = true
+	}
+	if !networkUpdate {
+		d.Partial(false)
+		return resourceKsyunInstanceRead(d, meta)
+	}
+	if v, ok := d.GetOk("security_group_id"); ok {
+		securityGroupIds := SchemaSetToStringSlice(v)
+		for k, v := range securityGroupIds {
+			updateNetworkReq[fmt.Sprintf("SecurityGroupId.%v", k+1)] = v
+		}
+	}
+	for _, v := range updates {
+		if v1, ok := d.GetOk(v); ok {
+			updateNetworkReq[Downline2Hump(v)] = fmt.Sprintf("%v", v1)
+		}
+	}
+	action := "ModifyNetworkInterfaceAttribute"
+	logger.Debug(logger.ReqFormat, action, updateNetworkReq)
+	resp, err := conn.ModifyNetworkInterfaceAttribute(&updateNetworkReq)
+	logger.Debug(logger.AllFormat, action, updateNetworkReq, *resp, err)
+	if err != nil {
+		return fmt.Errorf("update NetworkInterface (%v)error:%v", updateNetworkReq, err)
+	}
+	result, ok := (*resp)["Return"]
+	if !ok || fmt.Sprintf("%v", result) != "true" {
+		return fmt.Errorf("update NetworkInterface (%v)error:%v", updateNetworkReq, result)
+	}
+	d.SetPartial("subnet_id")
+	d.SetPartial("security_group_id")
+	for _, v := range updates {
+		d.SetPartial(v)
+	}
 	d.Partial(false)
 	return resourceKsyunInstanceRead(d, meta)
 }
@@ -721,10 +830,6 @@ func resourceKsyunInstanceDelete(d *schema.ResourceData, meta interface{}) error
 	//delete
 	deleteReq := make(map[string]interface{})
 	deleteReq["InstanceId.1"] = d.Id()
-	if v, ok := d.GetOk("force_delete"); ok {
-		deleteReq["ForceDelete"] = fmt.Sprintf("%v", v)
-	}
-
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
 		readReq := make(map[string]interface{})
 		readReq["InstanceId.1"] = d.Id()
@@ -746,79 +851,122 @@ func resourceKsyunInstanceDelete(d *schema.ResourceData, meta interface{}) error
 		if err1 != nil {
 			return resource.NonRetryableError(err1)
 		}
+		log.Printf("force_delete:%v", d.Get("force_delete"))
+		forceDelete, ok := d.GetOk("force_delete")
+		if !ok {
+			forceDelete = false
+		}
+		//recycling will cant't delete security group
+		/*else { //recycling will cant't delete security group
+			if err2 == nil || notFoundError(err2) {
+				return nil
+			}
+		}
+		*/
 		itemset, ok := (*resp)["InstancesSet"]
 		if !ok {
 			return nil
 		}
 		items, ok := itemset.([]interface{})
-		if !ok || len(items) == 0 {
+		if len(items) == 0 && fmt.Sprintf("%v", forceDelete) != "true" {
 			return nil
 		}
-		state, ok := items[0].(map[string]interface{})["InstanceState"]
-		if !ok {
-			return nil
-		}
-		initState, ok := state.(map[string]interface{})["Name"].(string)
-		if !ok {
-			return nil
-		}
-		if strings.ToLower(initState) != "stopped" && strings.ToLower(initState) != "error" {
-			action = "StopInstances"
-			logger.Debug(logger.ReqFormat, action, readReq)
-			resp, err := conn.StopInstances(&readReq) //sync
-			logger.Debug(logger.AllFormat, action, readReq, *resp, err)
-			if err1 != nil && notFoundError(err1) {
-				return nil
-			}
-			if err != nil {
-				return resource.RetryableError(err)
-			}
-			stateConf := &resource.StateChangeConf{
-				Pending:    []string{statusPending},
-				Target:     []string{"stopped"},
-				Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"stopped"}),
-				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      3 * time.Second,
-				MinTimeout: 2 * time.Second,
-			}
-			if _, err = stateConf.WaitForState(); err != nil {
-				return resource.RetryableError(err)
+		if len(items) > 0 { //not in recycling
+			action = "TerminateInstances"
+			logger.Debug(logger.ReqFormat, action, deleteReq)
+			resp, err2 := conn.TerminateInstances(&deleteReq)
+			logger.Debug(logger.AllFormat, action, deleteReq, *resp, err2)
+			if err2 != nil && inUseError(err2) {
+				return resource.RetryableError(err2)
 			}
 		}
 
-		action = "TerminateInstances"
-		logger.Debug(logger.ReqFormat, action, deleteReq)
-		resp, err2 := conn.TerminateInstances(&deleteReq)
-		logger.Debug(logger.AllFormat, action, deleteReq, *resp, err2)
-		if err2 == nil || notFoundError(err2) {
-			return nil
-		}
-		if err2 != nil && inUseError(err2) {
-			return resource.RetryableError(err2)
-		}
+		/*
+			if strings.ToLower(initState) != "stopped" &&
+				strings.ToLower(initState) != "error" &&
+				strings.ToLower(initState) != "recycling" {
+				action = "StopInstances"
+				logger.Debug(logger.ReqFormat, action, readReq)
+				resp, err := conn.StopInstances(&readReq) //sync
+				logger.Debug(logger.AllFormat, action, readReq, *resp, err)
+				if err1 != nil && notFoundError(err1) {
+					return nil
+				}
+				if err != nil {
+					return resource.RetryableError(err)
+				}
+				stateConf := &resource.StateChangeConf{
+					Pending:    []string{statusPending},
+					Target:     []string{"stopped"},
+					Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"stopped"}),
+					Timeout:    d.Timeout(schema.TimeoutUpdate),
+					Delay:      3 * time.Second,
+					MinTimeout: 2 * time.Second,
+				}
+				if _, err = stateConf.WaitForState(); err != nil {
+					return resource.RetryableError(err)
+				}
+			}
+
+		*/
+
 		//check
 		readReq = make(map[string]interface{})
 		readReq["InstanceId.1"] = d.Id()
+		readReq["Filter.1.Name"] = "instance-state.name"
+		readReq["Filter.1.Value.1"] = "recycling"
 		action = "DescribeInstances"
-		logger.Debug(logger.ReqFormat, action, readReq)
-		resp, err := conn.DescribeInstances(&readReq)
-		logger.Debug(logger.AllFormat, action, readReq, *resp)
-		if err != nil && notFoundError(err) {
-			return nil
-		}
-		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on  reading kec when delete %q, %s", d.Id(), err))
+		index := 1
+		for {
+			if index > 32 {
+				return resource.NonRetryableError(fmt.Errorf("no data on geting recycling kec when delete %q", d.Id()))
+			}
+			time.Sleep(time.Second * time.Duration(index))
+			index = index * 2
+
+			logger.Debug(logger.ReqFormat, action, readReq)
+			resp, err := conn.DescribeInstances(&readReq)
+			logger.Debug(logger.AllFormat, action, readReq, *resp)
+			if err != nil && notFoundError(err) {
+				return nil
+			}
+			if err != nil {
+				return resource.NonRetryableError(fmt.Errorf("error on  reading kec when delete %q, %s", d.Id(), err))
+			}
+			itemset, ok = (*resp)["InstancesSet"]
+			if !ok {
+				return nil
+			}
+			items, ok = itemset.([]interface{})
+			if len(items) == 0 {
+				return nil
+			}
+			state, ok := items[0].(map[string]interface{})["InstanceState"]
+			if !ok {
+				return nil
+			}
+			initState, ok := state.(map[string]interface{})["Name"].(string)
+			if !ok {
+				return nil
+			}
+			if initState == "recycling" {
+				break
+			}
 		}
 
-		itemset, ok = (*resp)["InstancesSet"]
-		if !ok {
+		//deleteReq["IsRefundResouce"] = "false"
+		deleteReq["ForceDelete"] = fmt.Sprintf("%v", forceDelete)
+		action = "TerminateInstances"
+		logger.Debug(logger.ReqFormat, action, deleteReq)
+		resp, err3 := conn.TerminateInstances(&deleteReq)
+		logger.Debug(logger.AllFormat, action, deleteReq, *resp, err3)
+		if err3 == nil || notFoundError(err3) {
 			return nil
 		}
-		items, ok = itemset.([]interface{})
-		if !ok || len(items) == 0 {
-			return nil
+		if err3 != nil && inUseError(err3) {
+			return resource.RetryableError(err3)
 		}
-		return resource.RetryableError(err2)
+		return resource.NonRetryableError(err3)
 	})
 }
 func instanceStateRefreshFunc(client *kec.Kec, instanceId string, target []string) resource.StateRefreshFunc {

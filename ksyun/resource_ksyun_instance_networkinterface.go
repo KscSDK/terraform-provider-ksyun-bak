@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
-	"log"
 	"strings"
 )
 
@@ -113,23 +112,21 @@ func resourceKsyunNetworkInterfaceRead(d *schema.ResourceData, meta interface{})
 		"SecurityGroupSet": true,
 	}
 	excludes := SetDByResp(d, items[0], networkInterfaceKeys, excludesKeys)
-	log.Printf("excludes:%v", excludes)
 	if sg, ok := excludes["SecurityGroupSet"]; ok {
 		itemSetSub := GetSubSliceDByRep(sg.([]interface{}), kecSecurityGroupKeys)
 		if len(itemSetSub) != 0 {
 			var itemSetSlice []string
 			for _, v := range itemSetSub {
 				for k1, v1 := range v {
-					log.Printf("k1:%v;v1:%v", k1, v1)
 					if k1 == "security_group_id" {
 						itemSetSlice = append(itemSetSlice, fmt.Sprintf("%v", v1))
 					}
 				}
 			}
-			log.Printf("itemSetSlice:%v", itemSetSlice)
 			d.Set("security_group_id", itemSetSlice)
 		}
 	}
+
 	return nil
 }
 
@@ -163,6 +160,9 @@ func resourceKsyunNetworkInterfaceUpdate(d *schema.ResourceData, m interface{}) 
 	if d.HasChange("subnet_id") && !d.IsNewResource() {
 		attributeUpdate = true
 	}
+	if d.HasChange("security_group_id") && !d.IsNewResource() {
+		attributeUpdate = true
+	}
 	if !attributeUpdate {
 		return nil
 	}
@@ -172,7 +172,6 @@ func resourceKsyunNetworkInterfaceUpdate(d *schema.ResourceData, m interface{}) 
 			updateReq[fmt.Sprintf("SecurityGroupId.%v", k+1)] = v
 		}
 	}
-	attributeUpdate = true
 	for _, v := range updates {
 		if v1, ok := d.GetOk(v); ok {
 			updateReq[Downline2Hump(v)] = fmt.Sprintf("%v", v1)
