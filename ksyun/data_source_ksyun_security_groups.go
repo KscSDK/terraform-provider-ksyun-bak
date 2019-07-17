@@ -123,7 +123,7 @@ func dataSourceKsyunSecurityGroupsRead(d *schema.ResourceData, m interface{}) er
 		}
 		req[fmt.Sprintf("SecurityGroupId.%d", k+1)] = v
 	}
-	filters := []string{"vpc_id", ""}
+	filters := []string{"vpc_id"}
 	req = *SchemaSetsToFilterMap(d, filters, &req)
 	var allSecurityGroups []interface{}
 

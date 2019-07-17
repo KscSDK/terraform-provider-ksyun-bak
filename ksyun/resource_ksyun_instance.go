@@ -466,6 +466,7 @@ func resourceKsyunInstanceRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("no network interfaces on reading Instance %q", d.Id())
 		}
 		var networkInterfaceItem map[string]interface{}
+		log.Printf("networks:%v", networks)
 		for _, v := range networks {
 			value, ok := v.(map[string]interface{})
 			if !ok {
@@ -477,12 +478,13 @@ func resourceKsyunInstanceRead(d *schema.ResourceData, meta interface{}) error {
 			}
 			networkInterfaceItem = value
 		}
+		log.Printf("networkInterfaceItem:%v", networkInterfaceItem)
 		excludeKeys := map[string]bool{
 			"SecurityGroupSet": true,
 			"GroupSet":         true,
 		}
 		SetDByResp(d, networkInterfaceItem, kecNetworkInterfaceKeys, excludeKeys)
-		if gs, ok := networkInterfaceItem["group_set"]; ok {
+		if gs, ok := networkInterfaceItem["GroupSet"]; ok {
 			itemSetSub := GetSubSliceDByRep(gs.([]interface{}), groupSetKeys)
 			d.Set("group_set", itemSetSub)
 		}
@@ -530,6 +532,7 @@ func resourceKsyunInstanceRead(d *schema.ResourceData, meta interface{}) error {
 		*/
 		excludesKeys := map[string]bool{
 			"SecurityGroupSet": true,
+			"InstanceType":     true,
 		}
 		excludes := SetDByResp(d, items[0], networkInterfaceKeys, excludesKeys)
 		if sg, ok := excludes["SecurityGroupSet"]; ok {
