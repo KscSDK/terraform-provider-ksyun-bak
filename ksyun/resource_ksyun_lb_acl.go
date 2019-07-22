@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
-	"strings"
 	"time"
 )
 
@@ -134,6 +133,8 @@ func resourceKsyunLoadBalancerAclRead(d *schema.ResourceData, m interface{}) err
 	if ok {
 		subRes := GetSubSliceDByRep(lbes, lbAclEntryKeys)
 		d.Set("load_balancer_acl_entry_set", subRes)
+	} else {
+		d.Set("load_balancer_acl_entry_set", make([]map[string]interface{}, 0))
 	}
 	return nil
 }
@@ -196,15 +197,15 @@ func resourceKsyunLoadBalancerAclDelete(d *schema.ResourceData, m interface{}) e
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteLoadBalancerAcl"
 		logger.Debug(logger.ReqFormat, action, req)
-
-		if resp, err := Slbconn.DeleteLoadBalancerAcl(&req); err != nil {
-			if strings.Contains(err.Error(), "NotFound") {
-				return nil
-			}
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lbacl %q, %s", d.Id(), err))
-		} else {
-			logger.Debug(logger.RespFormat, action, req, *resp)
+		resp, err1 := Slbconn.DeleteLoadBalancerAcl(&req)
+		logger.Debug(logger.RespFormat, action, req, *resp)
+		if err1 == nil || (err1 != nil && notFoundError(err1)) {
+			return nil
 		}
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
+		}
+
 		req := make(map[string]interface{})
 		req["LoadBalancerAclId"] = d.Id()
 		action = "DescribeLoadBalancerAcls"

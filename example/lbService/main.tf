@@ -1,10 +1,18 @@
 # Specify the provider and access details
 provider "ksyun" {
-  region = "eu-east-1"
+  region = "cn-shanghai-2"
+}
+data "ksyun_lines" "default" {
+  output_file=""
+  line_name="BGP"
+}
+resource "ksyun_vpc" "default" {
+  vpc_name        = "tf-acc-vpc"
+  cidr_block = "192.168.0.0/16"
 }
 # Create Load Balancer
 resource "ksyun_lb" "default" {
-  vpc_id = "74d0a45b-472d-49fc-84ad-221e21ee23aa"
+  vpc_id = "${ksyun_vpc.default.id}"
   load_balancer_name = "tf-xun-2"
   type = "public"
   subnet_id = ""
@@ -13,11 +21,11 @@ resource "ksyun_lb" "default" {
 }
 # Create Load Balancer Listener with tcp protocol
 resource "ksyun_lb_listener" "default" {
-  listener_name = "tf-xun-2",
-  listener_port = "8080",
-  listener_protocol = "HTTP",
-  listener_state = "start",
-  load_balancer_id = "${ksyun_lb.default.id}",
+  listener_name = "tf-xun-2"
+  listener_port = "8080"
+  listener_protocol = "HTTP"
+  listener_state = "start"
+  load_balancer_id = "${ksyun_lb.default.id}"
   method = "RoundRobin"
   certificate_id = ""
   session {
@@ -55,7 +63,7 @@ resource "ksyun_lb_listener_associate_acl" "default" {
 }
 # Create an eip
 resource "ksyun_eip" "default" {
-  line_id = "63873f31-8433-4a9c-aaa8-97e40dae0946"
+  line_id ="${data.ksyun_lines.default.lines.0.line_id}"
   band_width = 1
   charge_type = "PostPaidByDay"
   purchase_time = 1

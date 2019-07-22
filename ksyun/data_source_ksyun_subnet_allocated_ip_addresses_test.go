@@ -15,7 +15,7 @@ func TestAccKsyunSubnetAllocatedIpAddressesDataSource_basic(t *testing.T) {
 			{
 				Config: testAccDataSubnetAllocatedIpAddressesConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIDExists("data.ksyun_SubnetAllocatedIpAddresses.foo"),
+					testAccCheckIDExists("data.ksyun_subnet_allocated_ip_addresses.foo"),
 				),
 			},
 		},
@@ -23,10 +23,9 @@ func TestAccKsyunSubnetAllocatedIpAddressesDataSource_basic(t *testing.T) {
 }
 
 const testAccDataSubnetAllocatedIpAddressesConfig = `
-data "ksyun_SubnetAllocatedIpAddresses" "foo" {
+data "ksyun_subnet_allocated_ip_addresses" "foo" {
   output_file="output_result"
-  ids=[]
-  state=""
-  vpc_id=[]
+  ids=["d8f6f5dd-b0ee-4106-bf33-52042b70032d"]
+  subnet_id=["d8f6f5dd-b0ee-4106-bf33-52042b70032d"]
 }
 `

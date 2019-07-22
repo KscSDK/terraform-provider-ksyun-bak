@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
-	"strings"
 	"time"
 )
 
@@ -175,14 +174,15 @@ func resourceKsyunInstancesWithListenerDelete(d *schema.ResourceData, m interfac
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeregisterInstancesFromListener"
 		logger.Debug(logger.ReqFormat, action, req)
-		if resp, err := Slbconn.DeregisterInstancesFromListener(&req); err != nil {
-			if strings.Contains(err.Error(), "NotFound") {
-				return nil
-			}
-			return resource.NonRetryableError(fmt.Errorf("error on deleting Listener instance %q, %s", d.Id(), err))
-		} else {
-			logger.Debug(logger.RespFormat, action, req, *resp)
+		resp, err1 := Slbconn.DeregisterInstancesFromListener(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err1)
+		if err1 == nil || (err1 != nil && notFoundError(err1)) {
+			return nil
 		}
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
+		}
+
 		req := make(map[string]interface{})
 		req["RegisterId.1"] = d.Id()
 		action = "DescribeInstancesWithListener"

@@ -339,20 +339,18 @@ func resourceKsyunListenerDelete(d *schema.ResourceData, m interface{}) error {
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteListeners"
 		logger.Debug(logger.ReqFormat, action, req)
-
-		if resp, err := Slbconn.DeleteListeners(&req); err != nil {
-			if strings.Contains(err.Error(), "NotFound") {
-				return nil
-			}
-			return resource.NonRetryableError(fmt.Errorf("error on deleting Listener %q, %s", d.Id(), err))
-		} else {
-			logger.Debug(logger.RespFormat, action, req, *resp)
+		resp, err1 := Slbconn.DeleteListeners(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err1)
+		if err1 == nil || (err1 != nil && notFoundError(err1)) {
+			return nil
+		}
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
 		}
 		req := make(map[string]interface{})
 		req["ListenerId.1"] = d.Id()
 		action = "DescribeListeners"
 		logger.Debug(logger.ReqFormat, action, req)
-
 		resp, err := Slbconn.DescribeListeners(&req)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on reading Listener when deleting %q, %s", d.Id(), err))

@@ -9,20 +9,16 @@ import (
 
 func TestAccKsyunEip_basic(t *testing.T) {
 	var val map[string]interface{}
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-
 		IDRefreshName: "ksyun_eip.foo",
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckEipDestroy,
-
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEipConfig,
-
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEipExists("ksyun_eip.foo", &val),
 					testAccCheckEipAttributes(&val),
@@ -34,20 +30,16 @@ func TestAccKsyunEip_basic(t *testing.T) {
 
 func TestAccKsyunEip_update(t *testing.T) {
 	var val map[string]interface{}
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-
 		IDRefreshName: "ksyun_eip.foo",
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckEipDestroy,
-
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEipConfig,
-
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEipExists("ksyun_eip.foo", &val),
 					testAccCheckEipAttributes(&val),
@@ -55,7 +47,6 @@ func TestAccKsyunEip_update(t *testing.T) {
 			},
 			{
 				Config: testAccEipUpdateConfig,
-
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEipExists("ksyun_eip.foo", &val),
 					testAccCheckEipAttributes(&val),
@@ -87,12 +78,10 @@ func testAccCheckEipExists(n string, val *map[string]interface{}) resource.TestC
 				return err
 			}
 		}
-
 		*val = *ptr
 		return nil
 	}
 }
-
 func testAccCheckEipAttributes(val *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if val != nil {
@@ -104,7 +93,6 @@ func testAccCheckEipAttributes(val *map[string]interface{}) resource.TestCheckFu
 		return nil
 	}
 }
-
 func testAccCheckEipDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ksyun_eip" {
@@ -138,9 +126,8 @@ data "ksyun_lines" "default" {
   output_file="output_result1"
   line_name="BGP"
 }
-
 # Create an eip
-resource "ksyun_eip" "default1" {
+resource "ksyun_eip" "foo" {
   line_id ="${data.ksyun_lines.default.lines.0.line_id}"
   band_width =1
   charge_type = "PostPaidByDay"
@@ -154,9 +141,8 @@ data "ksyun_lines" "default" {
   output_file="output_result1"
   line_name="BGP"
 }
-
 # Create an eip
-resource "ksyun_eip" "default1" {
+resource "ksyun_eip" "foo" {
   line_id ="${data.ksyun_lines.default.lines.0.line_id}"
   band_width =10
   charge_type = "PostPaidByDay"

@@ -90,8 +90,6 @@ resource "ksyun_instance" "default" {
       delete_with_instance=true
     }
   ]
-  #max_count=1
-  #min_count=1
   subnet_id="${ksyun_subnet.default.id}"
   instance_password="Xuan663222"
   keep_image_login=false

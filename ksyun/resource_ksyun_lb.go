@@ -223,14 +223,13 @@ func resourceKsyunLbDelete(d *schema.ResourceData, m interface{}) error {
 		action := "DeleteLoadBalancer"
 		logger.Debug(logger.ReqFormat, action, req)
 
-		if resp, err := Slbconn.DeleteLoadBalancer(&req); err != nil {
-			if strings.Contains(err.Error(), "NotFound") {
-				return nil
-			}
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb %q, %s", d.Id(), err))
-		} else {
-			logger.Debug(logger.RespFormat, action, req, *resp)
-
+		resp, err1 := Slbconn.DeleteLoadBalancer(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err1)
+		if err1 == nil || (err1 != nil && notFoundError(err1)) {
+			return nil
+		}
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
 		}
 		req := make(map[string]interface{})
 		req["LoadBalancerId.1"] = d.Id()

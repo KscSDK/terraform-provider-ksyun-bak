@@ -25,7 +25,7 @@ func TestAccKsyunSubnetAvailableAddressesDataSource_basic(t *testing.T) {
 const testAccDataSubnetAvailableAddressesConfig = `
 data "ksyun_subnet_available_addresses" "foo" {
   output_file="output_result"
-  ids=["f5e3b70e-493d-4473-8072-9f50640f4ae3"]
-  #subnet_id=["f5e3b70e-493d-4473-8072-9f50640f4ae3"]
+  ids=[]
+  subnet_id=["d8f6f5dd-b0ee-4106-bf33-52042b70032d"]
 }
 `

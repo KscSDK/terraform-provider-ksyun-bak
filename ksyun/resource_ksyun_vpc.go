@@ -137,6 +137,9 @@ func resourceKsyunVPCDelete(d *schema.ResourceData, meta interface{}) error {
 		if err1 == nil || (err1 != nil && notFoundError(err1)) {
 			return nil
 		}
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
+		}
 		readVpc := make(map[string]interface{})
 		readVpc["VpcId.1"] = d.Id()
 		action = "DescribeVpcs"

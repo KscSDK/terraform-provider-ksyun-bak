@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
-	"strings"
 	"time"
 )
 
@@ -232,14 +231,13 @@ func resourceKsyunHealthCheckDelete(d *schema.ResourceData, m interface{}) error
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteHealthCheck"
 		logger.Debug(logger.ReqFormat, action, req)
-		if resp, err := Slbconn.DeleteHealthCheck(&req); err != nil {
-			if strings.Contains(err.Error(), "NotFound") {
-				return nil
-			}
-			return resource.NonRetryableError(fmt.Errorf("error on deleting healthcheck %q, %s", d.Id(), err))
-		} else {
-			logger.Debug(logger.RespFormat, action, req, *resp)
-
+		resp, err1 := Slbconn.DeleteHealthCheck(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err1)
+		if err1 == nil || (err1 != nil && notFoundError(err1)) {
+			return nil
+		}
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
 		}
 		req := make(map[string]interface{})
 		req["HealthCheckId.1"] = d.Id()

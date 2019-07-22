@@ -45,7 +45,7 @@ func GetSubSliceDByRep(items []interface{}, include /*,exclude*/ map[string]bool
 	return datas
 }
 
-//sdk resp []map[string]interface{} inline struct ->terraform schema.ResourceData
+//sdk resp map[string]interface{} inline struct ->terraform schema.ResourceData
 //convert inline struct from sdk response type ([]map[string]interface{}) to the type terraform can realized([]map[string]interface).
 //exclude ：representing the key which the type is not basic type.
 func GetSubStructDByRep(datas interface{}, exclude map[string]bool) map[string]interface{} {
