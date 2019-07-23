@@ -65,20 +65,21 @@ $ make testacc
 ```
 ## terraform-provider-ksyun开发
 ### 开发指南（以eip为例）
-#### 1、client.go 各产品请求连接声明（eipconn *eip.Eip）
-#### 2、config.go 各产品请求连接定义（client.eipconn = eip.SdkNew(cli, cfg, url)）
-#### 3、provider.go 配置dataSource和resource
-    配置dataSource: "ksyun_eips":dataSourceKsyunEips()
-    配置resource: "ksyun_eip":resourceKsyunEip()
-#### 4、data_source_ksyun_eips.go dataSource具体实现（根据具体过滤条件拉取eip列表）
-#### 5、resource_ksyun_eip.go resource具体实现（单个eip的增删改查）
+##### 1、client.go 各产品请求连接声明（eipconn *eip.Eip）
+##### 2、config.go 各产品请求连接定义（client.eipconn = eip.SdkNew(cli, cfg, url)）
+##### 3、provider.go 配置dataSource和resource
+      配置dataSource: "ksyun_eips":dataSourceKsyunEips()
+      配置resource: "ksyun_eip":resourceKsyunEip()
+##### 4、data_source_ksyun_eips.go dataSource具体实现（根据具体过滤条件拉取eip列表）
+##### 5、resource_ksyun_eip.go resource具体实现（单个eip的增删改查）
 ### 开发注意事项
-#### 1、所有的入参和出参必须在schema.Resource中定义，否则terraform无法识别。
-#### 2、terraform的出参和入参都是schema.Schema类型，其底层调用的sdk的出参和入参是map[string]interface{}类型，两者需进行转换。
-#### 3、异步创建需要添加状态轮询（参照主机创建resource_ksyun_instance.go）。
-#### 4、所有的删除都需添加重试机制（防止有资源依赖时删除失败）。
-#### 5、所有的修改最好添加Partial机制（防止有些属性同步有问题，多个修改接口或查询接口不展示全部属性会有问题）。
-#### 6、网络和主机的接口属性较多，开发采用了函数封装，初次开发，可先参考腾讯的开发指南（https://cloud.tencent.com/developer/article/1067230），更有易读性，了解terraform的开发过程后可直接调用封装好的函数，减少代码冗余。
+##### 1、所有的入参和出参必须在schema.Resource中定义，否则terraform无法识别。
+##### 2、terraform的出参和入参都是schema.Schema类型，其底层调用的sdk的出参和入参是map[string]interface{}类型，两者需进行转换。
+##### 3、异步创建需要添加状态轮询（参照主机创建resource_ksyun_instance.go）。
+##### 4、所有的删除都需添加重试机制（防止有资源依赖时删除失败）。
+##### 5、所有的修改最好添加Partial机制（防止有些属性同步有问题，多个修改接口或查询接口不展示全部属性会有问题）。
+##### 6、网络和主机的接口属性较多，开发采用了函数封装，初次开发，可先参考腾讯的开发指南，更有易读性，了解terraform的开发过程后可直接调用封装好的函数，减少代码冗余。
+      腾讯云开发指南：（https://cloud.tencent.com/developer/article/1067230）
       *Note:* 腾讯的sdk入参和出参是class（struct）类型，而我们的sdk是map类型。
 
 ## terraform-provider-ksyun使用
