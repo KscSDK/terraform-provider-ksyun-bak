@@ -81,6 +81,8 @@ $ make testacc
 ##### 6、网络和主机的接口属性较多，开发采用了函数封装，初次开发，可先参考腾讯的开发指南，更有易读性，了解terraform的开发过程后可直接调用封装好的函数，减少代码冗余。
       腾讯云开发指南：（https://cloud.tencent.com/developer/article/1067230）
       *Note:* 腾讯的sdk入参和出参是class（struct）类型，而我们的sdk是map类型。
+##### 7、每次提交都需要对代码进行交叉编译(mac、linux和windows),不然用户没法使用。
+##### 8、每次编译前都需要重新拉取terraform-provider-ksyun和ksc-sdk-go,保证terraform-provider-ksyun和ksc-sdk-go都是最新版，不然会导致其他服务不可用。
 
 ## terraform-provider-ksyun使用
 
