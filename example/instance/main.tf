@@ -31,7 +31,7 @@ resource "ksyun_instance" "default" {
   sriov_net_support=false
   project_id=0
   data_guard_id=""
-  key_id=[]
+  key_id=["6ae00afe-7daa-4dd9-a668-b6bcb175120f","76ad3eca-a3e4-4d73-a05d-b715933ef605"]
   "d_n_s1"=""
   "d_n_s2"=""
   "force_delete"=true

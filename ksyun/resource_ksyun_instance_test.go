@@ -66,9 +66,9 @@ func testAccCheckInstanceExists(n string, val *map[string]interface{}) resource.
 			return fmt.Errorf("Instance id is empty")
 		}
 		client := testAccProvider.Meta().(*KsyunClient)
-		Instance := make(map[string]interface{})
-		Instance["InstanceId.1"] = rs.Primary.ID
-		ptr, err := client.kecconn.DescribeInstances(&Instance)
+		instance := make(map[string]interface{})
+		instance["InstanceId.1"] = rs.Primary.ID
+		ptr, err := client.kecconn.DescribeInstances(&instance)
 		if err != nil {
 			return err
 		}
@@ -101,9 +101,9 @@ func testAccCheckInstanceDestroy(s *terraform.State) error {
 		}
 
 		client := testAccProvider.Meta().(*KsyunClient)
-		Instance := make(map[string]interface{})
-		Instance["InstanceId.1"] = rs.Primary.ID
-		ptr, err := client.kecconn.DescribeInstances(&Instance)
+		instance := make(map[string]interface{})
+		instance["InstanceId.1"] = rs.Primary.ID
+		ptr, err := client.kecconn.DescribeInstances(&instance)
 
 		// Verify the error is what we want
 		if err != nil {

@@ -68,7 +68,7 @@ func resourceKsyunLoadBalancerAcl() *schema.Resource {
 	}
 }
 func resourceKsyunLoadBalancerAclCreate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	creates := []string{
 		"load_balancer_acl_name",
@@ -81,7 +81,7 @@ func resourceKsyunLoadBalancerAclCreate(d *schema.ResourceData, m interface{}) e
 	}
 	action := "CreateLoadBalancerAcl"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := Slbconn.CreateLoadBalancerAcl(&req)
+	resp, err := slbconn.CreateLoadBalancerAcl(&req)
 	if err != nil {
 		return fmt.Errorf("create LoadBalancerAcl : %s", err)
 	}
@@ -110,13 +110,13 @@ func resourceKsyunLoadBalancerAclCreate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceKsyunLoadBalancerAclRead(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["LoadBalancerAclId.1"] = d.Id()
 	action := "DescribeLoadBalancerAcls"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.DescribeLoadBalancerAcls(&req)
+	resp, err := slbconn.DescribeLoadBalancerAcls(&req)
 	if err != nil {
 		return fmt.Errorf(" read LoadBalancerAcls : %s", err)
 	}
@@ -140,7 +140,7 @@ func resourceKsyunLoadBalancerAclRead(d *schema.ResourceData, m interface{}) err
 }
 
 func resourceKsyunLoadBalancerAclUpdate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["LoadBalancerAclId"] = d.Id()
 	allAttributes := []string{
@@ -169,7 +169,7 @@ func resourceKsyunLoadBalancerAclUpdate(d *schema.ResourceData, m interface{}) e
 	action := "ModifyLoadBalancerAcl"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.ModifyLoadBalancerAcl(&req)
+	resp, err := slbconn.ModifyLoadBalancerAcl(&req)
 	if err != nil {
 		return fmt.Errorf("update LoadBalancerAcl (%v)error:%v", req, err)
 	}
@@ -184,11 +184,11 @@ func resourceKsyunLoadBalancerAclUpdate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceKsyunLoadBalancerAclDelete(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["LoadBalancerAclId"] = d.Id()
 	/*
-		_, err := Slbconn.DeleteLoadBalancerAcl(&req)
+		_, err := slbconn.DeleteLoadBalancerAcl(&req)
 		if err != nil {
 			return fmt.Errorf("delete LoadBalancerAcl error:%v", err)
 		}
@@ -197,7 +197,7 @@ func resourceKsyunLoadBalancerAclDelete(d *schema.ResourceData, m interface{}) e
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteLoadBalancerAcl"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err1 := Slbconn.DeleteLoadBalancerAcl(&req)
+		resp, err1 := slbconn.DeleteLoadBalancerAcl(&req)
 		logger.Debug(logger.RespFormat, action, req, *resp)
 		if err1 == nil || (err1 != nil && notFoundError(err1)) {
 			return nil
@@ -210,7 +210,7 @@ func resourceKsyunLoadBalancerAclDelete(d *schema.ResourceData, m interface{}) e
 		req["LoadBalancerAclId"] = d.Id()
 		action = "DescribeLoadBalancerAcls"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err := Slbconn.DescribeLoadBalancerAcls(&req)
+		resp, err := slbconn.DescribeLoadBalancerAcls(&req)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on reading lbacl when deleting %q, %s", d.Id(), err))
 		}

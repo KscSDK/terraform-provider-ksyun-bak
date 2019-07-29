@@ -75,6 +75,10 @@ resource "ksyun_security_group_entry" "test3" {
   port_range_from=0
   port_range_to=0
 }
+resource "ksyun_ssh_key" "default" {
+  key_name="ssh_key_tf"
+  public_key=""
+}
 resource "ksyun_instance" "default" {
   image_id="${data.ksyun_images.centos-7_5.images.0.image_id}"
   instance_type="N3.2B"
@@ -102,7 +106,7 @@ resource "ksyun_instance" "default" {
   sriov_net_support=false
   project_id=0
   data_guard_id=""
-  key_id=[]
+  key_id=["${ksyun_ssh_key.default.id}"]
   force_delete=true
 }
 

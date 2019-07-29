@@ -103,9 +103,9 @@ func resourceKsyunSecurityGroupCreate(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("error on creating SecurityGroup, %s", err)
 	}
 	if resp != nil {
-		SecurityGroup := (*resp)["SecurityGroup"].(map[string]interface{})
-		SecurityGroupId := SecurityGroup["SecurityGroupId"].(string)
-		d.SetId(SecurityGroupId)
+		securityGroup := (*resp)["SecurityGroup"].(map[string]interface{})
+		securityGroupId := securityGroup["SecurityGroupId"].(string)
+		d.SetId(securityGroupId)
 	}
 	return resourceKsyunSecurityGroupRead(d, meta)
 }

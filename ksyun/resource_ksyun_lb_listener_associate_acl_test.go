@@ -44,9 +44,9 @@ func testAccCheckListenerAssociateAclExists(n string, val *map[string]interface{
 			return fmt.Errorf("id is error:%v", rs.Primary.ID)
 		}
 		client := testAccProvider.Meta().(*KsyunClient)
-		Listener := make(map[string]interface{})
-		Listener["ListenerId.1"] = ids[0]
-		ptr, err := client.slbconn.DescribeListeners(&Listener)
+		listener := make(map[string]interface{})
+		listener["ListenerId.1"] = ids[0]
+		ptr, err := client.slbconn.DescribeListeners(&listener)
 		if err != nil {
 			return err
 		}
@@ -92,13 +92,13 @@ func testAccCheckListenerAssociateAclDestroy(s *terraform.State) error {
 		}
 
 		client := testAccProvider.Meta().(*KsyunClient)
-		Listener := make(map[string]interface{})
+		listener := make(map[string]interface{})
 		ids := strings.Split(rs.Primary.ID, ":")
 		if len(ids) != 2 {
 			return fmt.Errorf("id is error:%v", rs.Primary.ID)
 		}
-		Listener["ListenerId.1"] = ids[0]
-		ptr, err := client.slbconn.DescribeListeners(&Listener)
+		listener["ListenerId.1"] = ids[0]
+		ptr, err := client.slbconn.DescribeListeners(&listener)
 
 		// Verify the error is what we want
 		if err != nil {

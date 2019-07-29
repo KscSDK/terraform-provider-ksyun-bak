@@ -164,7 +164,7 @@ func resourceKsyunEipUpdate(d *schema.ResourceData, m interface{}) error {
 	attributeUpdate := false
 	updateReq := make(map[string]interface{})
 	updateReq["AllocationId"] = d.Id()
-	// 修改带宽上限
+	// modify
 	if d.HasChange("band_width") && !d.IsNewResource() {
 		if v, ok := d.GetOk("band_width"); ok {
 			updateReq["BandWidth"] = fmt.Sprintf("%v", v)

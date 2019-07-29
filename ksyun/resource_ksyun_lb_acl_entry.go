@@ -48,7 +48,7 @@ func resourceKsyunLoadBalancerAclEntry() *schema.Resource {
 	}
 }
 func resourceKsyunLoadBalancerAclEntryRead(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
@@ -58,7 +58,7 @@ func resourceKsyunLoadBalancerAclEntryRead(d *schema.ResourceData, m interface{}
 	action := "DescribeLoadBalancerAcls"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.DescribeLoadBalancerAcls(&req)
+	resp, err := slbconn.DescribeLoadBalancerAcls(&req)
 	if err != nil {
 		return fmt.Errorf(" read LoadBalancerAcls : %s", err)
 	}
@@ -97,7 +97,7 @@ func resourceKsyunLoadBalancerAclEntryRead(d *schema.ResourceData, m interface{}
 	return fmt.Errorf("no LoadBalancerAclEntrySet get")
 }
 func resourceKsyunLoadBalancerAclEntryCreate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	creates := []string{
 		"load_balancer_acl_id",
@@ -114,7 +114,7 @@ func resourceKsyunLoadBalancerAclEntryCreate(d *schema.ResourceData, m interface
 	}
 	action := "CreateLoadBalancerAclEntry"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := Slbconn.CreateLoadBalancerAclEntry(&req)
+	resp, err := slbconn.CreateLoadBalancerAclEntry(&req)
 	if err != nil {
 		return fmt.Errorf("create LoadBalancerAclEntry : %s", err)
 	}
@@ -146,7 +146,7 @@ func resourceKsyunLoadBalancerAclEntryCreate(d *schema.ResourceData, m interface
 }
 
 func resourceKsyunLoadBalancerAclEntryDelete(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	ids := strings.Split(d.Id(), ":")
 	if len(ids) != 2 {
 		return fmt.Errorf("error id:%v", d.Id())
@@ -155,7 +155,7 @@ func resourceKsyunLoadBalancerAclEntryDelete(d *schema.ResourceData, m interface
 	req["LoadBalancerAclEntryId"] = ids[1]
 	req["LoadBalancerAclId"] = ids[0]
 	/*
-		_, err := Slbconn.DeregisterInstancesFromListener(&req)
+		_, err := slbconn.DeregisterInstancesFromListener(&req)
 		if err != nil {
 			return fmt.Errorf("delete LoadBalancerAclEntry error:%v", err)
 		}
@@ -164,7 +164,7 @@ func resourceKsyunLoadBalancerAclEntryDelete(d *schema.ResourceData, m interface
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteLoadBalancerAclEntry"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err1 := Slbconn.DeleteLoadBalancerAclEntry(&req)
+		resp, err1 := slbconn.DeleteLoadBalancerAclEntry(&req)
 		logger.Debug(logger.AllFormat, action, req, *resp, err1)
 		if err1 == nil || (err1 != nil && notFoundError(err1)) {
 			return nil

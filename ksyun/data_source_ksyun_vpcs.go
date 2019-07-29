@@ -69,7 +69,6 @@ func dataSourceKsyunVPCs() *schema.Resource {
 }
 
 func dataSourceKsyunVPCsRead(d *schema.ResourceData, meta interface{}) error {
-	fmt.Printf("%+v\n", "read")
 	var result []map[string]interface{}
 
 	client := meta.(*KsyunClient)

@@ -68,11 +68,11 @@ func testAccCheckSecurityGroupEntryExists(n string, val *map[string]interface{})
 			return fmt.Errorf("SecurityGroupEntry id is empty")
 		}
 		client := testAccProvider.Meta().(*KsyunClient)
-		SecurityGroupEntry := make(map[string]interface{})
-		SecurityGroupEntry["SecurityGroupId.1"] = rs.Primary.Attributes["security_group_id"]
+		securityGroupEntry := make(map[string]interface{})
+		securityGroupEntry["SecurityGroupId.1"] = rs.Primary.Attributes["security_group_id"]
 		securityGroupEntryId := rs.Primary.ID
 		log.Printf("SecurityGroupId:%v", rs.Primary.Attributes["security_group_id"])
-		ptr1, err := client.vpcconn.DescribeSecurityGroups(&SecurityGroupEntry)
+		ptr1, err := client.vpcconn.DescribeSecurityGroups(&securityGroupEntry)
 		if err != nil {
 			return err
 		}
@@ -118,10 +118,10 @@ func testAccCheckSecurityGroupEntryDestroy(s *terraform.State) error {
 			continue
 		}
 		client := testAccProvider.Meta().(*KsyunClient)
-		SecurityGroupEntry := make(map[string]interface{})
-		SecurityGroupEntry["SecurityGroupId.1"] = rs.Primary.Attributes["security_group_id"]
+		securityGroupEntry := make(map[string]interface{})
+		securityGroupEntry["SecurityGroupId.1"] = rs.Primary.Attributes["security_group_id"]
 		securityGroupEntryId := rs.Primary.ID
-		ptr1, err := client.vpcconn.DescribeSecurityGroups(&SecurityGroupEntry)
+		ptr1, err := client.vpcconn.DescribeSecurityGroups(&securityGroupEntry)
 		// Verify the error is what we want
 		if err != nil {
 			return err

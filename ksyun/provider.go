@@ -51,6 +51,8 @@ func Provider() terraform.ResourceProvider {
 			"ksyun_security_groups":               dataSourceKsyunSecurityGroups(),
 			"ksyun_instances":                     dataSourceKsyunInstances(),
 			"ksyun_images":                        dataSourceKsyunImages(),
+			"ksyun_certificates":                  dataSourceKsyunCertificates(),
+			"ksyun_ssh_keys":                      dataSourceKsyunSSHKeys(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"ksyun_eip":                       resourceKsyunEip(),
@@ -68,6 +70,8 @@ func Provider() terraform.ResourceProvider {
 			"ksyun_security_group_entry":      resourceKsyunSecurityGroupEntry(),
 			"ksyun_instance":                  resourceKsyunInstance(),
 			"ksyun_network_interface":         resourceKsyunNetworkInterface(),
+			"ksyun_certificate":               resourceKsyunCertificate(),
+			"ksyun_ssh_key":                   resourceKsyunSSHKey(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

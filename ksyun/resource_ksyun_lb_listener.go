@@ -190,7 +190,7 @@ func resourceKsyunListener() *schema.Resource {
 	}
 }
 func resourceKsyunListenerCreate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	creates := []string{
 		"load_balancer_id",
@@ -212,7 +212,7 @@ func resourceKsyunListenerCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	action := "CreateListeners"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := Slbconn.CreateListeners(&req)
+	resp, err := slbconn.CreateListeners(&req)
 	if err != nil {
 		return fmt.Errorf("Error CreateListeners : %s", err)
 	}
@@ -232,12 +232,12 @@ func resourceKsyunListenerCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKsyunListenerRead(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["ListenerId.1"] = d.Id()
 	action := "DescribeListeners"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := Slbconn.DescribeListeners(&req)
+	resp, err := slbconn.DescribeListeners(&req)
 	if err != nil {
 		return fmt.Errorf("Error DescribeListeners : %s", err)
 	}
@@ -267,7 +267,7 @@ func resourceKsyunListenerRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKsyunListenerUpdate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["ListenerId"] = d.Id()
 	allAttributes := []string{
@@ -305,12 +305,12 @@ func resourceKsyunListenerUpdate(d *schema.ResourceData, m interface{}) error {
 	d.Partial(true)
 	action := "ModifyListeners"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := Slbconn.ModifyListeners(&req)
+	resp, err := slbconn.ModifyListeners(&req)
 	if err != nil {
 		logger.Debug(logger.AllFormat, action, req, *resp, err)
 		if strings.Contains(err.Error(), "400") {
 			time.Sleep(time.Second * 3)
-			resp, err = Slbconn.ModifyLoadBalancer(&req)
+			resp, err = slbconn.ModifyLoadBalancer(&req)
 			if err != nil {
 				return fmt.Errorf("update Listener (%v)error:%v", req, err)
 			}
@@ -325,12 +325,12 @@ func resourceKsyunListenerUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKsyunListenerDelete(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["ListenerId"] = d.Id()
 	/*
 		req["LoadBalancerId"] = d.Id()
-		_, err := Slbconn.DeleteLoadBalancer(&req)
+		_, err := slbconn.DeleteLoadBalancer(&req)
 		if err != nil {
 			return fmt.Errorf("release Listener error:%v", err)
 		}
@@ -339,7 +339,7 @@ func resourceKsyunListenerDelete(d *schema.ResourceData, m interface{}) error {
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteListeners"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err1 := Slbconn.DeleteListeners(&req)
+		resp, err1 := slbconn.DeleteListeners(&req)
 		logger.Debug(logger.AllFormat, action, req, *resp, err1)
 		if err1 == nil || (err1 != nil && notFoundError(err1)) {
 			return nil
@@ -351,7 +351,7 @@ func resourceKsyunListenerDelete(d *schema.ResourceData, m interface{}) error {
 		req["ListenerId.1"] = d.Id()
 		action = "DescribeListeners"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err := Slbconn.DescribeListeners(&req)
+		resp, err := slbconn.DescribeListeners(&req)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on reading Listener when deleting %q, %s", d.Id(), err))
 		}
