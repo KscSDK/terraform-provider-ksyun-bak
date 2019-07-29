@@ -449,7 +449,7 @@ func resourceKsyunInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	excludes := SetDByResp(d, items[0], instanceKeys, excludesKeys)
 	//	if excludes["KeySet"] != nil {
 	d.Set("key_id", excludes["KeySet"])
-	log.Println("key_id:%v", excludes["KeySet"])
+	//log.Println("key_id:%v", excludes["KeySet"])
 	//	}
 	if excludes["InstanceConfigure"] != nil {
 		itemSet := GetSubDByRep(excludes["InstanceConfigure"], instanceConfigureKeys, map[string]bool{})
