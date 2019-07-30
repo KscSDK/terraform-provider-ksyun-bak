@@ -4,10 +4,10 @@ provider "ksyun"{
   secret_key = "OAeYHxiil7rl7nbVcpsUPnbvzJEkY6zQM4ExOR4aOYUx4SZhwLqrKnlaCETVyVv7gw=="
 }
 
-resource "ksyun_sqlserver" "houbin-7"{
+resource "ksyun_sqlserver" "houbin-9"{
   output_file = "output_file"
   dbinstanceclass= "db.ram.2|db.disk.20"
-  dbinstancename = "ksyun_sqlserver_8"
+  dbinstancename = "ksyun_sqlserver_9"
   dbinstancetype = "HRDS_SS"
   engine = "SQLServer"
   engineversion = "2008r2"
