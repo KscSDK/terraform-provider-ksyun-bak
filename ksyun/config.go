@@ -8,6 +8,7 @@ import (
 	"github.com/ksc/ksc-sdk-go/service/kec"
 	"github.com/ksc/ksc-sdk-go/service/sks"
 	"github.com/ksc/ksc-sdk-go/service/slb"
+	"github.com/ksc/ksc-sdk-go/service/sqlserver"
 	"github.com/ksc/ksc-sdk-go/service/vpc"
 )
 
@@ -29,13 +30,14 @@ func (c *Config) Client() (*KsyunClient, error) {
 		Region: &c.Region,
 	}
 	url := &utils.UrlInfo{
-		UseSSL: c.Insecure,
+		UseSSL: false,
 		Locate: false,
 	}
 	client.vpcconn = vpc.SdkNew(cli, cfg, url)
 	client.eipconn = eip.SdkNew(cli, cfg, url)
 	client.slbconn = slb.SdkNew(cli, cfg, url)
 	client.kecconn = kec.SdkNew(cli, cfg, url)
+	client.sqlserverconn = sqlserver.SdkNew(cli, cfg, url)
 	client.kcmconn = kcm.SdkNew(cli, cfg, url)
 	client.sksconn = sks.SdkNew(cli, cfg, url)
 	return &client, nil
