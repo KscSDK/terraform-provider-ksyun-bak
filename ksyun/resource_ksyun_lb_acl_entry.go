@@ -48,10 +48,56 @@ func resourceKsyunLoadBalancerAclEntry() *schema.Resource {
 	}
 }
 func resourceKsyunLoadBalancerAclEntryRead(d *schema.ResourceData, m interface{}) error {
-	return nil
+	slbconn := m.(*KsyunClient).slbconn
+	req := make(map[string]interface{})
+	ids := strings.Split(d.Id(), ":")
+	if len(ids) != 2 {
+		return fmt.Errorf("error id:%v", d.Id())
+	}
+	req["LoadBalancerAclId.1"] = ids[0]
+	action := "DescribeLoadBalancerAcls"
+	logger.Debug(logger.ReqFormat, action, req)
+
+	resp, err := slbconn.DescribeLoadBalancerAcls(&req)
+	if err != nil {
+		return fmt.Errorf(" read LoadBalancerAcls : %s", err)
+	}
+	logger.Debug(logger.RespFormat, action, req, *resp)
+
+	resSet := (*resp)["LoadBalancerAclSet"]
+	res, ok := resSet.([]interface{})
+	if !ok || len(res) == 0 {
+		d.SetId("")
+		return nil
+	}
+	subPara, ok := res[0].(map[string]interface{})
+	if !ok || len(subPara) == 0 {
+		d.SetId("")
+		return nil
+	}
+	lbes, ok := subPara["LoadBalancerAclEntrySet"].([]interface{})
+	if !ok || len(lbes) == 0 {
+		d.SetId("")
+		return nil
+	}
+	for _, aclEntry := range lbes {
+		aclEntryItem, ok := aclEntry.(map[string]interface{})
+		if !ok || len(aclEntryItem) == 0 {
+			d.SetId("")
+			return nil
+		}
+		if aclEntryItem["LoadBalancerAclEntryId"] == ids[1] {
+			for key, value := range aclEntryItem {
+				d.Set(Hump2Downline(key), value)
+				return nil
+			}
+		}
+
+	}
+	return fmt.Errorf("no LoadBalancerAclEntrySet get")
 }
 func resourceKsyunLoadBalancerAclEntryCreate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	creates := []string{
 		"load_balancer_acl_id",
@@ -68,7 +114,7 @@ func resourceKsyunLoadBalancerAclEntryCreate(d *schema.ResourceData, m interface
 	}
 	action := "CreateLoadBalancerAclEntry"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := Slbconn.CreateLoadBalancerAclEntry(&req)
+	resp, err := slbconn.CreateLoadBalancerAclEntry(&req)
 	if err != nil {
 		return fmt.Errorf("create LoadBalancerAclEntry : %s", err)
 	}
@@ -94,17 +140,22 @@ func resourceKsyunLoadBalancerAclEntryCreate(d *schema.ResourceData, m interface
 		return fmt.Errorf("create LoadBalancerAclEntry : no LoadBalancerAclEntry id found")
 	}
 	SetDByResp(d, lbae, lbAclEntryKeys, map[string]bool{})
+	ids = fmt.Sprintf("%v:%v", d.Get("load_balancer_acl_id"), ids)
 	d.SetId(ids)
 	return nil
 }
 
 func resourceKsyunLoadBalancerAclEntryDelete(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
+	ids := strings.Split(d.Id(), ":")
+	if len(ids) != 2 {
+		return fmt.Errorf("error id:%v", d.Id())
+	}
 	req := make(map[string]interface{})
-	req["LoadBalancerAclEntryId"] = d.Id()
-	req["LoadBalancerAclId"] = d.Get("load_balancer_acl_id")
+	req["LoadBalancerAclEntryId"] = ids[1]
+	req["LoadBalancerAclId"] = ids[0]
 	/*
-		_, err := Slbconn.DeregisterInstancesFromListener(&req)
+		_, err := slbconn.DeregisterInstancesFromListener(&req)
 		if err != nil {
 			return fmt.Errorf("delete LoadBalancerAclEntry error:%v", err)
 		}
@@ -113,15 +164,14 @@ func resourceKsyunLoadBalancerAclEntryDelete(d *schema.ResourceData, m interface
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteLoadBalancerAclEntry"
 		logger.Debug(logger.ReqFormat, action, req)
-
-		if resp, err := Slbconn.DeleteLoadBalancerAclEntry(&req); err != nil {
-			if strings.Contains(err.Error(), "NotFound") {
-				return nil
-			}
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lbacl %q, %s", d.Id(), err))
-		} else {
-			logger.Debug(logger.RespFormat, action, req, *resp)
+		resp, err1 := slbconn.DeleteLoadBalancerAclEntry(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err1)
+		if err1 == nil || (err1 != nil && notFoundError(err1)) {
+			return nil
 		}
-		return nil
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
+		}
+		return resource.NonRetryableError(fmt.Errorf("DeleteLoadBalancerAclEntry error:%v", err1))
 	})
 }

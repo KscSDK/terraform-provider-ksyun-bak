@@ -13,5 +13,4 @@ resource "ksyun_lb" "default" {
   subnet_id = "609d1736-d8d7-492d-abd3-1183bb60329e"
   load_balancer_state = "stop"
   private_ip_address = "10.0.77.11"
-
 }

@@ -81,6 +81,14 @@ func resourceKsyunEip() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"band_width_share_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"is_band_width_share": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -150,14 +158,14 @@ func resourceKsyunEipRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceKsyunEipUpdate(d *schema.ResourceData, m interface{}) error {
 	eipConn := m.(*KsyunClient).eipconn
-	// 开启 允许部分属性修改 功能
+	// Enable partial attribute modification
 	d.Partial(true)
-	// 标识是否有修改
+	// Whether the representative has any modifications
 	attributeUpdate := false
 	updateReq := make(map[string]interface{})
 	updateReq["AllocationId"] = d.Id()
-	// 修改带宽上限
-	if d.HasChange("band_width") && d.IsNewResource() {
+	// modify
+	if d.HasChange("band_width") && !d.IsNewResource() {
 		if v, ok := d.GetOk("band_width"); ok {
 			updateReq["BandWidth"] = fmt.Sprintf("%v", v)
 		} else {
@@ -197,7 +205,7 @@ func resourceKsyunEipDelete(d *schema.ResourceData, meta interface{}) error {
 			return resource.RetryableError(err1)
 		}
 
-		//查询验证
+		//check
 		readEip := make(map[string]interface{})
 		readEip["AllocationId.1"] = d.Id()
 		if pd, ok := d.GetOk("project_id"); ok {

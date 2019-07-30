@@ -54,6 +54,11 @@ func dataSourceKsyunSubnetAvailableAddressesRead(d *schema.ResourceData, m inter
 	if ids, ok := d.GetOk("ids"); ok {
 		SubnetAvailableAddresseIds = SchemaSetToStringSlice(ids)
 	}
+	if len(SubnetAvailableAddresseIds) == 0 {
+		if ids, ok := d.GetOk("subnet_id"); ok {
+			SubnetAvailableAddresseIds = SchemaSetToStringSlice(ids)
+		}
+	}
 	if len(SubnetAvailableAddresseIds) > 0 {
 		req["Filter.1.Name"] = "subnet-id"
 	}

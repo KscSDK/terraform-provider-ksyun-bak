@@ -4,7 +4,9 @@ import (
 	"github.com/ksc/ksc-sdk-go/ksc"
 	"github.com/ksc/ksc-sdk-go/ksc/utils"
 	"github.com/ksc/ksc-sdk-go/service/eip"
+	"github.com/ksc/ksc-sdk-go/service/kcm"
 	"github.com/ksc/ksc-sdk-go/service/kec"
+	"github.com/ksc/ksc-sdk-go/service/sks"
 	"github.com/ksc/ksc-sdk-go/service/slb"
 	"github.com/ksc/ksc-sdk-go/service/sqlserver"
 	"github.com/ksc/ksc-sdk-go/service/vpc"
@@ -36,5 +38,7 @@ func (c *Config) Client() (*KsyunClient, error) {
 	client.slbconn = slb.SdkNew(cli, cfg, url)
 	client.kecconn = kec.SdkNew(cli, cfg, url)
 	client.sqlserverconn = sqlserver.SdkNew(cli, cfg, url)
+	client.kcmconn = kcm.SdkNew(cli, cfg, url)
+	client.sksconn = sks.SdkNew(cli, cfg, url)
 	return &client, nil
 }

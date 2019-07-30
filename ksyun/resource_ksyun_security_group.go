@@ -103,9 +103,9 @@ func resourceKsyunSecurityGroupCreate(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("error on creating SecurityGroup, %s", err)
 	}
 	if resp != nil {
-		SecurityGroup := (*resp)["SecurityGroup"].(map[string]interface{})
-		SecurityGroupId := SecurityGroup["SecurityGroupId"].(string)
-		d.SetId(SecurityGroupId)
+		securityGroup := (*resp)["SecurityGroup"].(map[string]interface{})
+		securityGroupId := securityGroup["SecurityGroupId"].(string)
+		d.SetId(securityGroupId)
 	}
 	return resourceKsyunSecurityGroupRead(d, meta)
 }
@@ -150,7 +150,7 @@ func resourceKsyunSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 	modifySecurityGroup["SecurityGroupId"] = d.Id()
 
 	if d.HasChange("security_group_name") && !d.IsNewResource() {
-		modifySecurityGroup["SecurityGroupName"] = d.Get("security_group_name").(string)
+		modifySecurityGroup["SecurityGroupName"] = fmt.Sprintf("%v", d.Get("security_group_name"))
 		attributeUpdate = true
 	}
 	if attributeUpdate {
@@ -184,7 +184,7 @@ func resourceKsyunSecurityGroupDelete(d *schema.ResourceData, meta interface{}) 
 			return resource.RetryableError(err)
 		}
 
-		//查询验证
+		//check
 		readSecurityGroup := make(map[string]interface{})
 		readSecurityGroup["SecurityGroupId.1"] = d.Id()
 		action = "DescribeSecurityGroups"

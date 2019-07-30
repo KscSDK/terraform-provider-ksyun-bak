@@ -146,6 +146,14 @@ func dataSourceKsyunEips() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"band_width_share_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"is_band_width_share": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},

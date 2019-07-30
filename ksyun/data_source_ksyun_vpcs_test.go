@@ -23,9 +23,12 @@ func TestAccKsyunVPCsDataSource_basic(t *testing.T) {
 }
 
 const testAccDataVPCsConfig = `
-
+resource "ksyun_vpc" "default" {
+	vpc_name        = "tf-acc-vpc-data"
+    cidr_block      = "192.168.0.0/16"
+}
 data "ksyun_vpcs" "foo" {
-    ids = ["b6533caa-2f78-4d07-806e-e5dfdd03f331"]
+    ids = ["${ksyun_vpc.default.id}"]
 	output_file = "output_result"
 }
 `

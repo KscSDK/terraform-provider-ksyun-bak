@@ -7,7 +7,8 @@ import (
 	"strings"
 )
 
-//将得到的map[string]interface{}类型的值转换为可赋值给d的类型。只支持[k,v]中的v为基本数据类型
+//Convert sdk response type (map[string]interface{}) to the type terraform can realized([]map[string]interface).
+//params data limit ： [k,v]:the type of k must be string ,the type of v must be basic type.
 func GetSubDByRep(data interface{}, include, exclude map[string]bool) []interface{} {
 	ma, ok := data.(map[string]interface{})
 	if !ok {
@@ -23,19 +24,20 @@ func GetSubDByRep(data interface{}, include, exclude map[string]bool) []interfac
 	return []interface{}{subD}
 }
 
-//sdk resp->terraform d
-//将获取的list类型的值转换为可赋值给d的类型。
-//遍历[]interface{}数据（其中interface{}可以转换为map[string]interface{}),将驼峰型字段名转为下划线。
-//用于 d.Set（ key，value）中的value，且value为TypeList类型
+//sdk resp []map[string]interface{}->terraform schema.ResourceData
+//Convert sdk response type ([]map[string]interface{}) to the type terraform can realized([]map[string]interface).
+//include ：representing the key terraform has defined.
+//exclude ：representing the key which the type is not basic type.
+//Suitable for the value in d.Set（ key，value）,and the type of value must be List.
 func GetSubSliceDByRep(items []interface{}, include /*,exclude*/ map[string]bool) []map[string]interface{} {
 	datas := []map[string]interface{}{}
 	for _, v := range items {
 		data := map[string]interface{}{}
 		vv, _ := v.(map[string]interface{})
 		for key, value := range vv {
-			//此处不判断，需在后面对非基本类型单独处理
+			//ignore keys whose type is not basic type,and need to deal later.
 			if /*exclude[key]||*/ !include[key] {
-				continue //不判断，当有新字段加入时无法解析
+				continue //if not judge,sdk may set value to terraform which can identify,and will panic.
 			}
 			data[Hump2Downline(key)] = value
 		}
@@ -44,7 +46,9 @@ func GetSubSliceDByRep(items []interface{}, include /*,exclude*/ map[string]bool
 	return datas
 }
 
-//将获取的map类型的值转换为可赋值给d的类型。只支持Map中的elem为map[string]interface{}，且[k,v]中的v为基本数据类型
+//sdk resp map[string]interface{} inline struct ->terraform schema.ResourceData
+//convert inline struct from sdk response type ([]map[string]interface{}) to the type terraform can realized([]map[string]interface).
+//exclude ：representing the key which the type is not basic type.
 func GetSubStructDByRep(datas interface{}, exclude map[string]bool) map[string]interface{} {
 
 	subStruct := map[string]interface{}{}
@@ -61,10 +65,12 @@ func GetSubStructDByRep(datas interface{}, exclude map[string]bool) map[string]i
 	return subStruct
 }
 
-//将得到的map[string]interface{}类型的值赋值给d。只支持[k,v]中的v为基本数据类型
+//set sdk response (map[string]interface{}) to the terr`aform ([]map[string]interface).
+//params data limit ： [k,v]:the type of k must be string ,the type of v must be basic type.
+//exclude ：representing the key which the type is not basic type (terraform can't identity the type which is not basic type).
+//mre: the params not set to terraform .
 func SetDByRespV1(d *schema.ResourceData, m interface{}, exclud map[string]bool) map[string]interface{} {
 	ma, ok := m.(map[string]interface{})
-	fmt.Println("ok:", ok)
 	mre := make(map[string]interface{}, 0)
 	if !ok {
 		return mre
@@ -83,8 +89,11 @@ func SetDByRespV1(d *schema.ResourceData, m interface{}, exclud map[string]bool)
 	return mre
 }
 
-//将得到的map[string]interface{}类型的值赋值给d。只支持[k,v]中的v为基本数据类型
-//Include 是已有字段，防止日后新加字段无法解析。exclude是排除字段，非基本类型字段需排除做特殊处理。
+//set sdk response (map[string]interface{}) to the terraform ([]map[string]interface).
+//params data limit ： [k,v]:the type of k must be string ,the type of v must be basic type.
+//include ：representing the key terraform has defined. terraform will panic if set the key that not defined.
+//exclude ：representing the key which the type is not basic type (terraform can't identity the type which is not basic type).
+//mre: the params not set to terraform .
 func SetDByResp(d *schema.ResourceData, m interface{}, includ, exclude map[string]bool) map[string]interface{} {
 	mre := make(map[string]interface{}, 0)
 	ma, ok := m.(map[string]interface{})
@@ -106,8 +115,8 @@ func SetDByResp(d *schema.ResourceData, m interface{}, includ, exclude map[strin
 	return mre
 }
 
-//简单驼峰转下划线 未对连写大写字母做判断进行特殊处理。
-//即aDDCC 转为a_d_d_c_c 而非a_ddc_c
+//The hump is converted to an underline simply, and no special treatment is required for even uppercase letters.
+//ex:aDDCC ->a_d_d_c_c
 func Hump2Downline(s string) string {
 	s = strings.TrimSpace(s)
 	if len(s) == 0 {
@@ -133,7 +142,7 @@ func Hump2Downline(s string) string {
 	return s1
 }
 
-//简单下划线转驼峰
+//The underline is converted to an hump simply.
 func Downline2Hump(s string) string {
 	s = strings.TrimSpace(s)
 	if len(s) == 0 {
@@ -148,12 +157,16 @@ func Downline2Hump(s string) string {
 	return strings.Join(s1, "")
 }
 
-//flattern struct 用于创建时，结构体类型的入参转换为map型 ,不带前缀拼接
+//flattern struct
+// convert input param struct to map when create(with out prefix).
 func FlatternStruct(v interface{}, req *map[string]interface{}) {
 	if v1, ok1 := v.([]interface{}); ok1 {
 		if len(v1) > 0 {
 			vv := v1[0].(map[string]interface{})
 			for k2, v2 := range vv {
+				if len(fmt.Sprintf("%v", v2)) == 0 {
+					continue
+				}
 				vv := Downline2Hump(k2)
 				(*req)[vv] = fmt.Sprintf("%v", v2)
 			}
@@ -161,37 +174,54 @@ func FlatternStruct(v interface{}, req *map[string]interface{}) {
 	}
 }
 
-//flattern struct 用于创建时，结构体类型的入参转换为map型,带前缀拼接
+//flattern struct Suitable for inline struct
+//convert input param struct to map when create(with  prefix).
+//prefix: the name of the outer structure
 func FlatternStructPrefix(v interface{}, req *map[string]interface{}, prex string) {
 	if v1, ok1 := v.([]interface{}); ok1 {
 		if len(v1) > 0 {
 			vv := v1[0].(map[string]interface{})
 			for k2, v2 := range vv {
-				vv := Downline2Hump(k2)
-				(*req)[fmt.Sprintf("%s.%s", prex, vv)] = fmt.Sprintf("%v", v2)
+				if len(fmt.Sprintf("%v", v2)) == 0 {
+					continue
+				}
+				kk := Downline2Hump(k2)
+				(*req)[fmt.Sprintf("%s.%s", prex, kk)] = fmt.Sprintf("%v", v2)
 			}
 		}
 	}
 }
 
 //FlatternStructSlicePrefix 用于创建时，结构体切片类型的入参转换为map型 ,【
+//Flattern StructSlice Suitable for the slice of inline struct
+//convert input param struct to map when create(with  prefix).
+//prefix: the name of the slice
 func FlatternStructSlicePrefix(values interface{}, req *map[string]interface{}, prex string) {
 	v, _ := values.([]interface{})
-	for k1, v1 := range v {
+	k := 0
+	for _, v1 := range v {
 		vv := v1.(map[string]interface{})
+		if len(vv) == 0 {
+			continue
+		}
+		k++
 		for k2, v2 := range vv {
-			vv := Downline2Hump(k2)
-			(*req)[fmt.Sprintf("%s.%d.%s", prex, k1+1, vv)] = fmt.Sprintf("%v", v2)
+			kk := Downline2Hump(k2)
+			(*req)[fmt.Sprintf("%s.%d.%s", prex, k, kk)] = fmt.Sprintf("%v", v2)
 		}
 	}
 }
 
-//ConvertFilterStruct  用于创建时，结构体类型的入参转换为map型 ,不带前缀拼接
+//Suitable for filter which need conver param with "_"(terraform) to "-"(sdk) when read .
+//convert input param struct to map when create(without prefix).
 func ConvertFilterStruct(v interface{}, req *map[string]interface{}) {
 	if v1, ok1 := v.([]interface{}); ok1 {
 		if len(v1) > 0 {
 			vv := v1[0].(map[string]interface{})
 			for k2, v2 := range vv {
+				if len(fmt.Sprintf("%v", v2)) == 0 {
+					continue
+				}
 				vv := strings.ReplaceAll(k2, "_", "-")
 				(*req)[vv] = fmt.Sprintf("%v", v2)
 			}
@@ -199,7 +229,9 @@ func ConvertFilterStruct(v interface{}, req *map[string]interface{}) {
 	}
 }
 
-//ConvertFilterStruct  用于创建时，结构体类型的入参转换为map型,带前缀拼接
+//Suitable for filter which need conver param with "_"(terraform) to "-"(sdk) when read.
+//convert input param struct to map when create(with prefix).
+//prefix:the name of the elemet from filter
 func ConvertFilterStructPrefix(v interface{}, req *map[string]interface{}, prex string) {
 	if v1, ok1 := v.([]interface{}); ok1 {
 		if len(v1) > 0 {
@@ -208,6 +240,9 @@ func ConvertFilterStructPrefix(v interface{}, req *map[string]interface{}, prex 
 			}
 			vv := v1[0].(map[string]interface{})
 			for k2, v2 := range vv {
+				if len(fmt.Sprintf("%v", v2)) == 0 {
+					continue
+				}
 				vv := strings.ReplaceAll(k2, "_", "-")
 				(*req)[fmt.Sprintf("%s.%s", prex, vv)] = v2
 			}

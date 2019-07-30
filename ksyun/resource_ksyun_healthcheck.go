@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
-	"strings"
 	"time"
 )
 
@@ -68,7 +67,7 @@ func resourceKsyunHealthCheck() *schema.Resource {
 	}
 }
 func resourceKsyunHealthCheckCreate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	/*
 		if v, ok := d.GetOk("listener_id"); ok {
@@ -119,7 +118,7 @@ func resourceKsyunHealthCheckCreate(d *schema.ResourceData, m interface{}) error
 	action := "ConfigureHealthCheck"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.ConfigureHealthCheck(&req)
+	resp, err := slbconn.ConfigureHealthCheck(&req)
 	if err != nil {
 		return fmt.Errorf("create HealthCheck : %s", err)
 	}
@@ -138,13 +137,13 @@ func resourceKsyunHealthCheckCreate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceKsyunHealthCheckRead(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["HealthCheckId.1"] = d.Id()
 	action := "DescribeHealthChecks"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.DescribeHealthChecks(&req)
+	resp, err := slbconn.DescribeHealthChecks(&req)
 	if err != nil {
 		return fmt.Errorf(" read HealthChecks : %s", err)
 	}
@@ -162,7 +161,7 @@ func resourceKsyunHealthCheckRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["HealthCheckId"] = d.Id()
 	if _, ok := d.GetOk("health_check_state"); !ok {
@@ -176,11 +175,11 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 		"unhealthy_threshold",
 		"is_default_host_name",
 		"host_name",
-		"health_check_state",
+		"url_path",
 	}
 	attributeUpdate := false
 	var updates []string
-	//获取修改属性
+	//Get the property that needs to be modified
 	for _, v := range allAttributes {
 		if d.HasChange(v) {
 			attributeUpdate = true
@@ -190,27 +189,27 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 	if !attributeUpdate {
 		return nil
 	}
-	//创建修改请求
+	//Create a modification request
 	for _, v := range allAttributes {
 		if v1, ok := d.GetOk(v); ok {
 			req[Downline2Hump(v)] = fmt.Sprintf("%v", v1)
 		}
 	}
-	//必填字端，未修改也要传
+	//Required word, though not modified
 	if _, ok := req["HealthCheckState"]; !ok {
 		req["HealthCheckState"] = d.Get("health_check_state")
 	}
-	// 开启 允许部分属性修改 功能
+	// Enable partial attribute modification
 	d.Partial(true)
 	action := "ModifyHealthCheck"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.ModifyHealthCheck(&req)
+	resp, err := slbconn.ModifyHealthCheck(&req)
 	if err != nil {
 		return fmt.Errorf("update HealthCheck (%v)error:%v", req, err)
 	}
 	logger.Debug(logger.RespFormat, action, req, *resp)
-	// 设置部分修改属性
+	// Set partial modification properties
 	for _, v := range updates {
 		d.SetPartial(v)
 	}
@@ -219,11 +218,11 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceKsyunHealthCheckDelete(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["HealthCheckId"] = d.Id()
 	/*
-		_, err := Slbconn.DeleteHealthCheck(&req)
+		_, err := slbconn.DeleteHealthCheck(&req)
 		if err != nil {
 			return fmt.Errorf("delete HealthCheck error:%v", err)
 		}
@@ -232,20 +231,19 @@ func resourceKsyunHealthCheckDelete(d *schema.ResourceData, m interface{}) error
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteHealthCheck"
 		logger.Debug(logger.ReqFormat, action, req)
-		if resp, err := Slbconn.DeleteHealthCheck(&req); err != nil {
-			if strings.Contains(err.Error(), "NotFound") {
-				return nil
-			}
-			return resource.NonRetryableError(fmt.Errorf("error on deleting healthcheck %q, %s", d.Id(), err))
-		} else {
-			logger.Debug(logger.RespFormat, action, req, *resp)
-
+		resp, err1 := slbconn.DeleteHealthCheck(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err1)
+		if err1 == nil || (err1 != nil && notFoundError(err1)) {
+			return nil
+		}
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
 		}
 		req := make(map[string]interface{})
 		req["HealthCheckId.1"] = d.Id()
 		action = "DescribeHealthChecks"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err := Slbconn.DescribeHealthChecks(&req)
+		resp, err := slbconn.DescribeHealthChecks(&req)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on reading healthcheck when deleting %q, %s", d.Id(), err))
 		}

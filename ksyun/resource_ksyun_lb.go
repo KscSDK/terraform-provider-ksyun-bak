@@ -70,7 +70,7 @@ func resourceKsyunLb() *schema.Resource {
 	}
 }
 func resourceKsyunLbCreate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	if v, ok := d.GetOk("vpc_id"); ok {
 		req["VpcId"] = fmt.Sprintf("%v", v)
@@ -92,7 +92,7 @@ func resourceKsyunLbCreate(d *schema.ResourceData, m interface{}) error {
 	action := "CreateLoadBalancer"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.CreateLoadBalancer(&req)
+	resp, err := slbconn.CreateLoadBalancer(&req)
 	if err != nil {
 		return fmt.Errorf("Error CreateLoadBalancer : %s", err)
 	}
@@ -112,12 +112,12 @@ func resourceKsyunLbCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKsyunLbRead(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["LoadBalancerId.1"] = d.Id()
 	action := "DescribeLoadBalancers"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := Slbconn.DescribeLoadBalancers(&req)
+	resp, err := slbconn.DescribeLoadBalancers(&req)
 	if err != nil {
 		return fmt.Errorf("Error DescribeLoadBalancers : %s", err)
 	}
@@ -165,7 +165,7 @@ func resourceKsyunLbRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKsyunLbUpdate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["LoadBalancerId"] = d.Id()
 	if v, ok := d.GetOk("load_balancer_name"); ok {
@@ -176,11 +176,10 @@ func resourceKsyunLbUpdate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		return fmt.Errorf("cann't change load_balancer_state to empty string")
 	}
-	// 开启 允许部分属性修改 功能
+	// Enable partial attribute modification
 	d.Partial(true)
-	// 标识是否有修改
+	// Whether the representative has any modifications
 	attributeUpdate := false
-	// 修改负载均衡的名称
 	if d.HasChange("load_balancer_name") {
 		attributeUpdate = true
 	}
@@ -190,9 +189,16 @@ func resourceKsyunLbUpdate(d *schema.ResourceData, m interface{}) error {
 	if attributeUpdate {
 		action := "ModifyLoadBalancer"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err := Slbconn.ModifyLoadBalancer(&req)
+		resp, err := slbconn.ModifyLoadBalancer(&req)
 		if err != nil {
-			return fmt.Errorf("update Slb (%v)error:%v", req, err)
+			logger.Debug(logger.AllFormat, action+" first", req, *resp, err)
+			if strings.Contains(err.Error(), "400") {
+				time.Sleep(time.Second * 2)
+				resp, err = slbconn.ModifyLoadBalancer(&req)
+				if err != nil {
+					return fmt.Errorf("update Slb (%v)error twice:%v", req, err)
+				}
+			}
 		}
 		logger.Debug(logger.RespFormat, action, req, *resp)
 		d.SetPartial("load_balancer_name")
@@ -203,11 +209,11 @@ func resourceKsyunLbUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKsyunLbDelete(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["LoadBalancerId"] = d.Id()
 	/*
-		_, err := Slbconn.DeleteLoadBalancer(&req)
+		_, err := slbconn.DeleteLoadBalancer(&req)
 		if err != nil {
 			return fmt.Errorf("release Slb error:%v", err)
 		}
@@ -217,20 +223,19 @@ func resourceKsyunLbDelete(d *schema.ResourceData, m interface{}) error {
 		action := "DeleteLoadBalancer"
 		logger.Debug(logger.ReqFormat, action, req)
 
-		if resp, err := Slbconn.DeleteLoadBalancer(&req); err != nil {
-			if strings.Contains(err.Error(), "NotFound") {
-				return nil
-			}
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb %q, %s", d.Id(), err))
-		} else {
-			logger.Debug(logger.RespFormat, action, req, *resp)
-
+		resp, err1 := slbconn.DeleteLoadBalancer(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err1)
+		if err1 == nil || (err1 != nil && notFoundError(err1)) {
+			return nil
+		}
+		if err1 != nil && inUseError(err1) {
+			return resource.RetryableError(err1)
 		}
 		req := make(map[string]interface{})
 		req["LoadBalancerId.1"] = d.Id()
 		action = "DescribeLoadBalancers"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err := Slbconn.DescribeLoadBalancers(&req)
+		resp, err := slbconn.DescribeLoadBalancers(&req)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on reading lb when deleting %q, %s", d.Id(), err))
 		}

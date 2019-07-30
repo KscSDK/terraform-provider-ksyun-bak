@@ -3,6 +3,6 @@ provider "ksyun" {
 }
 
 resource "ksyun_vpc" "test" {
-  vpc_name   = "${var.vpc_name}"
-  cidr_block = "${var.vpc_cidr}"
+  vpc_name   = "ksyun_vpc_tf"
+  cidr_block = "10.1.0.2/24"
 }

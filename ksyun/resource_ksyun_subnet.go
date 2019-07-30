@@ -116,7 +116,7 @@ func resourceKsyunSubnetCreate(d *schema.ResourceData, meta interface{}) error {
 	if d.Get("subnet_type") != "Reserve" && (d.Get("gateway_ip") == nil || d.Get("gateway_ip") == "") {
 		return fmt.Errorf("subnet_type not Reserve,Must set gateway_ip")
 	}
-	action := "DescribeSubnets"
+	action := "CreateSubnet"
 	logger.Debug(logger.ReqFormat, action, createSubnet)
 	resp, err = conn.CreateSubnet(&createSubnet)
 	logger.Debug(logger.AllFormat, action, createSubnet, *resp, err)
@@ -144,22 +144,12 @@ func resourceKsyunSubnetRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error on reading Subnet %q, %s", d.Id(), err)
 	}
 	if resp != nil {
-		l := (*resp)["SubnetSet"].([]interface{})
-		if len(l) == 0 {
+		items, ok := (*resp)["SubnetSet"].([]interface{})
+		if !ok || len(items) == 0 {
 			d.SetId("")
 			return nil
 		}
-		item := l[0].(map[string]interface{})
-		d.Set("availability_zone", item["AvailabilityZoneName"].(string))
-		d.Set("subnet_name", item["SubnetName"].(string))
-		d.Set("cidr_block", item["CidrBlock"].(string))
-		d.Set("subnet_type", item["SubnetType"].(string))
-		d.Set("dhcp_ip_from", item["DhcpIpFrom"].(string))
-		d.Set("dhcp_ip_to", item["DhcpIpTo"].(string))
-		d.Set("gateway_ip", item["GatewayIp"].(string))
-		d.Set("vpc_id", item["VpcId"].(string))
-		d.Set("dns1", item["Dns1"].(string))
-		d.Set("dns2", item["Dns2"].(string))
+		SetDByResp(d, items[0], subnetKeys, map[string]bool{})
 	}
 	return nil
 }
@@ -173,15 +163,15 @@ func resourceKsyunSubnetUpdate(d *schema.ResourceData, meta interface{}) error {
 	modifySubnet["SubnetId"] = d.Id()
 
 	if d.HasChange("subnet_name") && !d.IsNewResource() {
-		modifySubnet["SubnetName"] = d.Get("subnet_name").(string)
+		modifySubnet["SubnetName"] = fmt.Sprintf("%v", d.Get("subnet_name"))
 		attributeUpdate = true
 	}
 	if d.HasChange("dns1") && !d.IsNewResource() {
-		modifySubnet["Dns1"] = d.Get("dns1").(string)
+		modifySubnet["Dns1"] = fmt.Sprintf("%v", d.Get("dns1"))
 		attributeUpdate = true
 	}
 	if d.HasChange("dns2") && !d.IsNewResource() {
-		modifySubnet["Dns2"] = d.Get("dns2").(string)
+		modifySubnet["Dns2"] = fmt.Sprintf("%v", d.Get("dns2").(string))
 		attributeUpdate = true
 	}
 	if attributeUpdate {

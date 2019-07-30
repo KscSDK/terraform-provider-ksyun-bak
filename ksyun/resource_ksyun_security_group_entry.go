@@ -170,7 +170,7 @@ func resourceKsyunSecurityGroupEntryDelete(d *schema.ResourceData, meta interfac
 	if err0 == nil || (err0 != nil && strings.Contains(err0.Error(), "NotFound")) {
 		return nil
 	}
-	//查询验证
+	//check
 	readSecurityGroup := make(map[string]interface{})
 	readSecurityGroup["SecurityGroupId.1"] = d.Get("security_group_id")
 	action = "DescribeSecurityGroups"
