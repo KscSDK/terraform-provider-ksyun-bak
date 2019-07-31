@@ -319,7 +319,8 @@ func dataSourceSqlserverSave(d *schema.ResourceData, dataKey string, ids []strin
 	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v",datas)
 	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
 		logger.DebugInfo(" ------------ %+v", outputFile)
-		writeToFile(outputFile.(string), datas)
+
+		writeToFile(outputFile.(string) + "_" + d.Id(), datas)
 	} else {
 		logger.DebugInfo(" !!!!!!!!!!! %+v",  outputFile)
 	}

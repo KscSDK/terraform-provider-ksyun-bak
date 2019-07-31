@@ -1,7 +1,7 @@
 provider "ksyun"{
   region = "cn-shanghai-3"
-  access_key = "AKLTpmhJ3QlBQEmB401iSDl0dA"
-  secret_key = "OAeYHxiil7rl7nbVcpsUPnbvzJEkY6zQM4ExOR4aOYUx4SZhwLqrKnlaCETVyVv7gw=="
+  access_key = "aaaaaaaa"
+  secret_key = "aaaaaaaa"
 }
 
 resource "ksyun_sqlserver" "houbin-9"{
