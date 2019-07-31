@@ -79,41 +79,50 @@ func resourceKsyunSqlServer() *schema.Resource{
 			"sqlservers": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema:map[string]*schema.Schema{
 						"dbinstanceclass": {
 							Type:     schema.TypeList,
 							Optional: true,
 							MaxItems: 1,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema:map[string]*schema.Schema{
 									"id": {
 										Type:     schema.TypeString,
 										Optional: true,
+										Computed: true,
 									},
 									"vcpus": {
 										Type:     schema.TypeInt,
 										Optional: true,
+										Computed: true,
 									},
 									"disk": {
 										Type:     schema.TypeInt,
 										Optional: true,
+										Computed: true,
 									},
 									"ram": {
 										Type:     schema.TypeInt,
 										Optional: true,
+										Computed: true,
 									},
 									"iops":{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Computed: true,
 									},
 									"maxconn": {
 										Type:     schema.TypeInt,
 										Optional: true,
+										Computed: true,
 									},
 									"mem":{
 										Type:     schema.TypeInt,
 										Optional: true,
+										Computed: true,
 									},
 								},
 							},
@@ -121,58 +130,72 @@ func resourceKsyunSqlServer() *schema.Resource{
 						"dbinstanceidentifier": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"dbinstancename": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"dbinstancestatus": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"dbinstancetype": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"groupid": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"vip": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"engine": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"engineversion": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"instancecreatetime": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"masterusername": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"vpcid": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"subnetid": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"publiclyaccessible": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 						"readreplicadbinstanceidentifiers": {
 							Type:     schema.TypeSet,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -180,86 +203,107 @@ func resourceKsyunSqlServer() *schema.Resource{
 						"billtype": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"ordertype": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"ordersource": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"masteravailabilityzone": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"slaveavailabilityzone": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"multiavailabilityzone": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 						"productid": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"orderuse": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"projectid": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 						"projectname": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"region": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"billtypeid": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 						"port":{
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 						"dbparametergroupid": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"datastoreversionid": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"diskused": {
 							Type:     schema.TypeFloat,
 							Optional: true,
+							Computed: true,
 						},
 						"preferredbackuptime": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"productwhat":{
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 						"servicestarttime" :{
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"suborderid": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"audit": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -407,8 +451,27 @@ func resourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceKsyunSqlServerUpdate(d *schema.ResourceData, meta interface{}) error {
 	// 关闭事务，允许部分属性被修改  d.Partial(true) d.Partial(false)
+	updateField := []string{
+		"output_file",
+		"dbinstanceidentifier",
+		"dbinstanceclass",
+		"dbinstancename",
+		"dbinstancetype",
+		"engine",
+		"engineversion",
+		"masterusername",
+		"masteruserpassword",
+		"vpcid",
+		"subnetid",
+		"billtype",
+	}
+	for _,v := range updateField{
+		if d.HasChange(v) && !d.IsNewResource() {
+			fmt.Errorf("error on updating instance , sqlserver is not support update")
+		}
+	}
 
-	return fmt.Errorf("error on updating instance , sqlserver is not support update")
+	return nil
 }
 
 func resourceKsyunSqlServerDelete(d *schema.ResourceData, meta interface{}) error {
