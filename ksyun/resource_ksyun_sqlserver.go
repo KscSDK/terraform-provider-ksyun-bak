@@ -467,7 +467,7 @@ func resourceKsyunSqlServerUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 	for _,v := range updateField{
 		if d.HasChange(v) && !d.IsNewResource() {
-			fmt.Errorf("error on updating instance , sqlserver is not support update")
+			return fmt.Errorf("error on updating instance , sqlserver is not support update")
 		}
 	}
 
