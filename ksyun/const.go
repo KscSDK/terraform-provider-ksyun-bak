@@ -37,3 +37,11 @@ const (
 	// statusStopped is the general status when remote resource is stopped
 	statusStopped = "stopped"
 )
+// trove front
+const (
+	tActiveStatus = "ACTIVE"
+	tDeletedStatus = "DELETED"
+	tCreatingStatus = "CREATING"
+	tFailedStatus = "FAILED"
+	tStopedStatus ="STOPPED"
+)

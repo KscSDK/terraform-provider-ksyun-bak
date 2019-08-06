@@ -66,9 +66,9 @@ func testAccCheckLbExists(n string, val *map[string]interface{}) resource.TestCh
 			return fmt.Errorf("Lb id is empty")
 		}
 		client := testAccProvider.Meta().(*KsyunClient)
-		Lb := make(map[string]interface{})
-		Lb["LoadBalancerId.1"] = rs.Primary.ID
-		ptr, err := client.slbconn.DescribeLoadBalancers(&Lb)
+		lb := make(map[string]interface{})
+		lb["LoadBalancerId.1"] = rs.Primary.ID
+		ptr, err := client.slbconn.DescribeLoadBalancers(&lb)
 		if err != nil {
 			return err
 		}
@@ -101,9 +101,9 @@ func testAccCheckLbDestroy(s *terraform.State) error {
 		}
 
 		client := testAccProvider.Meta().(*KsyunClient)
-		Lb := make(map[string]interface{})
-		Lb["LoadBalancerId.1"] = rs.Primary.ID
-		ptr, err := client.slbconn.DescribeLoadBalancers(&Lb)
+		lb := make(map[string]interface{})
+		lb["LoadBalancerId.1"] = rs.Primary.ID
+		ptr, err := client.slbconn.DescribeLoadBalancers(&lb)
 
 		// Verify the error is what we want
 		if err != nil {

@@ -175,6 +175,7 @@ var instanceKeys = map[string]bool{
 	"ProductWhat":           true,
 	"ChargeType":            true,
 	"SystemDisk":            true,
+	"KeySet":                true,
 }
 var instanceConfigureKeys = map[string]bool{
 	"VCPU":       true,
@@ -250,4 +251,14 @@ var networkInterfaceKeys = map[string]bool{
 	"ProjectId":            true,
 	"DNS1":                 true,
 	"DNS2":                 true,
+}
+var certificateKeys = map[string]bool{
+	"CertificateId":   true,
+	"CertificateName": true,
+}
+var sshKeyKeys = map[string]bool{
+	"KeyId":      true,
+	"KeyName":    true,
+	"PublicKey":  true,
+	"CreateTime": true,
 }

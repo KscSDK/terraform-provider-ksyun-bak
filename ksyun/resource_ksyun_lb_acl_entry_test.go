@@ -67,13 +67,13 @@ func testAccCheckLbAclEntryExists(n string, val *map[string]interface{}) resourc
 			return fmt.Errorf("LbAclEntry id is empty")
 		}
 		client := testAccProvider.Meta().(*KsyunClient)
-		LbAclEntry := make(map[string]interface{})
+		lbAclEntry := make(map[string]interface{})
 		ids := strings.Split(rs.Primary.ID, ":")
 		if len(ids) == 0 {
 			return fmt.Errorf("LbAclEntry id is error")
 		}
-		LbAclEntry["LoadBalancerAclId.1"] = ids[0]
-		ptr, err := client.slbconn.DescribeLoadBalancerAcls(&LbAclEntry)
+		lbAclEntry["LoadBalancerAclId.1"] = ids[0]
+		ptr, err := client.slbconn.DescribeLoadBalancerAcls(&lbAclEntry)
 		if err != nil {
 			return err
 		}
@@ -106,13 +106,13 @@ func testAccCheckLbAclEntryDestroy(s *terraform.State) error {
 		}
 
 		client := testAccProvider.Meta().(*KsyunClient)
-		LbAclEntry := make(map[string]interface{})
+		lbAclEntry := make(map[string]interface{})
 		ids := strings.Split(rs.Primary.ID, ":")
 		if len(ids) == 0 {
 			return fmt.Errorf("LbAclEntry id is error")
 		}
-		LbAclEntry["LoadBalancerAclId.1"] = ids[0]
-		ptr, err := client.slbconn.DescribeLoadBalancerAcls(&LbAclEntry)
+		lbAclEntry["LoadBalancerAclId.1"] = ids[0]
+		ptr, err := client.slbconn.DescribeLoadBalancerAcls(&lbAclEntry)
 
 		// Verify the error is what we want
 		if err != nil {

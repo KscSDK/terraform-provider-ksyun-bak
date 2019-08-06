@@ -3,6 +3,7 @@ package ksyun
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 	"strings"
 )
 
@@ -191,6 +192,7 @@ func FlatternStructPrefix(v interface{}, req *map[string]interface{}, prex strin
 	}
 }
 
+//FlatternStructSlicePrefix 用于创建时，结构体切片类型的入参转换为map型 ,【
 //Flattern StructSlice Suitable for the slice of inline struct
 //convert input param struct to map when create(with  prefix).
 //prefix: the name of the slice
@@ -294,6 +296,59 @@ func dataSourceKscSaveSlice(d *schema.ResourceData, dataKey string, ids []string
 	}
 	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
 		writeToFile(outputFile.(string), datas)
+	}
+
+	return nil
+}
+
+func dataSourceSqlserverSave(d *schema.ResourceData, dataKey string, ids []string, datas []map[string]interface{}) error {
+
+	if len(ids) == 1 {
+		d.SetId(ids[0])
+	} else {
+		d.SetId(strings.Join(ids,","))
+	}
+
+	d.Set("total_count", len(datas))
+
+	logger.DebugInfo("$$$$$$$$$datasdatasdatas$$$$$$$$ %+v",datas)
+	if err := d.Set(dataKey, datas); err != nil {
+		logger.DebugInfo("$$$$$$$$$omg$$$$$$$$ %+v",err)
+		return fmt.Errorf("error set datas %v :%v", datas, err)
+	}
+	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v",datas)
+	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
+		logger.DebugInfo(" ------------ %+v", outputFile)
+
+		writeToFile(outputFile.(string) + "_" + d.Id(), datas)
+	} else {
+		logger.DebugInfo(" !!!!!!!!!!! %+v",  outputFile)
+	}
+
+	return nil
+}
+
+func dataSourceSqlserverDataSave(d *schema.ResourceData, dataKey string, ids []string, datas []map[string]interface{}) error {
+
+	if len(ids) == 1 {
+		d.SetId(ids[0])
+	} else {
+		d.SetId(strings.Join(ids,","))
+	}
+
+	d.Set("total_count", len(datas))
+
+	logger.DebugInfo("$$$$$$$$$datasdatasdatas$$$$$$$$ %+v",datas)
+	if err := d.Set(dataKey, datas); err != nil {
+		logger.DebugInfo("$$$$$$$$$omg$$$$$$$$ %+v",err)
+		return fmt.Errorf("error set datas %v :%v", datas, err)
+	}
+	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v",datas)
+	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
+		logger.DebugInfo(" ------------ %+v", outputFile)
+		writeToFile(outputFile.(string)+"_data", datas)
+	} else {
+		logger.DebugInfo(" !!!!!!!!!!! %+v",  outputFile)
 	}
 
 	return nil

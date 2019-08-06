@@ -3,7 +3,7 @@ package ksyun
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/terraform-providers/terraform-provider-ksc/logger"
+	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 )
 
 func dataSourceKsyunInstances() *schema.Resource {

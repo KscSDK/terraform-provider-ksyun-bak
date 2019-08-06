@@ -67,7 +67,7 @@ func resourceKsyunHealthCheck() *schema.Resource {
 	}
 }
 func resourceKsyunHealthCheckCreate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	/*
 		if v, ok := d.GetOk("listener_id"); ok {
@@ -118,7 +118,7 @@ func resourceKsyunHealthCheckCreate(d *schema.ResourceData, m interface{}) error
 	action := "ConfigureHealthCheck"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.ConfigureHealthCheck(&req)
+	resp, err := slbconn.ConfigureHealthCheck(&req)
 	if err != nil {
 		return fmt.Errorf("create HealthCheck : %s", err)
 	}
@@ -137,13 +137,13 @@ func resourceKsyunHealthCheckCreate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceKsyunHealthCheckRead(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["HealthCheckId.1"] = d.Id()
 	action := "DescribeHealthChecks"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.DescribeHealthChecks(&req)
+	resp, err := slbconn.DescribeHealthChecks(&req)
 	if err != nil {
 		return fmt.Errorf(" read HealthChecks : %s", err)
 	}
@@ -161,7 +161,7 @@ func resourceKsyunHealthCheckRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["HealthCheckId"] = d.Id()
 	if _, ok := d.GetOk("health_check_state"); !ok {
@@ -204,7 +204,7 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 	action := "ModifyHealthCheck"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.ModifyHealthCheck(&req)
+	resp, err := slbconn.ModifyHealthCheck(&req)
 	if err != nil {
 		return fmt.Errorf("update HealthCheck (%v)error:%v", req, err)
 	}
@@ -218,11 +218,11 @@ func resourceKsyunHealthCheckUpdate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceKsyunHealthCheckDelete(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["HealthCheckId"] = d.Id()
 	/*
-		_, err := Slbconn.DeleteHealthCheck(&req)
+		_, err := slbconn.DeleteHealthCheck(&req)
 		if err != nil {
 			return fmt.Errorf("delete HealthCheck error:%v", err)
 		}
@@ -231,7 +231,7 @@ func resourceKsyunHealthCheckDelete(d *schema.ResourceData, m interface{}) error
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeleteHealthCheck"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err1 := Slbconn.DeleteHealthCheck(&req)
+		resp, err1 := slbconn.DeleteHealthCheck(&req)
 		logger.Debug(logger.AllFormat, action, req, *resp, err1)
 		if err1 == nil || (err1 != nil && notFoundError(err1)) {
 			return nil
@@ -243,7 +243,7 @@ func resourceKsyunHealthCheckDelete(d *schema.ResourceData, m interface{}) error
 		req["HealthCheckId.1"] = d.Id()
 		action = "DescribeHealthChecks"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err := Slbconn.DescribeHealthChecks(&req)
+		resp, err := slbconn.DescribeHealthChecks(&req)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on reading healthcheck when deleting %q, %s", d.Id(), err))
 		}

@@ -57,7 +57,7 @@ func resourceKsyunInstancesWithListener() *schema.Resource {
 	}
 }
 func resourceKsyunInstancesWithListenerCreate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	creates := []string{
 		"listener_id",
@@ -75,7 +75,7 @@ func resourceKsyunInstancesWithListenerCreate(d *schema.ResourceData, m interfac
 	}
 	action := "RegisterInstancesWithListener"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := Slbconn.RegisterInstancesWithListener(&req)
+	resp, err := slbconn.RegisterInstancesWithListener(&req)
 	if err != nil {
 		return fmt.Errorf("create InstancesWithListener : %s", err)
 	}
@@ -94,13 +94,13 @@ func resourceKsyunInstancesWithListenerCreate(d *schema.ResourceData, m interfac
 }
 
 func resourceKsyunInstancesWithListenerRead(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["RegisterId.1"] = d.Id()
 	action := "DescribeInstancesWithListener"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.DescribeInstancesWithListener(&req)
+	resp, err := slbconn.DescribeInstancesWithListener(&req)
 	if err != nil {
 		return fmt.Errorf(" read InstancesWithListeners : %s", err)
 	}
@@ -116,7 +116,7 @@ func resourceKsyunInstancesWithListenerRead(d *schema.ResourceData, m interface{
 }
 
 func resourceKsyunInstancesWithListenerUpdate(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["RegisterId"] = d.Id()
 	allAttributes := []string{
@@ -146,7 +146,7 @@ func resourceKsyunInstancesWithListenerUpdate(d *schema.ResourceData, m interfac
 	action := "ModifyInstancesWithListener"
 	logger.Debug(logger.ReqFormat, action, req)
 
-	resp, err := Slbconn.ModifyInstancesWithListener(&req)
+	resp, err := slbconn.ModifyInstancesWithListener(&req)
 	if err != nil {
 		return fmt.Errorf("update InstancesWithListener (%v)error:%v", req, err)
 	}
@@ -161,11 +161,11 @@ func resourceKsyunInstancesWithListenerUpdate(d *schema.ResourceData, m interfac
 }
 
 func resourceKsyunInstancesWithListenerDelete(d *schema.ResourceData, m interface{}) error {
-	Slbconn := m.(*KsyunClient).slbconn
+	slbconn := m.(*KsyunClient).slbconn
 	req := make(map[string]interface{})
 	req["RegisterId"] = d.Id()
 	/*
-		_, err := Slbconn.DeregisterInstancesFromListener(&req)
+		_, err := slbconn.DeregisterInstancesFromListener(&req)
 		if err != nil {
 			return fmt.Errorf("delete InstancesWithListener error:%v", err)
 		}
@@ -174,7 +174,7 @@ func resourceKsyunInstancesWithListenerDelete(d *schema.ResourceData, m interfac
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		action := "DeregisterInstancesFromListener"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err1 := Slbconn.DeregisterInstancesFromListener(&req)
+		resp, err1 := slbconn.DeregisterInstancesFromListener(&req)
 		logger.Debug(logger.AllFormat, action, req, *resp, err1)
 		if err1 == nil || (err1 != nil && notFoundError(err1)) {
 			return nil
@@ -187,7 +187,7 @@ func resourceKsyunInstancesWithListenerDelete(d *schema.ResourceData, m interfac
 		req["RegisterId.1"] = d.Id()
 		action = "DescribeInstancesWithListener"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err := Slbconn.DescribeInstancesWithListener(&req)
+		resp, err := slbconn.DescribeInstancesWithListener(&req)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on reading Listener instance when deleting %q, %s", d.Id(), err))
 		}

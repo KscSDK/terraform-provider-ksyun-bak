@@ -1,9 +1,0 @@
-[
-	{
-		"cidr_block": "172.31.0.0/16",
-		"create_time": "2018-03-21 16:15:44",
-		"is_default": true,
-		"vpc_id": "cf08e947-6577-44eb-80bc-2902d54818c3",
-		"vpc_name": "DefaultVPC"
-	}
-]

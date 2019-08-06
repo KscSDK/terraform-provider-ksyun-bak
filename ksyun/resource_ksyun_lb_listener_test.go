@@ -66,9 +66,9 @@ func testAccCheckListenerExists(n string, val *map[string]interface{}) resource.
 			return fmt.Errorf("Listener id is empty")
 		}
 		client := testAccProvider.Meta().(*KsyunClient)
-		Listener := make(map[string]interface{})
-		Listener["ListenerId.1"] = rs.Primary.ID
-		ptr, err := client.slbconn.DescribeListeners(&Listener)
+		listener := make(map[string]interface{})
+		listener["ListenerId.1"] = rs.Primary.ID
+		ptr, err := client.slbconn.DescribeListeners(&listener)
 		if err != nil {
 			return err
 		}
@@ -101,9 +101,9 @@ func testAccCheckListenerDestroy(s *terraform.State) error {
 		}
 
 		client := testAccProvider.Meta().(*KsyunClient)
-		Listener := make(map[string]interface{})
-		Listener["ListenerId.1"] = rs.Primary.ID
-		ptr, err := client.slbconn.DescribeListeners(&Listener)
+		listener := make(map[string]interface{})
+		listener["ListenerId.1"] = rs.Primary.ID
+		ptr, err := client.slbconn.DescribeListeners(&listener)
 
 		// Verify the error is what we want
 		if err != nil {

@@ -66,9 +66,9 @@ func testAccCheckSecurityGroupExists(n string, val *map[string]interface{}) reso
 			return fmt.Errorf("SecurityGroup id is empty")
 		}
 		client := testAccProvider.Meta().(*KsyunClient)
-		SecurityGroup := make(map[string]interface{})
-		SecurityGroup["SecurityGroupId.1"] = rs.Primary.ID
-		ptr, err := client.vpcconn.DescribeSecurityGroups(&SecurityGroup)
+		securityGroup := make(map[string]interface{})
+		securityGroup["SecurityGroupId.1"] = rs.Primary.ID
+		ptr, err := client.vpcconn.DescribeSecurityGroups(&securityGroup)
 		if err != nil {
 			return err
 		}
@@ -101,9 +101,9 @@ func testAccCheckSecurityGroupDestroy(s *terraform.State) error {
 		}
 
 		client := testAccProvider.Meta().(*KsyunClient)
-		SecurityGroup := make(map[string]interface{})
-		SecurityGroup["SecurityGroupId.1"] = rs.Primary.ID
-		ptr, err := client.vpcconn.DescribeSecurityGroups(&SecurityGroup)
+		securityGroup := make(map[string]interface{})
+		securityGroup["SecurityGroupId.1"] = rs.Primary.ID
+		ptr, err := client.vpcconn.DescribeSecurityGroups(&securityGroup)
 
 		// Verify the error is what we want
 		if err != nil {
