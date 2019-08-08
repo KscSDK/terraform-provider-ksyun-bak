@@ -31,3 +31,13 @@ func DebugInfo(format string, info interface{}) {
 	message := fmt.Sprintf("[DEBUG] {%v:%v}", file, line)
 	log.Printf(message+format, info)
 }
+
+func Info(format string, v ...interface{}) {
+	_, file, line, _ := runtime.Caller(skip)
+	start := strings.LastIndex(file, "/")
+	if start != -1 {
+		file = file[start+1:]
+	}
+	message := fmt.Sprintf("[INFO] {%v:%v}", file, line)
+	log.Printf(message+format, v)
+}

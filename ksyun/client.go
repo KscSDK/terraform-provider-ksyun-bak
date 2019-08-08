@@ -8,6 +8,8 @@ import (
 	"github.com/ksc/ksc-sdk-go/service/slb"
 	"github.com/ksc/ksc-sdk-go/service/sqlserver"
 	"github.com/ksc/ksc-sdk-go/service/vpc"
+	"github.com/ksc/ksc-sdk-go/service/kcsv1"
+	"github.com/ksc/ksc-sdk-go/service/kcsv2"
 )
 
 type KsyunClient struct {
@@ -19,4 +21,6 @@ type KsyunClient struct {
 	sqlserverconn *sqlserver.Sqlserver
 	kcmconn *kcm.Kcm
 	sksconn *sks.Sks
+	kcsv1conn 	*kcsv1.Kcsv1
+	kcsv2conn 	*kcsv2.Kcsv2
 }
