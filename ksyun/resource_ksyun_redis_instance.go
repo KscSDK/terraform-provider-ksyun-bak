@@ -384,6 +384,7 @@ func resourceRedisInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 	d.Partial(true)
 	defer d.Partial(false)
 	conn := meta.(*KsyunClient).kcsv1conn
+	// rename
 	if d.HasChange("name") {
 		d.SetPartial("name")
 		if v, ok = d.GetOk("name"); !ok {
@@ -402,7 +403,27 @@ func resourceRedisInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 		logger.Debug(logger.RespFormat, action, rename, *resp)
 	}
-
+	// update password
+	if d.HasChange("pass_word") {
+		d.SetPartial("pass_word")
+		if v, ok = d.GetOk("pass_word"); !ok {
+			return fmt.Errorf("cann't change password to empty string")
+		}
+		password := make(map[string]interface{})
+		password["CacheId"] = d.Id()
+		password["Password"] = v.(string)
+		password["Mode"] = d.Get("mode")
+		if az, ok := d.GetOk("availability_zone"); ok {
+			password["AvailabilityZone"] = az
+		}
+		action := "UpdatePassword"
+		logger.Debug(logger.ReqFormat, action, password)
+		if resp, err = conn.UpdatePassword(&password); err != nil {
+			return fmt.Errorf("error on update instance password %q, %s", d.Id(), err)
+		}
+		logger.Debug(logger.RespFormat, action, password, *resp)
+	}
+	// resize mem
 	if d.HasChange("capacity") {
 		d.SetPartial("capacity")
 		if v, ok = d.GetOk("capacity"); !ok {
@@ -437,7 +458,6 @@ func resourceRedisInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 	resourceRedisInstanceRead(d, meta)
-
 	// update parameter
 	if d.HasChange("reset_all_parameters") {
 		updateReq := make(map[string]interface{})
