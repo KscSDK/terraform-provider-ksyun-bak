@@ -10,6 +10,8 @@ import (
 	"github.com/ksc/ksc-sdk-go/service/slb"
 	"github.com/ksc/ksc-sdk-go/service/sqlserver"
 	"github.com/ksc/ksc-sdk-go/service/vpc"
+	"github.com/ksc/ksc-sdk-go/service/kcsv2"
+	"github.com/ksc/ksc-sdk-go/service/kcsv1"
 )
 
 // Config is the configuration of ksyun meta data
@@ -40,5 +42,7 @@ func (c *Config) Client() (*KsyunClient, error) {
 	client.sqlserverconn = sqlserver.SdkNew(cli, cfg, url)
 	client.kcmconn = kcm.SdkNew(cli, cfg, url)
 	client.sksconn = sks.SdkNew(cli, cfg, url)
+	client.kcsv1conn = kcsv1.SdkNew(cli, cfg, url)
+	client.kcsv2conn = kcsv2.SdkNew(cli, cfg, url)
 	return &client, nil
 }
