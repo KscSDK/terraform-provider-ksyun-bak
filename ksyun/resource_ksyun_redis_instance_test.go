@@ -5,7 +5,6 @@ import (
 	"testing"
 	"github.com/hashicorp/terraform/terraform"
 	"fmt"
-	"os"
 	"strings"
 	"github.com/pkg/errors"
 )
