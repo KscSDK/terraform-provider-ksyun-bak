@@ -25,6 +25,7 @@ func TestAccKsyunSqlserver_basic(t *testing.T) {
 				Config: testAccSqlserverConfig,
 
 				Check: resource.ComposeTestCheckFunc(
+
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstanceclass", "db.ram.2|db.disk.100"),
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstancename", "ksyun_sqlserver_2"),
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstancetype", "HRDS_SS"),
@@ -36,6 +37,7 @@ func TestAccKsyunSqlserver_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "vpcid", "40e0c2e0-3607-4f17-abb5-1a6efe3951c8"),
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "subnetid", "bc159134-4c94-4a6b-bec0-d97c75d83774"),
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "billtype", "DAY"),
+
 				),
 			},
 		},

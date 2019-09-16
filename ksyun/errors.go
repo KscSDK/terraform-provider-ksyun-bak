@@ -15,7 +15,7 @@ type ProviderError struct {
 }
 
 func (e *ProviderError) Error() string {
-	return fmt.Sprintf("[ERROR] Terraform UCloud Provider Error: Code: %s Message: %s", e.errorCode, e.message)
+	return fmt.Sprintf("[ERROR] Terraform Ksyun Provider Error: Code: %s Message: %s", e.errorCode, e.message)
 }
 
 func (err *ProviderError) ErrorCode() string {
@@ -49,7 +49,7 @@ func notFoundError(err error) bool {
 	errMessage := strings.ToLower(err.Error())
 	if strings.Contains(errMessage, "notfound") ||
 		strings.Contains(errMessage, "invalid") ||
-		strings.Contains(errMessage, "not_found"){
+		strings.Contains(errMessage, "not_found") {
 		//strings.Contains(errMessage,"notfound"){
 		return true
 	}
