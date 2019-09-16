@@ -63,6 +63,17 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 ```sh
 $ make testacc
 ```
+
+In order to run the single source of Acceptance tests, you can run them by entering the following instructions in a terminal:.
+
+*Note:* Acceptance tests create real resources, and often cost money to run.
+
+```sh
+$ cd ksyun
+$ export TF_ACC=true
+$  go test -test.run TestAccKsyunEip_basic -v
+```
+
 ## terraform-provider-ksyun开发
 ### 开发指南（以eip为例）
 ##### 1、client.go 各产品请求连接声明（eipconn *eip.Eip）
