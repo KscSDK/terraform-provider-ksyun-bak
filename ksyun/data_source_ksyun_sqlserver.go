@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func dataSourceKsyunSqlServer() *schema.Resource{
+func dataSourceKsyunSqlServer() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceKsyunSqlServerRead,
 		Schema: map[string]*schema.Schema{
@@ -28,13 +28,13 @@ func dataSourceKsyunSqlServer() *schema.Resource{
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
-					Schema:map[string]*schema.Schema{
+					Schema: map[string]*schema.Schema{
 						"dbinstanceclass": {
 							Type:     schema.TypeList,
 							Optional: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
-								Schema:map[string]*schema.Schema{
+								Schema: map[string]*schema.Schema{
 									"id": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -51,7 +51,7 @@ func dataSourceKsyunSqlServer() *schema.Resource{
 										Type:     schema.TypeInt,
 										Optional: true,
 									},
-									"iops":{
+									"iops": {
 										Type:     schema.TypeInt,
 										Optional: true,
 									},
@@ -59,7 +59,7 @@ func dataSourceKsyunSqlServer() *schema.Resource{
 										Type:     schema.TypeInt,
 										Optional: true,
 									},
-									"mem":{
+									"mem": {
 										Type:     schema.TypeInt,
 										Optional: true,
 									},
@@ -173,7 +173,7 @@ func dataSourceKsyunSqlServer() *schema.Resource{
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
-						"port":{
+						"port": {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
@@ -193,11 +193,11 @@ func dataSourceKsyunSqlServer() *schema.Resource{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"productwhat":{
+						"productwhat": {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
-						"servicestarttime" :{
+						"servicestarttime": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
@@ -212,16 +212,15 @@ func dataSourceKsyunSqlServer() *schema.Resource{
 					},
 				},
 			},
-
 		},
 	}
 
 }
 
-func dataSourceKsyunSqlServerRead(d *schema.ResourceData,meta interface{}) error {
+func dataSourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*KsyunClient).sqlserverconn
-	desReq:= make(map[string]interface{})
-	des :=[]string{
+	desReq := make(map[string]interface{})
+	des := []string{
 		"DBInstanceStatus",
 		"DBInstanceType",
 		"DBInstanceIdentifier",
@@ -230,104 +229,99 @@ func dataSourceKsyunSqlServerRead(d *schema.ResourceData,meta interface{}) error
 		"Marker",
 		"MaxRecords",
 	}
-	for _,v :=range des{
-		if v1,ok:=d.GetOk(strings.ToLower(v)); ok{
-			desReq[v]=fmt.Sprintf("%v",v1)
+	for _, v := range des {
+		if v1, ok := d.GetOk(strings.ToLower(v)); ok {
+			desReq[v] = fmt.Sprintf("%v", v1)
 		}
 	}
 	action := "DescribeDBInstances"
-	logger.Debug(logger.ReqFormat,action,desReq)
-	resp,err:=conn.DescribeDBInstances(&desReq)
-	logger.Debug(logger.AllFormat,action,desReq,*resp,err)
+	logger.Debug(logger.ReqFormat, action, desReq)
+	resp, err := conn.DescribeDBInstances(&desReq)
+	logger.Debug(logger.AllFormat, action, desReq, *resp, err)
 	if err != nil {
-		return fmt.Errorf("error on reading Instance(sqlserver)  %s",err)
+		return fmt.Errorf("error on reading Instance(sqlserver)  %s", err)
 	}
 
-
-	bodyData,dataOk := (*resp)["Data"].(map[string]interface{})
+	bodyData, dataOk := (*resp)["Data"].(map[string]interface{})
 	if !dataOk {
 		return fmt.Errorf("error on reading Instance(sqlserver) body %+v", (*resp)["Error"])
 	}
 	instances := bodyData["Instances"].([]interface{})
-	if len(instances) == 0{
+	if len(instances) == 0 {
 		return fmt.Errorf("error on reading Instance(sqlserver) body %+v", (*resp))
 	}
 
-
-	logger.Debug("sqlserver start get ids ",action,bodyData)
-	sqlserverIds := make([]string,len(instances))
+	logger.Debug("sqlserver start get ids ", action, bodyData)
+	sqlserverIds := make([]string, len(instances))
 	sqlserverMap := make([]map[string]interface{}, len(instances))
-	for k,instance := range instances {
-		instanceInfo,_ := instance.(map[string]interface{})
-		for k,v := range instanceInfo  {
+	for k, instance := range instances {
+		instanceInfo, _ := instance.(map[string]interface{})
+		for k, v := range instanceInfo {
 			if k == "DBInstanceClass" {
 				dbclass := v.(map[string]interface{})
 				dbinstanceclass := make(map[string]interface{})
-				for j,q := range dbclass {
+				for j, q := range dbclass {
 					dbinstanceclass[strings.ToLower(j)] = q
 				}
-				wtf := make([]interface{},1)
+				wtf := make([]interface{}, 1)
 				wtf[0] = dbinstanceclass
 				instanceInfo["dbinstanceclass"] = wtf
-				delete(instanceInfo,"DBInstanceClass")
-			}else {
-				delete(instanceInfo,k)
+				delete(instanceInfo, "DBInstanceClass")
+			} else {
+				delete(instanceInfo, k)
 				instanceInfo[strings.ToLower(k)] = v
 			}
 		}
 		sqlserverMap[k] = instanceInfo
-		logger.DebugInfo(" converted ---- %+v ",  instanceInfo)
-
+		logger.DebugInfo(" converted ---- %+v ", instanceInfo)
 
 		sqlserverIds[k] = instanceInfo["dbinstanceidentifier"].(string)
 	}
 
-	logger.DebugInfo(" converted ---- %+v ",  sqlserverMap)
-	dataSourceSqlserverDataSave(d,"sqlservers",sqlserverIds,sqlserverMap)
+	logger.DebugInfo(" converted ---- %+v ", sqlserverMap)
+	dataSourceSqlserverDataSave(d, "sqlservers", sqlserverIds, sqlserverMap)
 
 	return nil
 }
 
-var sqlserverIncludeKeys = map[string]bool {
+var sqlserverIncludeKeys = map[string]bool{
 	"DBInstanceIdentifier": true,
-	"PreferredBackupTime": true,
-	"DBInstanceName": true,
-	"DBInstanceStatus": true,
-	"DBInstanceType": true,
-	"DBParameterGroupId": true,
-	"GroupId": true,
-	"Vip": true,
-	"Port": true,
-	"Engine": true,
-	"EngineVersion": true,
-	"InstanceCreateTime": true,
-//	"MasterUserName": true,
-//	"DatastoreVersionId": true,
-	"VpcId": true,
-	"SubnetId": true,
+	"PreferredBackupTime":  true,
+	"DBInstanceName":       true,
+	"DBInstanceStatus":     true,
+	"DBInstanceType":       true,
+	"DBParameterGroupId":   true,
+	"GroupId":              true,
+	"Vip":                  true,
+	"Port":                 true,
+	"Engine":               true,
+	"EngineVersion":        true,
+	"InstanceCreateTime":   true,
+	//	"MasterUserName": true,
+	//	"DatastoreVersionId": true,
+	"VpcId":              true,
+	"SubnetId":           true,
 	"PubliclyAccessible": true,
-//	"BillType": true,
-//	"OrderType": true,
+	//	"BillType": true,
+	//	"OrderType": true,
 	"MultiAvailabilityZone": true,
-	"DiskUsed": true,
-//	"ProductId": true,
-//	"ProductWhat": true,
-	"ProjectId": true,
-	"ProjectName": true,
-	"Region": true,
+	"DiskUsed":              true,
+	//	"ProductId": true,
+	//	"ProductWhat": true,
+	"ProjectId":        true,
+	"ProjectName":      true,
+	"Region":           true,
 	"ServiceStartTime": true,
-//	"SubOrderId": true,
-	"Audit": true,
+	//	"SubOrderId": true,
+	"Audit":                            true,
 	"ReadReplicaDBInstanceIdentifiers": true,
-//	"BillTypeId": true,
-	"DBInstanceClass.Id": true,
-	"DBInstanceClass.Iops": true,
-	"DBInstanceClass.Vcpus": true,
-	"DBInstanceClass.Disk": true,
-	"DBInstanceClass.Ram": true,
-	"DBInstanceClass.Mem": true,
+	//	"BillTypeId": true,
+	"DBInstanceClass.Id":      true,
+	"DBInstanceClass.Iops":    true,
+	"DBInstanceClass.Vcpus":   true,
+	"DBInstanceClass.Disk":    true,
+	"DBInstanceClass.Ram":     true,
+	"DBInstanceClass.Mem":     true,
 	"DBInstanceClass.MaxConn": true,
 }
-var sqlserverExcludeKeys = map[string]bool{
-
-}
+var sqlserverExcludeKeys = map[string]bool{}

@@ -306,23 +306,23 @@ func dataSourceSqlserverSave(d *schema.ResourceData, dataKey string, ids []strin
 	if len(ids) == 1 {
 		d.SetId(ids[0])
 	} else {
-		d.SetId(strings.Join(ids,","))
+		d.SetId(strings.Join(ids, ","))
 	}
 
 	d.Set("total_count", len(datas))
 
-	logger.DebugInfo("$$$$$$$$$datasdatasdatas$$$$$$$$ %+v",datas)
+	logger.DebugInfo("$$$$$$$$$datasdatasdatas$$$$$$$$ %+v", datas)
 	if err := d.Set(dataKey, datas); err != nil {
-		logger.DebugInfo("$$$$$$$$$omg$$$$$$$$ %+v",err)
+		logger.DebugInfo("$$$$$$$$$omg$$$$$$$$ %+v", err)
 		return fmt.Errorf("error set datas %v :%v", datas, err)
 	}
-	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v",datas)
+	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v", datas)
 	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
 		logger.DebugInfo(" ------------ %+v", outputFile)
 
-		writeToFile(outputFile.(string) + "_" + d.Id(), datas)
+		writeToFile(outputFile.(string)+"_"+d.Id(), datas)
 	} else {
-		logger.DebugInfo(" !!!!!!!!!!! %+v",  outputFile)
+		logger.DebugInfo(" !!!!!!!!!!! %+v", outputFile)
 	}
 
 	return nil
@@ -333,22 +333,22 @@ func dataSourceSqlserverDataSave(d *schema.ResourceData, dataKey string, ids []s
 	if len(ids) == 1 {
 		d.SetId(ids[0])
 	} else {
-		d.SetId(strings.Join(ids,","))
+		d.SetId(strings.Join(ids, ","))
 	}
 
 	d.Set("total_count", len(datas))
 
-	logger.DebugInfo("$$$$$$$$$datasdatasdatas$$$$$$$$ %+v",datas)
+	logger.DebugInfo("$$$$$$$$$datasdatasdatas$$$$$$$$ %+v", datas)
 	if err := d.Set(dataKey, datas); err != nil {
-		logger.DebugInfo("$$$$$$$$$omg$$$$$$$$ %+v",err)
+		logger.DebugInfo("$$$$$$$$$omg$$$$$$$$ %+v", err)
 		return fmt.Errorf("error set datas %v :%v", datas, err)
 	}
-	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v",datas)
+	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v", datas)
 	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
 		logger.DebugInfo(" ------------ %+v", outputFile)
 		writeToFile(outputFile.(string)+"_data", datas)
 	} else {
-		logger.DebugInfo(" !!!!!!!!!!! %+v",  outputFile)
+		logger.DebugInfo(" !!!!!!!!!!! %+v", outputFile)
 	}
 
 	return nil

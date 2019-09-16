@@ -2,10 +2,10 @@ package ksyun
 
 import (
 	"fmt"
-	"strconv"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 	"github.com/ksc/ksc-sdk-go/service/kcsv1"
+	"github.com/terraform-providers/terraform-provider-ksyun/logger"
+	"strconv"
 )
 
 // instance List
@@ -157,7 +157,7 @@ func dataSourceRedisInstances() *schema.Resource {
 							Computed: true,
 						},
 						"readonly_node": {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -218,13 +218,13 @@ func dataSourceRedisInstances() *schema.Resource {
 func dataSourceRedisInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	var (
 		allInstances []interface{}
-		az map[string]string
-		item interface{}
-		resp *map[string]interface{}
-		ok bool
-		limit = 100
-		nextToken string
-		err error
+		az           map[string]string
+		item         interface{}
+		resp         *map[string]interface{}
+		ok           bool
+		limit        = 100
+		nextToken    string
+		err          error
 	)
 
 	action := "DescribeCacheClusters"
@@ -315,7 +315,7 @@ func dataSourceRedisInstancesRead(d *schema.ResourceData, meta interface{}) erro
 		}
 		logger.Debug(logger.RespFormat, paramAction, readParamReq, *resp)
 		paramData := (*resp)["Data"].([]interface{})
-		if len(paramData)  > 0 {
+		if len(paramData) > 0 {
 			params := make(map[string]interface{})
 			for _, d := range paramData {
 				param := d.(map[string]interface{})
@@ -333,7 +333,7 @@ func dataSourceRedisInstancesRead(d *schema.ResourceData, meta interface{}) erro
 		if resp, err = secConn.DescribeCacheSecurityRules(&readSecReq); err == nil {
 			logger.Debug(logger.RespFormat, secAction, readSecReq, *resp)
 			secData := (*resp)["Data"].([]interface{})
-			if len(secData)  > 0 {
+			if len(secData) > 0 {
 				var rules []map[string]interface{}
 				for _, v := range secData {
 					group := v.(map[string]interface{})
@@ -392,7 +392,7 @@ func dataSourceRedisInstancesRead(d *schema.ResourceData, meta interface{}) erro
 func queryAz(conn *kcsv1.Kcsv1) (map[string]string, error) {
 	var (
 		resp *map[string]interface{}
-		err error
+		err  error
 	)
 	result := make(map[string]string)
 	az := []string{"1", "2"}

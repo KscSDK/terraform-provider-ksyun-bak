@@ -1,18 +1,17 @@
 package ksyun
 
 import (
-	"github.com/hashicorp/terraform/helper/resource"
-	"testing"
-	"github.com/hashicorp/terraform/terraform"
 	"fmt"
-	"os"
-	"strings"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 	"github.com/pkg/errors"
+	"strings"
+	"testing"
 )
 
 func TestAccKcs_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() {
+		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 		Providers:    testAccProviders,
