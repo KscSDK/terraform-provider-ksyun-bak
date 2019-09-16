@@ -138,7 +138,7 @@ Usage:
 ```hcl
 $ export KSYUN_ACCESS_KEY="your_public_key"
 $ export KSYUN_SECRET_KEY="your_private_key"
-$ export KSYUN_REGION="cn-shanghai-2"
+$ export KSYUN_REGION="cn-beijing-6"
 
 $ terraform plan
 ```
@@ -161,10 +161,6 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 * `max_retries` - (Optional) This is the max retry attempts number. Default max retry attempts number is `0`.
 
 * `insecure` - (Optional) This is a switch to disable/enable https. (Default: `false`, means enable https).
-
-* `profile` - (Optional) This is the Ksyun profile name as set in the shared credentials file, it can also be sourced from the `KSYUN_PROFILE` environment variables.
-
-* `shared_credentials_file` - (Optional) This is the path to the shared credentials file, it can also be sourced from the `KSYUN_SHARED_CREDENTIAL_FILE` environment variables. If this is not set and a profile is specified, `~/.ksyun/credential.json` will be used.
 
 * `base_url` - (Optional) This is the base url.(Default: `https://api.ksyun.com`)
 
