@@ -15,7 +15,7 @@ type ProviderError struct {
 }
 
 func (e *ProviderError) Error() string {
-	return fmt.Sprintf("[ERROR] Terraform UCloud Provider Error: Code: %s Message: %s", e.errorCode, e.message)
+	return fmt.Sprintf("[ERROR] Terraform Ksyun Provider Error: Code: %s Message: %s", e.errorCode, e.message)
 }
 
 func (err *ProviderError) ErrorCode() string {
