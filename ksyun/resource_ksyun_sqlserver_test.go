@@ -2,15 +2,10 @@ package ksyun
 
 import (
 	"github.com/hashicorp/terraform/helper/resource"
-	"os"
 	"testing"
 )
 
 func TestAccKsyunSqlserver_basic(t *testing.T) {
-	os.Setenv("TF_ACC", "1")
-	os.Setenv("KSYUN_ACCESS_KEY", "")
-	os.Setenv("KSYUN_SECRET_KEY", "")
-	os.Setenv("KSYUN_REGION", "cn-beijing-6")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -37,7 +32,6 @@ func TestAccKsyunSqlserver_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "vpcid", "40e0c2e0-3607-4f17-abb5-1a6efe3951c8"),
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "subnetid", "bc159134-4c94-4a6b-bec0-d97c75d83774"),
 					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "billtype", "DAY"),
-
 				),
 			},
 		},
