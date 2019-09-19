@@ -100,7 +100,7 @@ $  go test -test.run TestAccKsyunEip_basic -v
 ### 快速安装
 
 
-  若用户只是利用插件，不对插件进行二次开发，且不想安装go环境和编译代码，可直接安装编译好的插件。不同操作系统的插件（terraform-provider-ksyun）位于目录bin-os/下，将其直接拷贝至terraform的plugins默认目录即可。
+  若用户只是利用插件，不对插件进行二次开发，且不想安装go环境和编译代码，可直接安装编译好的插件。不同操作系统的插件（terraform-provider-ksyun）位于目录bin/下，将其直接解压拷贝至terraform的plugins默认目录即可。
 不同操作系统terraform的plugins默认目录：(https://www.terraform.io/docs/configuration/providers.html#third-party-plugins)。
 >注意：首次拷贝，需手动创建plugins文件夹。
 
@@ -218,11 +218,15 @@ $ terraform 0.12upgrade
   
 ### Terraform-provider-ksyun 属性介绍：
  
- 大部分的接口可以直接参考官网openapi的接口介绍。下面只介绍官网openapi文档和tf配置文件不一致的资源。
+ 1、.tf文件的参数属性请直接参考官网openapi的接口介绍。.tf文件中的属性字段一般都可以在openapi中找到。
+ 
+ 2、terraform-provider-ksyun 尽量保持了原子性，openapi创建接口里若出现同时创建多个资源的情况，provider是不支持的，请分别配置。
+   例：官网openapi里主机创建的接口里，可以同时创建eip和主机，在terraform里是不支持的。主机和eip需单独配置。
+ 
+##### 下面只介绍官网openapi文档和tf配置文件不一致的资源。
   
 ######  云主机
 1、不支持单个resource(ksyun_instance)批量创建主机，即不支持openapi文档里的MaxCount，MinCount，InstanceNameSuffix。
-2、resource资源尽量保持原子性，不支持在云主机resource(ksyun_instance)里创建eip。
-3、
+2、官网openapi主机创建时，SecurityGroupId 目前仅支持绑定一个安全组，terraform 里可配置多个。
 
 ######  redis
