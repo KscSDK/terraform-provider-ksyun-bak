@@ -215,3 +215,14 @@ $ eip_id=‘e9587b84-0da7-4fd7-a26d-bc56df63b01e’
 $ terraform 0.12upgrade
 ```
   terraform会询问是否确认修改，输入yes即可。
+  
+### Terraform-provider-ksyun 属性介绍：
+ 
+ 大部分的接口可以直接参考官网openapi的接口介绍。下面只介绍官网openapi文档和tf配置文件不一致的资源。
+  
+######  云主机
+1、不支持单个resource(ksyun_instance)批量创建主机，即不支持openapi文档里的MaxCount，MinCount，InstanceNameSuffix。
+2、resource资源尽量保持原子性，不支持在云主机resource(ksyun_instance)里创建eip。
+3、
+
+######  redis
