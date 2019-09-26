@@ -73,6 +73,19 @@ $ cd ksyun
 $ export TF_ACC=true
 $  go test -test.run TestAccKsyunEip_basic -v
 ```
+# 中文版介绍
+该介绍包括三部分：
+##### terraform-provider-ksyun开发
+
+_各产品线开发人员参考。_
+
+##### terraform-provider-ksyun使用
+
+_云产品用户参考。_
+
+##### terraform-provider-ksyun 属性介绍
+
+_各产品线开发人员负责补充，云产品用户参考。_
 
 ## terraform-provider-ksyun开发
 ### 开发指南（以eip为例）
