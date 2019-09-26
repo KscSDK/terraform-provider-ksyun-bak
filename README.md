@@ -221,12 +221,14 @@ $ terraform 0.12upgrade
  1、.tf文件的参数属性请直接参考官网openapi的接口介绍。.tf文件中的属性字段一般都可以在openapi中找到。
  
  2、terraform-provider-ksyun 尽量保持了原子性，openapi创建接口里若出现同时创建多个资源的情况，provider是不支持的，请分别配置。
-   例：官网openapi里主机创建的接口里，可以同时创建eip和主机，在terraform里是不支持的。主机和eip需单独配置。
+   
+_例：官网openapi里主机创建的接口里，可以同时创建eip和主机，在terraform里是不支持的。主机和eip需单独配置。_
  
 ##### 下面只介绍官网openapi文档和tf配置文件不一致的资源。
   
 ######  云主机
 1、不支持单个resource(ksyun_instance)批量创建主机，即不支持openapi文档里的MaxCount，MinCount，InstanceNameSuffix。
+
 2、官网openapi主机创建时，SecurityGroupId 目前仅支持绑定一个安全组，terraform 里可配置多个。
 
 ######  redis
