@@ -245,3 +245,6 @@ _例：官网openapi里主机创建的接口里，可以同时创建eip和主机
 2、官网openapi主机创建时，SecurityGroupId 目前仅支持绑定一个安全组，terraform 里可配置多个。
 
 ######  redis
+1、实例参数配置功能在ksyun_redis_instance资源的parameters中配置。
+
+2、实例主从模式节点不支持并行批量添加, 顺序批量添加多个节点, 需要在ksyun_redis_instance_node资源中配置pre_node_id属性, 属性值是上一个创建的节点ID。
