@@ -149,26 +149,6 @@ func resourceKsyunInstance() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"address_band_width": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
-			"line_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"address_charge_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"address_purchase_time": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
 			"address_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,

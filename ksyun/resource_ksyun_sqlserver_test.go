@@ -6,13 +6,12 @@ import (
 )
 
 func TestAccKsyunSqlserver_basic(t *testing.T) {
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: "ksyun_sqlserver.houbin-1",
+		IDRefreshName: "ksyun_sqlserver.houbin-2",
 		Providers:     testAccProviders,
 		//CheckDestroy:  testAccCheckSqlserverDestroy,
 
@@ -21,18 +20,18 @@ func TestAccKsyunSqlserver_basic(t *testing.T) {
 				Config: testAccSqlserverConfig,
 
 				Check: resource.ComposeTestCheckFunc(
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "dbinstanceclass", "db.ram.2%7Cdb.disk.50"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "dbinstancename", "ksyun_sqlserver_1"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "dbinstancetype", "HRDS_SS"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "engine", "SQLServer"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "engineversion", "2008r2"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "masterusername", "admin"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "masteruserpassword", "123qweASD"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "version", "2008r2"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "vpcid", "3c12ccdf-9b8f-4d9b-8aa6-a523897e97a1"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "subnetid", "293c16a5-c757-405c-a693-3b2a3adead50"),
-				//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-1", "billtype", "DAY"),
 
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstanceclass", "db.ram.2|db.disk.100"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstancename", "ksyun_sqlserver_2"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstancetype", "HRDS_SS"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "engine", "SQLServer"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "engineversion", "2008r2"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "masterusername", "admin"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "masteruserpassword", "123qweASD"),
+					//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "version", "2019-04-25"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "vpcid", "40e0c2e0-3607-4f17-abb5-1a6efe3951c8"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "subnetid", "bc159134-4c94-4a6b-bec0-d97c75d83774"),
+					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "billtype", "DAY"),
 				),
 			},
 		},
@@ -148,21 +147,23 @@ func TestAccKsyunSqlserver_basic(t *testing.T) {
 //}
 
 const testAccSqlserverConfig = `
-resource "ksyun_sqlserver" "houbin-1"{
+resource "ksyun_sqlserver" "houbin-2"{
 
-  dbinstanceclass= "db.ram.2%7Cdb.disk.50"
-  dbinstancename = "ksyun_sqlserver_1"
+  dbinstanceclass= "db.ram.2|db.disk.100"
+  dbinstancename = "ksyun_sqlserver_2"
   dbinstancetype = "HRDS_SS"
   engine = "SQLServer"
   engineversion = "2008r2"
   masterusername = "admin"
   masteruserpassword = "123qweASD"
-  version = "2008r2"
-  vpcid =	"3c12ccdf-9b8f-4d9b-8aa6-a523897e97a1"
-  subnetid = "293c16a5-c757-405c-a693-3b2a3adead50"
+  
+  vpcid =	"40e0c2e0-3607-4f17-abb5-1a6efe3951c8"
+  subnetid = "bc159134-4c94-4a6b-bec0-d97c75d83774"
   billtype = "DAY"
 }
 `
+
+//version = "2008r2"
 
 //const testAccSqlserverConfigUpdate = `
 //resource "ksyun_vpc" "foo" {

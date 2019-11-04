@@ -1,7 +1,7 @@
 provider "ksyun"{
   region = "cn-shanghai-3"
-  access_key = "aaaaaaaa"
-  secret_key = "aaaaaaaa"
+  access_key = "666"
+  secret_key = "666"
 }
 
 
