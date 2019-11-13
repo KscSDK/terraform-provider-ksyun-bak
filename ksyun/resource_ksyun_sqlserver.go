@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func resourceKsyunSqlServer() *schema.Resource{
+func resourceKsyunSqlServer() *schema.Resource {
 
 	return &schema.Resource{
 		Create: resourceKsyunSqlServerCreate,
@@ -30,49 +30,49 @@ func resourceKsyunSqlServer() *schema.Resource{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"dbinstanceidentifier":{
-				Type:schema.TypeString,
-				Optional:true,
+			"dbinstanceidentifier": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
-			"dbinstanceclass":{
-				Type:schema.TypeString,
-				Required:true,
+			"dbinstanceclass": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"dbinstancename":{
-				Type:schema.TypeString,
-				Required:true,
+			"dbinstancename": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"dbinstancetype":{
-				Type:schema.TypeString,
-				Required:true,
+			"dbinstancetype": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"engine":{
-				Type:schema.TypeString,
-				Required:true,
+			"engine": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"engineversion":{
-				Type:schema.TypeString,
-				Required:true,
+			"engineversion": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"masterusername":{
-				Type:schema.TypeString,
-				Required:true,
+			"masterusername": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"masteruserpassword":{
-				Type:schema.TypeString,
-				Required:true,
+			"masteruserpassword": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"vpcid":{
-				Type:schema.TypeString,
-				Required:true,
+			"vpcid": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"subnetid":{
-				Type:schema.TypeString,
-				Required:true,
+			"subnetid": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"billtype":{
-				Type:schema.TypeString,
-				Required:true,
+			"billtype": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 
 			// oxoxoxox
@@ -81,14 +81,14 @@ func resourceKsyunSqlServer() *schema.Resource{
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
-					Schema:map[string]*schema.Schema{
+					Schema: map[string]*schema.Schema{
 						"dbinstanceclass": {
 							Type:     schema.TypeList,
 							Optional: true,
 							MaxItems: 1,
 							Computed: true,
 							Elem: &schema.Resource{
-								Schema:map[string]*schema.Schema{
+								Schema: map[string]*schema.Schema{
 									"id": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -109,7 +109,7 @@ func resourceKsyunSqlServer() *schema.Resource{
 										Optional: true,
 										Computed: true,
 									},
-									"iops":{
+									"iops": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Computed: true,
@@ -119,7 +119,7 @@ func resourceKsyunSqlServer() *schema.Resource{
 										Optional: true,
 										Computed: true,
 									},
-									"mem":{
+									"mem": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Computed: true,
@@ -260,7 +260,7 @@ func resourceKsyunSqlServer() *schema.Resource{
 							Optional: true,
 							Computed: true,
 						},
-						"port":{
+						"port": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
@@ -285,12 +285,12 @@ func resourceKsyunSqlServer() *schema.Resource{
 							Optional: true,
 							Computed: true,
 						},
-						"productwhat":{
+						"productwhat": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
 						},
-						"servicestarttime" :{
+						"servicestarttime": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
@@ -316,7 +316,7 @@ func resourceKsyunSqlServerCreate(d *schema.ResourceData, meta interface{}) erro
 	var resp *map[string]interface{}
 	createReq := make(map[string]interface{})
 	var err error
-	creates :=[]string{
+	creates := []string{
 		"DBInstanceClass",
 		"DBInstanceName",
 		"DBInstanceType",
@@ -328,17 +328,17 @@ func resourceKsyunSqlServerCreate(d *schema.ResourceData, meta interface{}) erro
 		"SubnetId",
 		"BillType",
 	}
-	for _,v :=range creates{
-		if v1,ok:=d.GetOk(strings.ToLower(v)); ok{
-			createReq[v]=fmt.Sprintf("%v",v1)
+	for _, v := range creates {
+		if v1, ok := d.GetOk(strings.ToLower(v)); ok {
+			createReq[v] = fmt.Sprintf("%v", v1)
 		}
 	}
-	action :="CreateDBInstance"
-	logger.Debug(logger.RespFormat,action,createReq)
-	resp,err = conn.CreateDBInstance(&createReq)
-	logger.Debug(logger.AllFormat,action,createReq,*resp,err)
-	if err != nil{
-		return fmt.Errorf("error on creating Instance(sqlserver): %s",err)
+	action := "CreateDBInstance"
+	logger.Debug(logger.RespFormat, action, createReq)
+	resp, err = conn.CreateDBInstance(&createReq)
+	logger.Debug(logger.AllFormat, action, createReq, *resp, err)
+	if err != nil {
+		return fmt.Errorf("error on creating Instance(sqlserver): %s", err)
 	}
 
 	if resp != nil {
@@ -346,93 +346,88 @@ func resourceKsyunSqlServerCreate(d *schema.ResourceData, meta interface{}) erro
 		instances := bodyData["Instances"].([]interface{})
 		sqlserverInstance := instances[0].(map[string]interface{})
 		instanceId := sqlserverInstance["DBInstanceIdentifier"].(string)
-		logger.DebugInfo("~*~*~*~*~ DBInstanceIdentifier : %v",instanceId)
+		logger.DebugInfo("~*~*~*~*~ DBInstanceIdentifier : %v", instanceId)
 		d.SetId(instanceId)
 	}
 	stateConf := &resource.StateChangeConf{
-		Pending:[]string{tCreatingStatus},
-		Target:[]string{tActiveStatus,tFailedStatus,tDeletedStatus,tStopedStatus},
-		Timeout:d.Timeout(schema.TimeoutCreate),
-		Delay:10*time.Second,
-		MinTimeout:10*time.Second,
-		Refresh:sqlserverInstanceStateRefreshForCreate(conn,d.Id(),[]string{tCreatingStatus}),
+		Pending:    []string{tCreatingStatus},
+		Target:     []string{tActiveStatus, tFailedStatus, tDeletedStatus, tStopedStatus},
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 10 * time.Second,
+		Refresh:    sqlserverInstanceStateRefreshForCreate(conn, d.Id(), []string{tCreatingStatus}),
 	}
-	_,err = stateConf.WaitForState()
+	_, err = stateConf.WaitForState()
 
-
-	return resourceKsyunSqlServerRead(d,meta)
+	return resourceKsyunSqlServerRead(d, meta)
 }
 
 func sqlserverInstanceStateRefreshForCreate(client *sqlserver.Sqlserver, instanceId string, target []string) resource.StateRefreshFunc {
-	return func() ( interface{}, string, error) {
-		req:= map[string]interface{}{"DBInstanceIdentifier": instanceId}
+	return func() (interface{}, string, error) {
+		req := map[string]interface{}{"DBInstanceIdentifier": instanceId}
 		action := "DescribeDBInstances"
-		logger.Debug(logger.ReqFormat,action,req)
-		resp,err:=client.DescribeDBInstances(&req)
-		logger.Debug(logger.AllFormat,action,req,*resp,err)
+		logger.Debug(logger.ReqFormat, action, req)
+		resp, err := client.DescribeDBInstances(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err)
 		if err != nil {
-			return nil,"",err
+			return nil, "", err
 		}
 		bodyData := (*resp)["Data"].(map[string]interface{})
 		instances := bodyData["Instances"].([]interface{})
 		sqlserverInstance := instances[0].(map[string]interface{})
 		state := sqlserverInstance["DBInstanceStatus"].(string)
 
-		return resp,state,nil
+		return resp, state, nil
 
 	}
 }
 
 func resourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*KsyunClient).sqlserverconn
-	req:= map[string]interface{}{"DBInstanceIdentifier": d.Id()}
+	req := map[string]interface{}{"DBInstanceIdentifier": d.Id()}
 	action := "DescribeDBInstances"
-	logger.Debug(logger.ReqFormat,action,req)
-	resp,err:=conn.DescribeDBInstances(&req)
-	logger.Debug(logger.AllFormat,action,req,*resp,err)
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err := conn.DescribeDBInstances(&req)
+	logger.Debug(logger.AllFormat, action, req, *resp, err)
 	if err != nil {
-		return fmt.Errorf("error on reading Instance(sqlserver) %q, %s",d.Id(),err)
+		return fmt.Errorf("error on reading Instance(sqlserver) %q, %s", d.Id(), err)
 	}
 
-
-	bodyData,dataOk := (*resp)["Data"].(map[string]interface{})
+	bodyData, dataOk := (*resp)["Data"].(map[string]interface{})
 	if !dataOk {
-		return fmt.Errorf("error on reading Instance(sqlserver) body %q, %+v",d.Id(), (*resp)["Error"])
+		return fmt.Errorf("error on reading Instance(sqlserver) body %q, %+v", d.Id(), (*resp)["Error"])
 	}
 	instances := bodyData["Instances"].([]interface{})
 
-
-
-	sqlserverIds := make([]string,len(instances))
+	sqlserverIds := make([]string, len(instances))
 	sqlserverMap := make([]map[string]interface{}, len(instances))
-	for k,instance := range instances {
-		instanceInfo,_ := instance.(map[string]interface{})
-		for k,v := range instanceInfo  {
+	for k, instance := range instances {
+		instanceInfo, _ := instance.(map[string]interface{})
+		for k, v := range instanceInfo {
 			if k == "DBInstanceClass" {
 				dbclass := v.(map[string]interface{})
 				dbinstanceclass := make(map[string]interface{})
-				for j,q := range dbclass {
+				for j, q := range dbclass {
 					dbinstanceclass[strings.ToLower(j)] = q
 				}
-				wtf := make([]interface{},1)
+				wtf := make([]interface{}, 1)
 				wtf[0] = dbinstanceclass
 				instanceInfo["dbinstanceclass"] = wtf
-				delete(instanceInfo,"DBInstanceClass")
-			}else {
-				delete(instanceInfo,k)
+				delete(instanceInfo, "DBInstanceClass")
+			} else {
+				delete(instanceInfo, k)
 				instanceInfo[strings.ToLower(k)] = v
 			}
 		}
 		sqlserverMap[k] = instanceInfo
-		logger.DebugInfo(" converted ---- %+v ",  instanceInfo)
-
+		logger.DebugInfo(" converted ---- %+v ", instanceInfo)
 
 		sqlserverIds[k] = instanceInfo["dbinstanceidentifier"].(string)
-		logger.DebugInfo("sqlserverIds fuck : %v",sqlserverIds)
+		logger.DebugInfo("sqlserverIds fuck : %v", sqlserverIds)
 	}
 
-	logger.DebugInfo(" converted ---- %+v ",  sqlserverMap)
-	dataSourceSqlserverSave(d,"sqlservers",sqlserverIds,sqlserverMap)
+	logger.DebugInfo(" converted ---- %+v ", sqlserverMap)
+	dataSourceSqlserverSave(d, "sqlservers", sqlserverIds, sqlserverMap)
 	//sqlserverInstance := instances[0].(map[string]interface{})
 	//DBInstanceClass := sqlserverInstance["DBInstanceClass"].(map[string]interface{})
 	//for k,v := range DBInstanceClass{
@@ -445,7 +440,7 @@ func resourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error 
 	//	}
 	//}
 	//state := sqlserverInstance["DBInstanceStatus"].(string)
-	
+
 	return nil
 }
 
@@ -465,7 +460,7 @@ func resourceKsyunSqlServerUpdate(d *schema.ResourceData, meta interface{}) erro
 		"subnetid",
 		"billtype",
 	}
-	for _,v := range updateField{
+	for _, v := range updateField {
 		if d.HasChange(v) && !d.IsNewResource() {
 			return fmt.Errorf("error on updating instance , sqlserver is not support update")
 		}
@@ -477,10 +472,10 @@ func resourceKsyunSqlServerUpdate(d *schema.ResourceData, meta interface{}) erro
 func resourceKsyunSqlServerDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*KsyunClient).sqlserverconn
 	deleteReq := make(map[string]interface{})
-	deleteReq["DBInstanceIdentifier"]=d.Id()
+	deleteReq["DBInstanceIdentifier"] = d.Id()
 
-	return resource.Retry(15*time.Minute,func() *resource.RetryError{
-		readReq:= map[string]interface{}{"DBInstanceIdentifier": d.Id()}
+	return resource.Retry(15*time.Minute, func() *resource.RetryError {
+		readReq := map[string]interface{}{"DBInstanceIdentifier": d.Id()}
 		discribeAction := "DescribeInstances"
 		logger.Debug(logger.ReqFormat, discribeAction, readReq)
 		desResp, desErr := conn.DescribeDBInstances(&readReq)
@@ -499,15 +494,15 @@ func resourceKsyunSqlServerDelete(d *schema.ResourceData, meta interface{}) erro
 		sqlserverInstance := instances[0].(map[string]interface{})
 		state := sqlserverInstance["DBInstanceStatus"].(string)
 
-		if state != tDeletedStatus{
+		if state != tDeletedStatus {
 			deleteAction := "DeleteDBInstance"
 			logger.Debug(logger.ReqFormat, deleteAction, deleteReq)
-			deleteResp,deleteErr := conn.DeleteDBInstance(&deleteReq)
+			deleteResp, deleteErr := conn.DeleteDBInstance(&deleteReq)
 			logger.Debug(logger.AllFormat, deleteAction, deleteReq, *deleteResp, deleteErr)
 			if deleteErr == nil || notFoundError(deleteErr) {
 				return nil
 			}
-			if deleteErr !=nil {
+			if deleteErr != nil {
 				return resource.RetryableError(deleteErr)
 			}
 

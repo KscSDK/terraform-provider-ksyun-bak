@@ -1,17 +1,17 @@
 package ksyun
 
 import (
-	"fmt"
-	"sync"
-	"time"
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
-	"github.com/ksc/ksc-sdk-go/service/kcsv1"
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/ksc/ksc-sdk-go/service/kcsv1"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 )
 
@@ -59,7 +59,7 @@ func resourceRedisInstance() *schema.Resource {
 				Required: true,
 			},
 			"slave_num": {
-				Type:     schema.TypeInt,
+				Type: schema.TypeInt,
 				//Optional: true,
 				Computed: true,
 				//ValidateFunc: validation.IntBetween(0,8),
@@ -225,8 +225,8 @@ func resourceRedisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 	// create instance
 	var (
 		resp *map[string]interface{}
-		err error
-		az string
+		err  error
+		az   string
 	)
 
 	conn := meta.(*KsyunClient).kcsv1conn
@@ -269,10 +269,10 @@ func resourceRedisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceRedisInstanceParamCreate(d *schema.ResourceData, meta interface{}) error {
 	var (
-		resp *map[string]interface{}
+		resp  *map[string]interface{}
 		param map[string]interface{}
-		az string
-		err error
+		az    string
+		err   error
 	)
 	if !d.Get("reset_all_parameters").(bool) {
 		conn := meta.(*KsyunClient).kcsv1conn
@@ -332,7 +332,7 @@ func resourceRedisInstanceParamCreate(d *schema.ResourceData, meta interface{}) 
 func resourceRedisInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	var (
 		resp *map[string]interface{}
-		err error
+		err  error
 	)
 
 	conn := meta.(*KsyunClient).kcsv1conn
@@ -347,10 +347,10 @@ func resourceRedisInstanceDelete(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("error on deleting instance %q, %s", d.Id(), err)
 	}
 	logger.Debug(logger.RespFormat, action, deleteReq, *resp)
-	return resource.Retry(20 * time.Minute, func() *resource.RetryError {
+	return resource.Retry(20*time.Minute, func() *resource.RetryError {
 		var (
 			resp *map[string]interface{}
-			err error
+			err  error
 		)
 
 		queryReq := make(map[string]interface{})
@@ -373,12 +373,12 @@ func resourceRedisInstanceDelete(d *schema.ResourceData, meta interface{}) error
 
 func resourceRedisInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	var (
-		resp *map[string]interface{}
-		v interface{}
+		resp   *map[string]interface{}
+		v      interface{}
 		params interface{}
-		err error
-		ok bool
-		az string
+		err    error
+		ok     bool
+		az     string
 	)
 
 	d.Partial(true)
@@ -529,8 +529,8 @@ func resourceRedisInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	var (
 		item map[string]interface{}
 		resp *map[string]interface{}
-		ok bool
-		err error
+		ok   bool
+		err  error
 	)
 
 	conn := meta.(*KsyunClient).kcsv1conn
@@ -555,7 +555,7 @@ func resourceRedisInstanceRead(d *schema.ResourceData, meta interface{}) error {
 		}
 		result[Hump2Downline(k)] = v
 	}
-	for k, v := range result  {
+	for k, v := range result {
 		if err := d.Set(k, v); err != nil {
 			return fmt.Errorf("error set data %v :%v", v, err)
 		}
@@ -568,7 +568,7 @@ func resourceRedisInstanceRead(d *schema.ResourceData, meta interface{}) error {
 func resourceRedisInstanceParamRead(d *schema.ResourceData, meta interface{}) error {
 	var (
 		resp *map[string]interface{}
-		err error
+		err  error
 	)
 	conn := meta.(*KsyunClient).kcsv1conn
 	readReq := make(map[string]interface{})
@@ -583,7 +583,7 @@ func resourceRedisInstanceParamRead(d *schema.ResourceData, meta interface{}) er
 	}
 	logger.Debug(logger.RespFormat, action, readReq, *resp)
 	data := (*resp)["Data"].([]interface{})
-	if len(data)  == 0 {
+	if len(data) == 0 {
 		logger.Info("instance parameters result size : 0")
 		return nil
 	}
@@ -603,8 +603,8 @@ func stateRefreshForCreateFunc(client *kcsv1.Kcsv1, az, instanceId string, targe
 		var (
 			resp *map[string]interface{}
 			item map[string]interface{}
-			ok bool
-			err error
+			ok   bool
+			err  error
 		)
 
 		queryReq := map[string]interface{}{"CacheId": instanceId}
@@ -646,8 +646,8 @@ func stateRefreshForOperateFunc(client *kcsv1.Kcsv1, az, instanceId string, targ
 		var (
 			resp *map[string]interface{}
 			item map[string]interface{}
-			ok bool
-			err error
+			ok   bool
+			err  error
 		)
 
 		queryReq := map[string]interface{}{"CacheId": instanceId}
@@ -682,7 +682,7 @@ func stateRefreshForOperateFunc(client *kcsv1.Kcsv1, az, instanceId string, targ
 func validParam(d *schema.ResourceData) error {
 	var (
 		param map[string]interface{}
-		ok bool
+		ok    bool
 	)
 	protocol := d.Get("protocol")
 	v1, ok := d.GetOk("parameters")
@@ -732,22 +732,23 @@ func validParam(d *schema.ResourceData) error {
 }
 
 type Validity struct {
-	Type string
+	Type     string
 	DataType string
-	Value string
-	Values []string
-	Min int
-	Max int
+	Value    string
+	Values   []string
+	Min      int
+	Max      int
 }
 
 type ValidatorParam struct {
-	Name string
-	Desc string
+	Name  string
+	Desc  string
 	Valid *Validity
 }
 
 var filterForProto4 map[string]*ValidatorParam
 var onceFor4 sync.Once
+
 func GetValidatorParamForProto4() map[string]*ValidatorParam {
 	onceFor4.Do(func() {
 		filterForProto4 = make(map[string]*ValidatorParam)
@@ -755,144 +756,144 @@ func GetValidatorParamForProto4() map[string]*ValidatorParam {
 			Name: "appendonly",
 			Desc: "是否开启AOF持久化功能",
 			Valid: &Validity{
-				Type: "enum",
+				Type:     "enum",
 				DataType: "string",
-				Value: "",
-				Values:[]string{"yes", "no"},
-				Min : 0,
-				Max : 0,
+				Value:    "",
+				Values:   []string{"yes", "no"},
+				Min:      0,
+				Max:      0,
 			},
 		}
 		filterForProto4["appendfsync"] = &ValidatorParam{
 			Name: "appendfsync",
 			Desc: "AOF文件同步方式",
 			Valid: &Validity{
-				Type: "enum",
+				Type:     "enum",
 				DataType: "string",
-				Value: "",
-				Values:[]string{"everysec", "always", "no"},
-				Min : 0,
-				Max : 0,
+				Value:    "",
+				Values:   []string{"everysec", "always", "no"},
+				Min:      0,
+				Max:      0,
 			},
 		}
 		filterForProto4["maxmemory-policy"] = &ValidatorParam{
 			Name: "maxmemory-policy",
 			Desc: "Redis淘汰策略",
 			Valid: &Validity{
-				Type: "enum",
+				Type:     "enum",
 				DataType: "string",
-				Value: "",
-				Values:[]string{"volatile-lru", "volatile-lfu", "volatile-random", "volatile-ttl", "allkeys-lru", "allkeys-lfu", "allkeys-random", "noeviction"},
-				Min : 0,
-				Max : 0,
+				Value:    "",
+				Values:   []string{"volatile-lru", "volatile-lfu", "volatile-random", "volatile-ttl", "allkeys-lru", "allkeys-lfu", "allkeys-random", "noeviction"},
+				Min:      0,
+				Max:      0,
 			},
 		}
 		filterForProto4["maxmemory-samples"] = &ValidatorParam{
 			Name: "maxmemory-samples",
 			Desc: "淘汰算法运行时的采样数",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 1,
-				Max : 10,
+				Value:    "",
+				Values:   nil,
+				Min:      1,
+				Max:      10,
 			},
 		}
 		filterForProto4["hash-max-ziplist-entries"] = &ValidatorParam{
 			Name: "hash-max-ziplist-entries",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto4["hash-max-ziplist-value"] = &ValidatorParam{
 			Name: "hash-max-ziplist-value",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto4["list-max-ziplist-size"] = &ValidatorParam{
 			Name: "list-max-ziplist-size",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : -2147483648,
-				Max : 2147483647,
+				Value:    "",
+				Values:   nil,
+				Min:      -2147483648,
+				Max:      2147483647,
 			},
 		}
 		filterForProto4["set-max-intset-entries"] = &ValidatorParam{
 			Name: "set-max-intset-entries",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto4["zset-max-ziplist-entries"] = &ValidatorParam{
 			Name: "zset-max-ziplist-entries",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto4["zset-max-ziplist-value"] = &ValidatorParam{
 			Name: "zset-max-ziplist-value",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto4["notify-keyspace-events"] = &ValidatorParam{
 			Name: "notify-keyspace-events",
 			Desc: "键空间通知配置",
 			Valid: &Validity{
-				Type: "regexp",
+				Type:     "regexp",
 				DataType: "string",
-				Value: "[KEg$lshzxeA]*",
-				Values:nil,
-				Min : 0,
-				Max : 0,
+				Value:    "[KEg$lshzxeA]*",
+				Values:   nil,
+				Min:      0,
+				Max:      0,
 			},
 		}
 		filterForProto4["timeout"] = &ValidatorParam{
 			Name: "timeout",
 			Desc: "连接空闲超时时间",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 86400,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      86400,
 			},
 		}
 	})
@@ -902,6 +903,7 @@ func GetValidatorParamForProto4() map[string]*ValidatorParam {
 
 var filterForProto map[string]*ValidatorParam
 var once sync.Once
+
 func GetValidatorParamForProto() map[string]*ValidatorParam {
 	once.Do(func() {
 		filterForProto = make(map[string]*ValidatorParam)
@@ -909,96 +911,96 @@ func GetValidatorParamForProto() map[string]*ValidatorParam {
 			Name: "appendonly",
 			Desc: "是否开启AOF持久化功能",
 			Valid: &Validity{
-				Type: "enum",
+				Type:     "enum",
 				DataType: "string",
-				Value: "",
-				Values:[]string{"yes", "no"},
-				Min : 0,
-				Max : 0,
+				Value:    "",
+				Values:   []string{"yes", "no"},
+				Min:      0,
+				Max:      0,
 			},
 		}
 		filterForProto["appendfsync"] = &ValidatorParam{
 			Name: "appendfsync",
 			Desc: "AOF文件同步方式",
 			Valid: &Validity{
-				Type: "enum",
+				Type:     "enum",
 				DataType: "string",
-				Value: "",
-				Values:[]string{"everysec", "always", "no"},
-				Min : 0,
-				Max : 0,
+				Value:    "",
+				Values:   []string{"everysec", "always", "no"},
+				Min:      0,
+				Max:      0,
 			},
 		}
 		filterForProto["maxmemory-policy"] = &ValidatorParam{
 			Name: "maxmemory-policy",
 			Desc: "Redis淘汰策略",
 			Valid: &Validity{
-				Type: "enum",
+				Type:     "enum",
 				DataType: "string",
-				Value: "",
-				Values:[]string{"volatile-lru", "volatile-lfu", "volatile-random", "volatile-ttl", "allkeys-lru", "allkeys-lfu", "allkeys-random", "noeviction"},
-				Min : 0,
-				Max : 0,
+				Value:    "",
+				Values:   []string{"volatile-lru", "volatile-lfu", "volatile-random", "volatile-ttl", "allkeys-lru", "allkeys-lfu", "allkeys-random", "noeviction"},
+				Min:      0,
+				Max:      0,
 			},
 		}
 		filterForProto["maxmemory-samples"] = &ValidatorParam{
 			Name: "maxmemory-samples",
 			Desc: "淘汰算法运行时的采样数",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 1,
-				Max : 10,
+				Value:    "",
+				Values:   nil,
+				Min:      1,
+				Max:      10,
 			},
 		}
 		filterForProto["hash-max-ziplist-entries"] = &ValidatorParam{
 			Name: "hash-max-ziplist-entries",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto["hash-max-ziplist-value"] = &ValidatorParam{
 			Name: "hash-max-ziplist-value",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto["list-max-ziplist-entries"] = &ValidatorParam{
 			Name: "list-max-ziplist-entries",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto["list-max-ziplist-value"] = &ValidatorParam{
 			Name: "list-max-ziplist-value",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 
@@ -1006,60 +1008,60 @@ func GetValidatorParamForProto() map[string]*ValidatorParam {
 			Name: "set-max-intset-entries",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto["zset-max-ziplist-entries"] = &ValidatorParam{
 			Name: "zset-max-ziplist-entries",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto["zset-max-ziplist-value"] = &ValidatorParam{
 			Name: "zset-max-ziplist-value",
 			Desc: "内部数据结构优化的阈值",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 9007199254740990,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      9007199254740990,
 			},
 		}
 		filterForProto["notify-keyspace-events"] = &ValidatorParam{
 			Name: "notify-keyspace-events",
 			Desc: "键空间通知配置",
 			Valid: &Validity{
-				Type: "regexp",
+				Type:     "regexp",
 				DataType: "string",
-				Value: "[KEg$lshzxeA]*",
-				Values:nil,
-				Min : 0,
-				Max : 0,
+				Value:    "[KEg$lshzxeA]*",
+				Values:   nil,
+				Min:      0,
+				Max:      0,
 			},
 		}
 		filterForProto["timeout"] = &ValidatorParam{
 			Name: "timeout",
 			Desc: "连接空闲超时时间",
 			Valid: &Validity{
-				Type: "range",
+				Type:     "range",
 				DataType: "integer",
-				Value: "",
-				Values:nil,
-				Min : 0,
-				Max : 86400,
+				Value:    "",
+				Values:   nil,
+				Min:      0,
+				Max:      86400,
 			},
 		}
 	})

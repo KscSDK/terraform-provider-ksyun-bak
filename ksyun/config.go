@@ -4,14 +4,15 @@ import (
 	"github.com/ksc/ksc-sdk-go/ksc"
 	"github.com/ksc/ksc-sdk-go/ksc/utils"
 	"github.com/ksc/ksc-sdk-go/service/eip"
+	"github.com/ksc/ksc-sdk-go/service/epc"
 	"github.com/ksc/ksc-sdk-go/service/kcm"
+	"github.com/ksc/ksc-sdk-go/service/kcsv1"
+	"github.com/ksc/ksc-sdk-go/service/kcsv2"
 	"github.com/ksc/ksc-sdk-go/service/kec"
 	"github.com/ksc/ksc-sdk-go/service/sks"
 	"github.com/ksc/ksc-sdk-go/service/slb"
 	"github.com/ksc/ksc-sdk-go/service/sqlserver"
 	"github.com/ksc/ksc-sdk-go/service/vpc"
-	"github.com/ksc/ksc-sdk-go/service/kcsv2"
-	"github.com/ksc/ksc-sdk-go/service/kcsv1"
 )
 
 // Config is the configuration of ksyun meta data
@@ -44,5 +45,6 @@ func (c *Config) Client() (*KsyunClient, error) {
 	client.sksconn = sks.SdkNew(cli, cfg, url)
 	client.kcsv1conn = kcsv1.SdkNew(cli, cfg, url)
 	client.kcsv2conn = kcsv2.SdkNew(cli, cfg, url)
+	client.epcconn = epc.SdkNew(cli, cfg, url)
 	return &client, nil
 }

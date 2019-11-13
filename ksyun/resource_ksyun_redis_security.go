@@ -48,9 +48,9 @@ func resourceRedisSecurityRule() *schema.Resource {
 func resourceRedisSecurityRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	var (
 		rules []interface{}
-		resp *map[string]interface{}
-		err error
-		ok bool
+		resp  *map[string]interface{}
+		err   error
+		ok    bool
 	)
 
 	conn := meta.(*KsyunClient).kcsv1conn
@@ -85,7 +85,7 @@ func resourceRedisSecurityRuleCreate(d *schema.ResourceData, meta interface{}) e
 func resourceRedisSecurityRuleDelete(d *schema.ResourceData, meta interface{}) error {
 	var (
 		resp *map[string]interface{}
-		err error
+		err  error
 	)
 	conn := meta.(*KsyunClient).kcsv1conn
 	deleteReq := make(map[string]interface{})
@@ -109,10 +109,10 @@ func resourceRedisSecurityRuleDelete(d *schema.ResourceData, meta interface{}) e
 
 func resourceRedisSecurityRuleUpdate(d *schema.ResourceData, meta interface{}) error {
 	var (
-		deleteRulesResults 	[]float64
-		addRulesResults 	[]string
-		resp *map[string]interface{}
-		err error
+		deleteRulesResults []float64
+		addRulesResults    []string
+		resp               *map[string]interface{}
+		err                error
 	)
 	d.Partial(true)
 	defer d.Partial(false)
@@ -143,7 +143,7 @@ func resourceRedisSecurityRuleUpdate(d *schema.ResourceData, meta interface{}) e
 			newR := newRule.(map[string]interface{})
 			ip := newR["cidr"]
 			exist := false
-			for _, oldRule  := range oldRules {
+			for _, oldRule := range oldRules {
 				oldR := oldRule.(map[string]interface{})
 				if oldR["cidr"] == ip {
 					exist = true
@@ -192,7 +192,7 @@ func resourceRedisSecurityRuleUpdate(d *schema.ResourceData, meta interface{}) e
 func resourceRedisSecurityRuleRead(d *schema.ResourceData, meta interface{}) error {
 	var (
 		resp *map[string]interface{}
-		err error
+		err  error
 	)
 	conn := meta.(*KsyunClient).kcsv1conn
 	readReq := make(map[string]interface{})
@@ -207,7 +207,7 @@ func resourceRedisSecurityRuleRead(d *schema.ResourceData, meta interface{}) err
 	}
 	logger.Debug(logger.RespFormat, action, readReq, *resp)
 	data := (*resp)["Data"].([]interface{})
-	if len(data)  == 0 {
+	if len(data) == 0 {
 		logger.Info("instance security rule result size : 0")
 		return nil
 	}
@@ -221,7 +221,7 @@ func resourceRedisSecurityRuleRead(d *schema.ResourceData, meta interface{}) err
 		rulesTemp = append(rulesTemp, rule)
 	}
 	result["rules"] = rulesTemp
-	for k, v := range result  {
+	for k, v := range result {
 		if err := d.Set(k, v); err != nil {
 			return fmt.Errorf("error set data %v :%v", v, err)
 		}

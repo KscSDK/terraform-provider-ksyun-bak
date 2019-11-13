@@ -2,12 +2,12 @@ package ksyun
 
 import (
 	"fmt"
-	"time"
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/terraform-providers/terraform-provider-ksyun/logger"
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/ksc/ksc-sdk-go/service/kcsv1"
+	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 	"strconv"
+	"time"
 )
 
 // instance node
@@ -72,8 +72,8 @@ func resourceRedisInstanceNode() *schema.Resource {
 func resourceRedisInstanceNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	var (
 		resp *map[string]interface{}
-		err error
-		az string
+		err  error
+		az   string
 	)
 
 	// create
@@ -89,7 +89,7 @@ func resourceRedisInstanceNodeCreate(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("error on add instance node: %s", err)
 	}
 	if resp != nil {
-		d.Set( "instance_id",(*resp)["Data"].(map[string]interface{})["NodeId"].(string))
+		d.Set("instance_id", (*resp)["Data"].(map[string]interface{})["NodeId"].(string))
 	}
 	d.SetId(d.Get("instance_id").(string))
 	logger.Debug(logger.RespFormat, action, createNodeReq, *resp)
@@ -117,8 +117,8 @@ func resourceRedisInstanceNodeCreate(d *schema.ResourceData, meta interface{}) e
 func resourceRedisInstanceNodeDelete(d *schema.ResourceData, meta interface{}) error {
 	var (
 		resp *map[string]interface{}
-		err error
-		az string
+		err  error
+		az   string
 	)
 
 	// delete
@@ -165,8 +165,8 @@ func resourceRedisInstanceNodeRead(d *schema.ResourceData, meta interface{}) err
 	var (
 		item interface{}
 		resp *map[string]interface{}
-		ok bool
-		err error
+		ok   bool
+		err  error
 	)
 
 	conn := meta.(*KsyunClient).kcsv2conn
@@ -202,7 +202,7 @@ func resourceRedisInstanceNodeRead(d *schema.ResourceData, meta interface{}) err
 			result["proxy"] = vMap["proxy"]
 		}
 	}
-	for k, v := range result  {
+	for k, v := range result {
 		if err := d.Set(k, v); err != nil {
 			return fmt.Errorf("error set data %v :%v", v, err)
 		}
@@ -215,8 +215,8 @@ func stateRefreshForOperateNodeFunc(client *kcsv1.Kcsv1, az, instanceId string, 
 		var (
 			resp *map[string]interface{}
 			item map[string]interface{}
-			ok bool
-			err error
+			ok   bool
+			err  error
 		)
 
 		queryReq := map[string]interface{}{"CacheId": instanceId}

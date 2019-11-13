@@ -63,6 +63,30 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 ```sh
 $ make testacc
 ```
+
+In order to run the single source of Acceptance tests, you can run them by entering the following instructions in a terminal:.
+
+*Note:* Acceptance tests create real resources, and often cost money to run.
+
+```sh
+$ cd ksyun
+$ export TF_ACC=true
+$  go test -test.run TestAccKsyunEip_basic -v
+```
+# 中文版介绍
+该介绍包括三部分：
+##### terraform-provider-ksyun开发
+
+_各产品线开发人员参考。_
+
+##### terraform-provider-ksyun使用
+
+_云产品用户参考。_
+
+##### terraform-provider-ksyun 属性介绍
+
+_各产品线开发人员负责补充，云产品用户参考。_
+
 ## terraform-provider-ksyun开发
 ### 开发指南（以eip为例）
 ##### 1、client.go 各产品请求连接声明（eipconn *eip.Eip）
@@ -89,7 +113,7 @@ $ make testacc
 ### 快速安装
 
 
-  若用户只是利用插件，不对插件进行二次开发，且不想安装go环境和编译代码，可直接安装编译好的插件。不同操作系统的插件（terraform-provider-ksyun）位于目录bin-os/下，将其直接拷贝至terraform的plugins默认目录即可。
+  若用户只是利用插件，不对插件进行二次开发，且不想安装go环境和编译代码，可直接安装编译好的插件。不同操作系统的插件（terraform-provider-ksyun）位于目录bin/下，将其直接解压拷贝至terraform的plugins默认目录即可。
 不同操作系统terraform的plugins默认目录：(https://www.terraform.io/docs/configuration/providers.html#third-party-plugins)。
 >注意：首次拷贝，需手动创建plugins文件夹。
 
@@ -204,3 +228,23 @@ $ eip_id=‘e9587b84-0da7-4fd7-a26d-bc56df63b01e’
 $ terraform 0.12upgrade
 ```
   terraform会询问是否确认修改，输入yes即可。
+  
+### Terraform-provider-ksyun 属性介绍：
+ 
+ 1、.tf文件的参数属性请直接参考官网openapi的接口介绍。.tf文件中的属性字段一般都可以在openapi中找到。
+ 
+ 2、terraform-provider-ksyun 尽量保持了原子性，openapi创建接口里若出现同时创建多个资源的情况，provider是不支持的，请分别配置。
+   
+_例：官网openapi里主机创建的接口里，可以同时创建eip和主机，在terraform里是不支持的。主机和eip需单独配置。_
+ 
+##### 下面只介绍官网openapi文档和tf配置文件不一致的资源。
+  
+######  云主机
+1、不支持单个resource(ksyun_instance)批量创建主机，即不支持openapi文档里的MaxCount，MinCount，InstanceNameSuffix。
+
+2、官网openapi主机创建时，SecurityGroupId 目前仅支持绑定一个安全组，terraform 里可配置多个。
+
+######  redis
+1、实例参数配置功能在ksyun_redis_instance资源的parameters中配置。
+
+2、实例主从模式节点不支持并行批量添加, 顺序批量添加多个节点, 需要在ksyun_redis_instance_node资源中配置pre_node_id属性, 属性值是上一个创建的节点ID。
