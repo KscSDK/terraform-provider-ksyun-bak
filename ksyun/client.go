@@ -6,6 +6,7 @@ import (
 	"github.com/ksc/ksc-sdk-go/service/kcsv1"
 	"github.com/ksc/ksc-sdk-go/service/kcsv2"
 	"github.com/ksc/ksc-sdk-go/service/kec"
+	"github.com/ksc/ksc-sdk-go/service/krds"
 	"github.com/ksc/ksc-sdk-go/service/sks"
 	"github.com/ksc/ksc-sdk-go/service/slb"
 	"github.com/ksc/ksc-sdk-go/service/sqlserver"
@@ -19,6 +20,7 @@ type KsyunClient struct {
 	vpcconn       *vpc.Vpc
 	kecconn       *kec.Kec
 	sqlserverconn *sqlserver.Sqlserver
+	krdsconn      *krds.Krds
 	kcmconn       *kcm.Kcm
 	sksconn       *sks.Sks
 	kcsv1conn     *kcsv1.Kcsv1
