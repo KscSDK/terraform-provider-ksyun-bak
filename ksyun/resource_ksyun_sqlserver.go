@@ -75,7 +75,7 @@ func resourceKsyunSqlServer() *schema.Resource {
 				Required: true,
 			},
 
-			// the key
+			// oxoxoxox
 			"sqlservers": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -427,7 +427,7 @@ func resourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	logger.DebugInfo(" converted ---- %+v ", sqlserverMap)
-	dataSourceDbSave(d, "sqlservers", sqlserverIds, sqlserverMap)
+	dataSourceSqlserverSave(d, "sqlservers", sqlserverIds, sqlserverMap)
 	//sqlserverInstance := instances[0].(map[string]interface{})
 	//DBInstanceClass := sqlserverInstance["DBInstanceClass"].(map[string]interface{})
 	//for k,v := range DBInstanceClass{
