@@ -374,3 +374,17 @@ var epcGpuKeys = map[string]bool{
 var epcSecurityGroupKeys = map[string]bool{
 	"SecurityGroupId": true,
 }
+
+var volumeKeys = map[string]bool{
+	"VolumeId":         true,
+	"VolumeName":       true,
+	"VolumeDesc":       true,
+	"Size":             true,
+	"VolumeStatus":     true,
+	"VolumeType":       true,
+	"VolumeCategory":   true,
+	"InstanceId":       true,
+	"CreateTime":       true,
+	"AvailabilityZone": true,
+	"ProjectId":        true,
+}
