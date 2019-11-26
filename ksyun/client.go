@@ -1,6 +1,7 @@
 package ksyun
 
 import (
+	"github.com/ksc/ksc-sdk-go/service/ebs"
 	"github.com/ksc/ksc-sdk-go/service/eip"
 	"github.com/ksc/ksc-sdk-go/service/epc"
 	"github.com/ksc/ksc-sdk-go/service/kcm"
@@ -25,4 +26,5 @@ type KsyunClient struct {
 	kcsv1conn     *kcsv1.Kcsv1
 	kcsv2conn     *kcsv2.Kcsv2
 	epcconn       *epc.Epc
+	ebsconn       *ebs.Ebs
 }
