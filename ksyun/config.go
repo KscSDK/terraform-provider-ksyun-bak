@@ -1,19 +1,19 @@
 package ksyun
 
 import (
-	"github.com/ksc/ksc-sdk-go/ksc"
-	"github.com/ksc/ksc-sdk-go/ksc/utils"
-	"github.com/ksc/ksc-sdk-go/service/ebs"
-	"github.com/ksc/ksc-sdk-go/service/eip"
-	"github.com/ksc/ksc-sdk-go/service/epc"
-	"github.com/ksc/ksc-sdk-go/service/kcm"
-	"github.com/ksc/ksc-sdk-go/service/kcsv1"
-	"github.com/ksc/ksc-sdk-go/service/kcsv2"
-	"github.com/ksc/ksc-sdk-go/service/kec"
-	"github.com/ksc/ksc-sdk-go/service/sks"
-	"github.com/ksc/ksc-sdk-go/service/slb"
-	"github.com/ksc/ksc-sdk-go/service/sqlserver"
-	"github.com/ksc/ksc-sdk-go/service/vpc"
+	"github.com/KscSDK/ksc-sdk-go/ksc"
+	"github.com/KscSDK/ksc-sdk-go/ksc/utils"
+	"github.com/KscSDK/ksc-sdk-go/service/ebs"
+	"github.com/KscSDK/ksc-sdk-go/service/eip"
+	"github.com/KscSDK/ksc-sdk-go/service/epc"
+	"github.com/KscSDK/ksc-sdk-go/service/kcm"
+	"github.com/KscSDK/ksc-sdk-go/service/kcsv1"
+	"github.com/KscSDK/ksc-sdk-go/service/kcsv2"
+	"github.com/KscSDK/ksc-sdk-go/service/kec"
+	"github.com/KscSDK/ksc-sdk-go/service/sks"
+	"github.com/KscSDK/ksc-sdk-go/service/slb"
+	"github.com/KscSDK/ksc-sdk-go/service/sqlserver"
+	"github.com/KscSDK/ksc-sdk-go/service/vpc"
 )
 
 // Config is the configuration of ksyun meta data
