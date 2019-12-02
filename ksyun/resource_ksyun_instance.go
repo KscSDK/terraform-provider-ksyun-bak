@@ -4,9 +4,9 @@ package ksyun
 
 import (
 	"fmt"
+	"github.com/KscSDK/ksc-sdk-go/service/kec"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/KscSDK/ksc-sdk-go/service/kec"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 	"log"
 	"strings"
