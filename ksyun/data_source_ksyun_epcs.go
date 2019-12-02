@@ -296,19 +296,19 @@ func dataSourceKsyunEpcs() *schema.Resource {
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"model": &schema.Schema{
+									"model": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"frequence": &schema.Schema{
+									"frequence": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"count": &schema.Schema{
+									"count": {
 										Type:     schema.TypeInt,
 										Computed: true,
 									},
-									"core_count": &schema.Schema{
+									"core_count": {
 										Type:     schema.TypeInt,
 										Computed: true,
 									},
@@ -322,19 +322,19 @@ func dataSourceKsyunEpcs() *schema.Resource {
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"model": &schema.Schema{
+									"model": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"frequence": &schema.Schema{
+									"frequence": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"count": &schema.Schema{
+									"count": {
 										Type:     schema.TypeInt,
 										Computed: true,
 									},
-									"core_count": &schema.Schema{
+									"core_count": {
 										Type:     schema.TypeInt,
 										Computed: true,
 									},
