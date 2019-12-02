@@ -890,7 +890,7 @@ func operateEpcStatus(d *schema.ResourceData, hostStatus string, updateReq map[s
 //清除除HostId其他的属性
 func clearUpdateReq(updateReq *map[string]interface{}) {
 	if *updateReq != nil {
-		for k, _ := range *updateReq {
+		for k := range *updateReq {
 			if k != "HostId" {
 				delete(*updateReq, k)
 			}
