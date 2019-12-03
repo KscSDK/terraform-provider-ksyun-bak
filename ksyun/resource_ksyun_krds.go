@@ -49,8 +49,8 @@ var krdsTfField = []string{
 	"security_group_id",
 	"db_parameter_group_id",
 	"preferred_backup_time",
-	"availability_zone.1",
-	"availability_zone.2",
+	"availability_zone_1",
+	"availability_zone_2",
 	"project_id",
 	"port",
 }
@@ -705,7 +705,7 @@ func resourceKsyunMysqlUpdate(d *schema.ResourceData, meta interface{}) error {
 			if v == "preferred_backup_time" {
 				execModifyDBBackupPolicy = true
 			}
-			if v == "availability_zone.1" || v == "availability_zone.2" {
+			if v == "availability_zone_1" || v == "availability_zone_2" {
 				execModifyDBInstanceAvailabilityZone = true
 			}
 		}
