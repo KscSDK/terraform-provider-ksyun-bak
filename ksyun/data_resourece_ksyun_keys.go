@@ -388,3 +388,66 @@ var volumeKeys = map[string]bool{
 	"AvailabilityZone": true,
 	"ProjectId":        true,
 }
+
+var mongodbInstanceKeys = map[string]bool{
+	"UserId":          true,
+	"Region":          true,
+	"Name":            true,
+	"InstanceId":      true,
+	"Status":          true,
+	"IP":              true,
+	"InstanceType":    true,
+	"Version":         true,
+	"InstanceClass":   true,
+	"Storage":         true,
+	"totalStorage":    true,
+	"SecurityGroupId": true,
+	"Port":            true,
+	"NetworkType":     true,
+	"VpcId":           true,
+	"VnetId":          true,
+	"TimingSwitch":    true,
+	"Timezone":        true,
+	"TimeCycle":       true,
+	"ProductId":       true,
+	"PayType":         true,
+	"ProductWhat":     true,
+	"CreateDate":      true,
+	"ExpirationDate":  true,
+	"IamProjectId":    true,
+	"IamProjectName":  true,
+	"NodeNum":         true,
+	"MongosNum":       true,
+	"ShardNum":        true,
+	"Mode":            true,
+	"Config":          true,
+	"Area":            true,
+}
+
+var mongodbInstanceNodeKeys = map[string]bool{
+	"NodeId": true,
+	"Name":   true,
+	"Role":   true,
+	"IP":     true,
+	"Port":   true,
+	"Status": true,
+}
+
+var mongodbShardInstanceMongosNodeKeys = map[string]bool{
+	"NodeId":        true,
+	"Name":          true,
+	"Role":          true,
+	"Endpoint":      true,
+	"Status":        true,
+	"Connections":   true,
+	"InstanceClass": true,
+}
+
+var mongodbShardInstanceShardNodeKeys = map[string]bool{
+	"NodeId":        true,
+	"Name":          true,
+	"Status":        true,
+	"Disk":          true,
+	"Iops":          true,
+	"InstanceClass": true,
+}
