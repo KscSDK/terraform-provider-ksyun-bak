@@ -21,7 +21,7 @@ func resourceKsyunSqlServer() *schema.Resource {
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -52,12 +52,12 @@ func resourceKsyunSqlServer() *schema.Resource {
 			"engine": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "engine is db type, only support mysql|percona",
+				Description: "engine is db type, only support SQLServer",
 			},
 			"engine_version": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "db engine version only support 5.5|5.6|5.7|8.0",
+				Description: "db engine version only support 2008r2,2012,2016",
 			},
 			"master_user_name": {
 				Type:     schema.TypeString,
