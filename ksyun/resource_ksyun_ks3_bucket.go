@@ -72,22 +72,22 @@ func resourceKsyunKs3Bucket() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"allowed_origins": { //指定哪个域名可访问 www.example.com
+						"allowed_origin": { //指定哪个域名可访问 www.example.com
 							Type:     schema.TypeList,
 							Required: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
-						"allowed_headers": { //指定head enable disable
+						"allowed_header": { //指定head enable disable
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
-						"allowed_methods": { //访问域名 GET PUT POST DELETE HEAD
+						"allowed_method": { //访问域名 GET PUT POST DELETE HEAD
 							Type:     schema.TypeList,
 							Required: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
-						"expose_headers": { //在响应中暴露的头
+						"expose_header": { //在响应中暴露的头
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
@@ -315,12 +315,12 @@ func resourceKsyunKs3BucketRead(d *schema.ResourceData, meta interface{}) error 
 		corsRules = make([]map[string]interface{}, 0, len(cors.CORSRules))
 		for _, ruleObject := range cors.CORSRules {
 			rule := make(map[string]interface{})
-			rule["allowed_headers"] = flattenStringList(ruleObject.AllowedHeaders)
-			rule["allowed_methods"] = flattenStringList(ruleObject.AllowedMethods)
-			rule["allowed_origins"] = flattenStringList(ruleObject.AllowedOrigins)
+			rule["allowed_header"] = flattenStringList(ruleObject.AllowedHeaders)
+			rule["allowed_method"] = flattenStringList(ruleObject.AllowedMethods)
+			rule["allowed_origin"] = flattenStringList(ruleObject.AllowedOrigins)
 			// Both the "ExposeHeaders" and "MaxAgeSeconds" might not be set.
 			if ruleObject.AllowedOrigins != nil {
-				rule["expose_headers"] = flattenStringList(ruleObject.ExposeHeaders)
+				rule["expose_header"] = flattenStringList(ruleObject.ExposeHeaders)
 			}
 			if ruleObject.MaxAgeSeconds != nil {
 				rule["max_age_seconds"] = int(*ruleObject.MaxAgeSeconds)
@@ -473,13 +473,13 @@ func resourceKsyunKs3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) err
 						}
 					}
 					switch k {
-					case "allowed_headers":
+					case "allowed_header":
 						r.AllowedHeaders = vMap
-					case "allowed_methods":
+					case "allowed_method":
 						r.AllowedMethods = vMap
-					case "allowed_origins":
+					case "allowed_origin":
 						r.AllowedOrigins = vMap
-					case "expose_headers":
+					case "expose_header":
 						r.ExposeHeaders = vMap
 					}
 				}
