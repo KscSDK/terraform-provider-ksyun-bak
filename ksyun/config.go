@@ -11,6 +11,7 @@ import (
 	"github.com/KscSDK/ksc-sdk-go/service/kcsv2"
 	"github.com/KscSDK/ksc-sdk-go/service/kec"
 	"github.com/KscSDK/ksc-sdk-go/service/krds"
+	"github.com/KscSDK/ksc-sdk-go/service/mongodb"
 	"github.com/KscSDK/ksc-sdk-go/service/sks"
 	"github.com/KscSDK/ksc-sdk-go/service/slb"
 	"github.com/KscSDK/ksc-sdk-go/service/sqlserver"
@@ -50,5 +51,6 @@ func (c *Config) Client() (*KsyunClient, error) {
 	client.kcsv2conn = kcsv2.SdkNew(cli, cfg, url)
 	client.epcconn = epc.SdkNew(cli, cfg, url)
 	client.ebsconn = ebs.SdkNew(cli, cfg, url)
+	client.mongodbconn = mongodb.SdkNew(cli, cfg, url)
 	return &client, nil
 }
