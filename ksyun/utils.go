@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/hashcode"
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"io/ioutil"
 	"os"
@@ -129,4 +130,9 @@ func SchemaSetToStringSlice(s interface{}) []string {
 	}
 
 	return vL
+}
+
+func isResourceTimeoutError(err error) bool {
+	timeoutErr, ok := err.(*resource.TimeoutError)
+	return ok && timeoutErr.LastError == nil
 }

@@ -86,6 +86,7 @@ func Provider() terraform.ResourceProvider {
 			"ksyun_mongodb_instance":          resourceKsyunMongodbInstance(),
 			"ksyun_mongodb_shard_instance":    resourceKsyunMongodbShardInstance(),
 			"ksyun_mongodb_security_rule":     resourceKsyunMongodbSecurityRule(),
+			"ksyun_ks3":                       resourceKsyunKs3Bucket(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
