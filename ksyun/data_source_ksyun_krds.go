@@ -37,6 +37,12 @@ func dataSourceKsyunKrds() *schema.Resource {
 				Optional:    true,
 				Description: "HRDS（高可用）,RR（只读实例）,TRDS（临时实例）",
 			},
+			"db_instance_status": {
+				Type:        schema.TypeString,
+				Required:    false,
+				Optional:    true,
+				Description: "ACTIVE（运行中）/INVALID（请续费）",
+			},
 			"keyword": {
 				Type:     schema.TypeString,
 				Required: false,

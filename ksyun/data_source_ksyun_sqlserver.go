@@ -392,7 +392,7 @@ func dataSourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	instances := bodyData["Instances"].([]interface{})
 	if len(instances) == 0 {
-		return fmt.Errorf("empty on reading Instance(sqlserver) body %+v", (*resp))
+		return fmt.Errorf("empty on reading Instance(sqlserver) body %+v", *resp)
 	}
 
 	krdsIds := make([]string, len(instances))
