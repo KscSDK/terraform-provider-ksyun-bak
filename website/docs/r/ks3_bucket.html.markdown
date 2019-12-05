@@ -8,7 +8,7 @@ description: |-
 
 # ksyun_ks3
 
-Provides a resource to create a ks3 bucket and set its attribution.
+Provides a resource to create a KS3 bucket and set its attribution.
 
 ~> **Note**  The bucket namespace is shared by all users of the KS3 system. Please set bucket name as unique as possible.
 ## Example Usage
@@ -53,7 +53,7 @@ resource "ksyun_ks3" "bucket-cors" {
   cors_rule {
     allowed_header = ["*"]
     allowed_method = ["PUT", "POST"]
-    allowed_origin = ["https://www.baidu.com"]
+    allowed_origin = ["https://www.example.com"]
     expose_header  = ["ETag"]
     max_age_seconds = 3000
   }
@@ -64,7 +64,7 @@ resource "ksyun_ks3" "bucket-cors" {
 
 The following arguments are supported:
 
-* `bucket` - (Optional, Forces new resource) The name of the bucket. If omitted, Terraform will assign a random, unique name.
+* `bucket` - (Required) The name of the bucket. If omitted, Terraform will assign a random, unique name.
 * `acl` - (Optional) The canned ACL to apply. Defaults to "private".
 * `cors_rule` - (Optional) A rule of Cross-Origin Resource Sharing.
     * `allowed_header` - (Optional) Specifies which headers are allowed.
@@ -74,6 +74,7 @@ The following arguments are supported:
     * `max_age_seconds` - (Optional) Specifies time in seconds that browser can cache the response for a preflight request.
 * `logging` - (Optional) A settings of bucket logging.
     * `target_bucket` - (Required) The name of the bucket that will receive the log objects.
+    * `target_prefix` - (Optional) To specify a key prefix for log objects.
 
 ## Attributes Reference
 

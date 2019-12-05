@@ -27,7 +27,7 @@ func resourceKsyunKs3Bucket() *schema.Resource {
 			"bucket": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringLenBetween(0, 63),
+				ValidateFunc: validation.StringLenBetween(3, 63),
 			},
 			"type": {
 				Type:     schema.TypeString,
