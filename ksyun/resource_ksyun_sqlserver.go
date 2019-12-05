@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
+	"strings"
 	"time"
 )
 
@@ -21,7 +22,7 @@ func resourceKsyunSqlServer() *schema.Resource {
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -29,104 +30,62 @@ func resourceKsyunSqlServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"db_instance_identifier": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "source instance identifier",
-			},
-			"db_instance_class": {
+			"dbinstanceidentifier": {
 				Type:     schema.TypeString,
-				Required: true,
-				Description: "this value regex db.ram.d{1,3}|db.disk.d{1,5} , " +
-					"db.ram is rds random access memory size, db.disk is disk size",
+				Optional: true,
 			},
-			"db_instance_name": {
+			"dbinstanceclass": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"db_instance_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "HRDS_SS",
+			"dbinstancename": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"dbinstancetype": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"engine": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "engine is db type, only support SQLServer",
-			},
-			"engine_version": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "db engine version only support 2008r2,2012,2016",
-			},
-			"master_user_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"master_user_password": {
+			"engineversion": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"vpc_id": {
+			"masterusername": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"subnet_id": {
+			"masteruserpassword": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"bill_type": {
+			"vpcid": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"duration": {
-				Type:     schema.TypeInt,
-				Required: false,
-				Optional: true,
-			},
-			"security_group_id": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Optional:    true,
-				Description: "proprietary security group id for krds",
-			},
-			"preferred_backup_time": {
+			"subnetid": {
 				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
+				Required: true,
 			},
-			"availability_zone_1": {
+			"billtype": {
 				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"availability_zone_2": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
-			},
-			"project_id": {
-				Type:     schema.TypeInt,
-				Required: false,
-				Optional: true,
-			},
-			"port": {
-				Type:     schema.TypeString,
-				Required: false,
-				Optional: true,
+				Required: true,
 			},
 
-			// 与存入数据一致datakey
+			// oxoxoxox
 			"sqlservers": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"db_instance_class": {
-							Type:     schema.TypeSet,
-							MaxItems: 1,
+						"dbinstanceclass": {
+							Type:     schema.TypeList,
 							Optional: true,
+							MaxItems: 1,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -155,7 +114,7 @@ func resourceKsyunSqlServer() *schema.Resource {
 										Optional: true,
 										Computed: true,
 									},
-									"max_conn": {
+									"maxconn": {
 										Type:     schema.TypeInt,
 										Optional: true,
 										Computed: true,
@@ -168,27 +127,27 @@ func resourceKsyunSqlServer() *schema.Resource {
 								},
 							},
 						},
-						"db_instance_identifier": {
+						"dbinstanceidentifier": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"db_instance_name": {
+						"dbinstancename": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"db_instance_status": {
+						"dbinstancestatus": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"db_instance_type": {
+						"dbinstancetype": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"group_id": {
+						"groupid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
@@ -203,106 +162,90 @@ func resourceKsyunSqlServer() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"engine_version": {
+						"engineversion": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"instance_create_time": {
+						"instancecreatetime": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"master_user_name": {
+						"masterusername": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"vpc_id": {
+						"vpcid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"subnet_id": {
+						"subnetid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"publicly_accessible": {
+						"publiclyaccessible": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Computed: true,
 						},
-						"read_replica_db_instance_identifiers": {
+						"readreplicadbinstanceidentifiers": {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"vip": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"read_replica_db_instance_identifier": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-								},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
 						},
-						"bill_type": {
+						"billtype": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"order_type": {
+						"ordertype": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"order_source": {
+						"ordersource": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"master_availability_zone": {
+						"masteravailabilityzone": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"slave_availability_zone": {
+						"slaveavailabilityzone": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"multi_availability_zone": {
+						"multiavailabilityzone": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Computed: true,
 						},
-						"product_id": {
+						"productid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"order_use": {
+						"orderuse": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"project_id": {
+						"projectid": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
 						},
-						"project_name": {
+						"projectname": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
@@ -312,7 +255,7 @@ func resourceKsyunSqlServer() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"bill_type_id": {
+						"billtypeid": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
@@ -322,42 +265,37 @@ func resourceKsyunSqlServer() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"db_parameter_group_id": {
+						"dbparametergroupid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"datastore_version_id": {
+						"datastoreversionid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"disk_used": {
+						"diskused": {
 							Type:     schema.TypeFloat,
 							Optional: true,
 							Computed: true,
 						},
-						"preferred_backup_time": {
+						"preferredbackuptime": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"product_what": {
+						"productwhat": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
 						},
-						"service_start_time": {
+						"servicestarttime": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
-						"order_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"sub_order_id": {
+						"suborderid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
@@ -366,41 +304,6 @@ func resourceKsyunSqlServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Computed: true,
-						},
-						"security_group_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"availability_zone": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"db_source": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Computed: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"db_instance_identifier": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"db_instance_name": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"db_instance_type": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-								},
-							},
 						},
 					},
 				},
@@ -424,16 +327,9 @@ func resourceKsyunSqlServerCreate(d *schema.ResourceData, meta interface{}) erro
 		"VpcId",
 		"SubnetId",
 		"BillType",
-		"Duration",
-		"SecurityGroupId",
-		"PreferredBackupTime",
-		"AvailabilityZone.1",
-		"AvailabilityZone.2",
-		"ProjectId",
-		"Port",
 	}
 	for _, v := range creates {
-		if v1, ok := d.GetOk(FuckHump2Downline(v)); ok {
+		if v1, ok := d.GetOk(strings.ToLower(v)); ok {
 			createReq[v] = fmt.Sprintf("%v", v1)
 		}
 	}
@@ -450,7 +346,7 @@ func resourceKsyunSqlServerCreate(d *schema.ResourceData, meta interface{}) erro
 		instances := bodyData["Instances"].([]interface{})
 		sqlserverInstance := instances[0].(map[string]interface{})
 		instanceId := sqlserverInstance["DBInstanceIdentifier"].(string)
-		logger.DebugInfo(" DBInstanceIdentifier : %v", instanceId)
+		logger.DebugInfo("~*~*~*~*~ DBInstanceIdentifier : %v", instanceId)
 		d.SetId(instanceId)
 	}
 	stateConf := &resource.StateChangeConf{
@@ -462,9 +358,6 @@ func resourceKsyunSqlServerCreate(d *schema.ResourceData, meta interface{}) erro
 		Refresh:    sqlserverInstanceStateRefreshForCreate(conn, d.Id(), []string{tCreatingStatus}),
 	}
 	_, err = stateConf.WaitForState()
-	if err != nil {
-		return err
-	}
 
 	return resourceKsyunSqlServerRead(d, meta)
 }
@@ -515,7 +408,7 @@ func resourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error 
 				dbclass := v.(map[string]interface{})
 				dbinstanceclass := make(map[string]interface{})
 				for j, q := range dbclass {
-					dbinstanceclass[FuckHump2Downline(j)] = q
+					dbinstanceclass[strings.ToLower(j)] = q
 				}
 				wtf := make([]interface{}, 1)
 				wtf[0] = dbinstanceclass
@@ -523,18 +416,30 @@ func resourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error 
 				delete(instanceInfo, "DBInstanceClass")
 			} else {
 				delete(instanceInfo, k)
-				instanceInfo[FuckHump2Downline(k)] = v
+				instanceInfo[strings.ToLower(k)] = v
 			}
 		}
 		sqlserverMap[k] = instanceInfo
 		logger.DebugInfo(" converted ---- %+v ", instanceInfo)
 
-		sqlserverIds[k] = instanceInfo["db_instance_identifier"].(string)
+		sqlserverIds[k] = instanceInfo["dbinstanceidentifier"].(string)
 		logger.DebugInfo("sqlserverIds fuck : %v", sqlserverIds)
 	}
 
 	logger.DebugInfo(" converted ---- %+v ", sqlserverMap)
-	dataSourceDbSave(d, "sqlservers", sqlserverIds, sqlserverMap)
+	dataSourceSqlserverSave(d, "sqlservers", sqlserverIds, sqlserverMap)
+	//sqlserverInstance := instances[0].(map[string]interface{})
+	//DBInstanceClass := sqlserverInstance["DBInstanceClass"].(map[string]interface{})
+	//for k,v := range DBInstanceClass{
+	//	sqlserverInstance["DBInstanceClass."+k] = v
+	//}
+	//
+	//for k,v := range sqlserverInstance {
+	//	if !sqlserverIncludeKeys[k] || sqlserverExcludeKeys[k] {
+	//		d.Set(k,v)
+	//	}
+	//}
+	//state := sqlserverInstance["DBInstanceStatus"].(string)
 
 	return nil
 }
@@ -542,23 +447,18 @@ func resourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error 
 func resourceKsyunSqlServerUpdate(d *schema.ResourceData, meta interface{}) error {
 	// 关闭事务，允许部分属性被修改  d.Partial(true) d.Partial(false)
 	updateField := []string{
-		"db_instance_class",
-		"db_instance_name",
-		"db_instance_type",
+		"output_file",
+		"dbinstanceidentifier",
+		"dbinstanceclass",
+		"dbinstancename",
+		"dbinstancetype",
 		"engine",
-		"engine_version",
-		"master_user_name",
-		"master_user_password",
-		"vpc_id",
-		"subnet_id",
-		"bill_type",
-		"duration",
-		"security_group_id",
-		"preferred_backup_time",
-		"availability_zone_1",
-		"availability_zone_2",
-		"project_id",
-		"port",
+		"engineversion",
+		"masterusername",
+		"masteruserpassword",
+		"vpcid",
+		"subnetid",
+		"billtype",
 	}
 	for _, v := range updateField {
 		if d.HasChange(v) && !d.IsNewResource() {

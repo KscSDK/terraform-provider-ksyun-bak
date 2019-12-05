@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
-	"log"
 	"strings"
 )
 
@@ -302,7 +301,8 @@ func dataSourceKscSaveSlice(d *schema.ResourceData, dataKey string, ids []string
 	return nil
 }
 
-func dataSourceDbSave(d *schema.ResourceData, dataKey string, ids []string, datas []map[string]interface{}) error {
+func dataSourceSqlserverSave(d *schema.ResourceData, dataKey string, ids []string, datas []map[string]interface{}) error {
+
 	if len(ids) == 1 {
 		d.SetId(ids[0])
 	} else {
@@ -310,89 +310,46 @@ func dataSourceDbSave(d *schema.ResourceData, dataKey string, ids []string, data
 	}
 
 	d.Set("total_count", len(datas))
-	log.Printf("reset  dataKey: %v datas: %v", dataKey, datas)
 
+	logger.DebugInfo("$$$$$$$$$datasdatasdatas$$$$$$$$ %+v", datas)
 	if err := d.Set(dataKey, datas); err != nil {
-		logger.DebugInfo("err %+v", err)
+		logger.DebugInfo("$$$$$$$$$omg$$$$$$$$ %+v", err)
 		return fmt.Errorf("error set datas %v :%v", datas, err)
 	}
-	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
-		logger.DebugInfo(" output file name : %+v", outputFile.(string)+"_"+d.Id())
-		writeToFile(outputFile.(string)+"_"+d.Id(), datas)
-	} else {
-		return fmt.Errorf(" output file error,  %+v", outputFile)
-	}
-	return nil
-}
-
-func dataDbSave(d *schema.ResourceData, dataKey string, ids []string, datas []map[string]interface{}) error {
-	if len(ids) == 1 {
-		d.SetId(ids[0])
-	} else {
-		d.SetId(strings.Join(ids, ","))
-	}
-
-	d.Set("total_count", len(datas))
-	log.Printf("reset  dataKey: %v datas: %v", dataKey, datas)
-
-	if err := d.Set(dataKey, datas); err != nil {
-		logger.DebugInfo("$$err$$ %+v", err)
-		return fmt.Errorf("error set datas %v :%v", datas, err)
-	}
+	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v", datas)
 	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
 		logger.DebugInfo(" ------------ %+v", outputFile)
 
-		writeToFile(outputFile.(string)+"_"+"data", datas)
+		writeToFile(outputFile.(string)+"_"+d.Id(), datas)
 	} else {
-		return fmt.Errorf(" !!! %+v", outputFile)
+		logger.DebugInfo(" !!!!!!!!!!! %+v", outputFile)
 	}
+
 	return nil
 }
 
-func FuckHump2Downline(s string) string {
-	s = strings.TrimSpace(s)
-	if len(s) == 0 {
-		return s
-	}
-	var s1 string
-	if len(s) == 1 {
-		s1 = strings.ToLower(s[:1])
-		return s1
-	}
-	for k, v := range s {
-		if k == 0 {
-			s1 = strings.ToLower(s[0:1])
-			continue
-		}
-		if v >= 65 && v <= 90 {
-			v1 := "_" + strings.ToLower(s[k:k+1])
-			s1 = s1 + v1
-		} else {
-			s1 = s1 + s[k:k+1]
-		}
-	}
-	if len(s1) < 3 {
-		return s1
+func dataSourceSqlserverDataSave(d *schema.ResourceData, dataKey string, ids []string, datas []map[string]interface{}) error {
+
+	if len(ids) == 1 {
+		d.SetId(ids[0])
+	} else {
+		d.SetId(strings.Join(ids, ","))
 	}
 
-	var s2 string
-	if s1[:3] == "d_b" {
-		s2 = "db" + s1[3:]
-	} else {
-		if s1 == "read_replica_d_b_instance_identifiers" {
-			s2 = "read_replica_db_instance_identifiers"
-		} else if s1 == "read_replica_d_b_instance_identifier" {
-			s2 = "read_replica_db_instance_identifier"
-		} else {
-			s2 = s1
-		}
+	d.Set("total_count", len(datas))
+
+	logger.DebugInfo("$$$$$$$$$datasdatasdatas$$$$$$$$ %+v", datas)
+	if err := d.Set(dataKey, datas); err != nil {
+		logger.DebugInfo("$$$$$$$$$omg$$$$$$$$ %+v", err)
+		return fmt.Errorf("error set datas %v :%v", datas, err)
 	}
-	var s3 string
-	if s2[len(s2)-2:] == ".1" || s2[len(s2)-2:] == ".2" {
-		s3 = s2[:len(s2)-2] + "_" + s2[len(s2)-1:]
+	logger.DebugInfo("$$$$$$$$$fuckfuckfuck$$$$$$$$ %+v", datas)
+	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
+		logger.DebugInfo(" ------------ %+v", outputFile)
+		writeToFile(outputFile.(string)+"_data", datas)
 	} else {
-		s3 = s2
+		logger.DebugInfo(" !!!!!!!!!!! %+v", outputFile)
 	}
 
-	return s3
+	return nil
 }
