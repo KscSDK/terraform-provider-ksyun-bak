@@ -18,7 +18,7 @@ func TestAccKsyunKrdsRR_basic(t *testing.T) {
 
 		IDRefreshName: "ksyun_krds_rr.rds-rr-1",
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckKrdsDestroy,
+		CheckDestroy:  testAccCheckKrdsRRDestroy,
 
 		Steps: []resource.TestStep{
 			{
@@ -97,17 +97,44 @@ func testAccCheckKrdsRRDestroy(s *terraform.State) error {
 }
 
 const testAccKrdsRRConfig = `
-resource "ksyun_krds_rr" "rds-rr-1"{
-  output_file = "output_file"
-  db_instance_identifier= "ca79f6e5-cf73-42d8-9fd2-8c40fd5a22a3"
-  db_instance_class= "db.ram.2|db.disk.50"
-  db_instance_name = "houbin_terraform_888_rr_1"
-  bill_type = "DAY"
-  security_group_id = "62185"
 
+
+variable "available_zone" {
+  default = "cn-guangzhou-1a"
+}
+resource "ksyun_vpc" "default" {
+  vpc_name   = "ksyun-vpc-tf"
+  cidr_block = "10.7.0.0/21"
+}
+resource "ksyun_subnet" "foo" {
+  subnet_name      = "ksyun-subnet-tf"
+  cidr_block = "10.7.0.0/21"
+  subnet_type = "Reserve"
+  dhcp_ip_from = "10.7.0.2"
+  dhcp_ip_to = "10.7.0.253"
+  vpc_id  = "${ksyun_vpc.default.id}"
+  gateway_ip = "10.7.0.1"
+  dns1 = "198.18.254.41"
+  dns2 = "198.18.254.40"
+  availability_zone = "${var.available_zone}"
+}
+
+resource "ksyun_krds" "houbin_terraform_777"{
+  output_file = "output_file"
+  db_instance_class= "db.ram.2|db.disk.50"
+  db_instance_name = "houbin_terraform_1-n"
+  db_instance_type = "HRDS"
+  engine = "mysql"
+  engine_version = "5.5"
+  master_user_name = "admin"
+  master_user_password = "123qweASD123"
+  vpc_id = "${ksyun_vpc.default.id}"
+  subnet_id = "${ksyun_subnet.foo.id}"
+  bill_type = "DAY"
+  preferred_backup_time = "01:00-02:00"
   parameters {
     name = "auto_increment_increment"
-    value = "7"
+    value = "8"
   }
 
   parameters {
@@ -115,10 +142,15 @@ resource "ksyun_krds_rr" "rds-rr-1"{
     value = "ROW"
   }
 
-  parameters {
-    name = "delayed_insert_limit"
-    value = "107"
-  }
+}
+
+resource "ksyun_krds_rr" "rds-rr-1"{
+  output_file = "output_file"
+  db_instance_identifier= "${ksyun_krds.houbin_terraform_777.id}"
+  db_instance_class= "db.ram.4|db.disk.100"
+  db_instance_name = "houbin_terraform_777_rr_1"
+  bill_type = "DAY"
+
 }
 
 `

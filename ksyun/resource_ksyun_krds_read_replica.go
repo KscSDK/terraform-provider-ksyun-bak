@@ -2,6 +2,7 @@ package ksyun
 
 import (
 	"fmt"
+	"github.com/KscSDK/ksc-sdk-go/service/krds"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
@@ -427,6 +428,9 @@ func resourceKsyunKrdsRrCreate(d *schema.ResourceData, meta interface{}) error {
 			createReq[v] = fmt.Sprintf("%v", v1)
 		}
 	}
+
+	checkBackupComplete(d, meta)
+
 	action := "CreateDBInstanceReadReplica"
 	logger.Debug(logger.RespFormat, action, createReq)
 	resp, err = conn.CreateDBInstanceReadReplica(&createReq)
@@ -462,6 +466,46 @@ func resourceKsyunKrdsRrCreate(d *schema.ResourceData, meta interface{}) error {
 
 	return modifyParameters(d, meta)
 }
+
+func checkBackupComplete(d *schema.ResourceData, meta interface{}) error {
+	conn := meta.(*KsyunClient).krdsconn
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"wait"},
+		Target:     []string{"complete", "err"},
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 10 * time.Second,
+		Refresh:    mysqlBackupStateRefresh(conn, d.Id()),
+	}
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("error on check backup Instance(krds): %s", err)
+	} else {
+		return nil
+	}
+}
+
+func mysqlBackupStateRefresh(client *krds.Krds, instanceId string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		req := map[string]interface{}{"DBInstanceIdentifier": instanceId}
+		action := "DescribeDBInstances"
+		logger.Debug(logger.ReqFormat, action, req)
+		resp, err := client.DescribeDBBackups(&req)
+		logger.Debug(logger.AllFormat, action, req, *resp, err)
+		if err != nil {
+			return nil, "err", err
+		}
+		bodyData := (*resp)["Data"].(map[string]interface{})
+		backups := bodyData["DBBackup"].([]interface{})
+		if len(backups) > 0 {
+			return resp, "complete", nil
+		} else {
+			return resp, "wait", nil
+		}
+
+	}
+}
+
 func resourceKsyunKrdsRrUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	return fmt.Errorf("read replica instance do not support update ...")

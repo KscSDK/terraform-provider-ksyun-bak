@@ -20,7 +20,7 @@ func resourceKsyunSqlServer() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(30 * time.Minute),
+			Create: schema.DefaultTimeout(50 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
@@ -519,7 +519,7 @@ func resourceKsyunSqlServerRead(d *schema.ResourceData, meta interface{}) error 
 				}
 				wtf := make([]interface{}, 1)
 				wtf[0] = dbinstanceclass
-				instanceInfo["dbinstanceclass"] = wtf
+				instanceInfo["db_instance_class"] = wtf
 				delete(instanceInfo, "DBInstanceClass")
 			} else {
 				delete(instanceInfo, k)
@@ -560,12 +560,13 @@ func resourceKsyunSqlServerUpdate(d *schema.ResourceData, meta interface{}) erro
 		"project_id",
 		"port",
 	}
+	d.Partial(true)
 	for _, v := range updateField {
-		if d.HasChange(v) && !d.IsNewResource() {
+		if d.HasChange(v) {
 			return fmt.Errorf("error on updating instance , sqlserver is not support update")
 		}
 	}
-
+	d.Partial(false)
 	return nil
 }
 
