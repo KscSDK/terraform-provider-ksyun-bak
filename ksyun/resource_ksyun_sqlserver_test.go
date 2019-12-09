@@ -1,173 +1,126 @@
 package ksyun
 
 import (
+	"fmt"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 	"testing"
 )
 
-func TestAccKsyunSqlserver_basic(t *testing.T) {
+func TestAccKsyunSqlServer_basic(t *testing.T) {
+	var val map[string]interface{}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: "ksyun_sqlserver.houbin-2",
+		IDRefreshName: "ksyun_sqlserver.ks-ss-233",
 		Providers:     testAccProviders,
-		//CheckDestroy:  testAccCheckSqlserverDestroy,
+		CheckDestroy:  testAccCheckSqlServerDestroy,
 
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlserverConfig,
+				Config: testAccSqlServerConfig,
 
 				Check: resource.ComposeTestCheckFunc(
-
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstanceclass", "db.ram.2|db.disk.100"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstancename", "ksyun_sqlserver_2"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "dbinstancetype", "HRDS_SS"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "engine", "SQLServer"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "engineversion", "2008r2"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "masterusername", "admin"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "masteruserpassword", "123qweASD"),
-					//resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "version", "2019-04-25"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "vpcid", "40e0c2e0-3607-4f17-abb5-1a6efe3951c8"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "subnetid", "bc159134-4c94-4a6b-bec0-d97c75d83774"),
-					resource.TestCheckResourceAttr("ksyun_sqlserver.houbin-2", "billtype", "DAY"),
+					testCheckSqlServerExists("ksyun_sqlserver.ks-ss-233", &val),
 				),
 			},
 		},
 	})
 }
 
-//func TestAccKsyunSqlserver_update(t *testing.T) {
-//	var val map[string]interface{}
-//
-//	resource.ParallelTest(t, resource.TestCase{
-//		PreCheck: func() {
-//			testAccPreCheck(t)
-//		},
-//
-//		IDRefreshName: "ksyun_vpc.foo",
-//		Providers:     testAccProviders,
-//		CheckDestroy:  testAccCheckSqlserverDestroy,
-//
-//		Steps: []resource.TestStep{
-//			{
-//				Config: testAccVPCConfig,
-//
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckSqlserverExists("ksyun_vpc.foo", &val),
-//					testAccCheckSqlserverAttributes(&val),
-//					//resource.TestCheckResourceAttr("ksyun_vpc.foo", "vpc_name", "tf-acc-vpc"),
-//					//resource.TestCheckResourceAttr("ksyun_vpc.foo", "cidr_block", "192.168.0.0/16"),
-//				),
-//			},
-//			{
-//				Config: testAccVPCConfigUpdate,
-//
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckSqlserverExists("ksyun_vpc.foo", &val),
-//					testAccCheckSqlserverAttributes(&val),
-//					//resource.TestCheckResourceAttr("ksyun_vpc.foo", "vpc_name", "tf-acc-vpc-1"),
-//				),
-//			},
-//		},
-//	})
-//}
-//
-//func testAccCheckSqlserverExists(n string, val *map[string]interface{}) resource.TestCheckFunc {
-//	return func(s *terraform.State) error {
-//		rs, ok := s.RootModule().Resources[n]
-//
-//		if !ok {
-//			return fmt.Errorf("not found: %s", n)
-//		}
-//
-//		if rs.Primary.ID == "" {
-//			return fmt.Errorf("vpc id is empty")
-//		}
-//
-//		client := testAccProvider.Meta().(*KsyunClient)
-//		vpc := make(map[string]interface{})
-//		vpc["VpcId.1"] = rs.Primary.ID
-//		ptr, err := client.vpcconn.DescribeVpcs(&vpc)
-//
-//		if err != nil {
-//			return err
-//		}
-//		if ptr != nil {
-//			l := (*ptr)["VpcSet"].([]interface{})
-//			if len(l) == 0 {
-//				return err
-//			}
-//		}
-//
-//		*val = *ptr
-//		return nil
-//	}
-//}
-//
-//func testAccCheckSqlserverAttributes(val *map[string]interface{}) resource.TestCheckFunc {
-//	return func(s *terraform.State) error {
-//		if val != nil {
-//			l := (*val)["VpcSet"].([]interface{})
-//			if len(l) == 0 {
-//				return fmt.Errorf("vpc id is empty")
-//			}
-//		}
-//		return nil
-//	}
-//}
-//
-//func testAccCheckSqlserverDestroy(s *terraform.State) error {
-//	for _, rs := range s.RootModule().Resources {
-//		if rs.Type != "ksyun_vpc" {
-//			continue
-//		}
-//
-//		client := testAccProvider.Meta().(*KsyunClient)
-//		vpc := make(map[string]interface{})
-//		vpc["VpcId.1"] = rs.Primary.ID
-//		ptr, err := client.vpcconn.DescribeVpcs(&vpc)
-//
-//		// Verify the error is what we want
-//		if err != nil {
-//			return err
-//		}
-//		if ptr != nil {
-//			l := (*ptr)["VpcSet"].([]interface{})
-//			if len(l) == 0 {
-//				continue
-//			} else {
-//				return fmt.Errorf("VPC still exist")
-//			}
-//		}
-//	}
-//
-//	return nil
-//}
+func testCheckSqlServerExists(n string, val *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		res, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found : %s", n)
+		}
+		if res.Primary.ID == "" {
+			return fmt.Errorf("instance is empty")
+		}
+		client := testAccProvider.Meta().(*KsyunClient)
+		req := map[string]interface{}{
+			"DBInstanceIdentifier": res.Primary.ID,
+		}
+		resp, err := client.krdsconn.DescribeDBInstances(&req)
+		if err != nil {
+			return err
+		}
+		if resp != nil {
+			bodyData, dataOk := (*resp)["Data"].(map[string]interface{})
+			if !dataOk {
+				return fmt.Errorf("error on reading Instance(krds)  %+v", (*resp)["Error"])
+			}
+			instances := bodyData["Instances"].([]interface{})
+			if len(instances) == 0 {
+				return fmt.Errorf("no instance find, instance number is 0")
+			}
+		}
+		*val = *resp
+		return nil
+	}
+}
 
-const testAccSqlserverConfig = `
-resource "ksyun_sqlserver" "houbin-2"{
+func testAccCheckSqlServerDestroy(s *terraform.State) error {
+	for _, res := range s.RootModule().Resources {
+		if res.Type != "ksyun_krds" {
+			continue
+		}
 
-  dbinstanceclass= "db.ram.2|db.disk.100"
-  dbinstancename = "ksyun_sqlserver_2"
-  dbinstancetype = "HRDS_SS"
-  engine = "SQLServer"
-  engineversion = "2008r2"
-  masterusername = "admin"
-  masteruserpassword = "123qweASD"
-  
-  vpcid =	"40e0c2e0-3607-4f17-abb5-1a6efe3951c8"
-  subnetid = "bc159134-4c94-4a6b-bec0-d97c75d83774"
-  billtype = "DAY"
+		client := testAccProvider.Meta().(*KsyunClient)
+		req := map[string]interface{}{
+			"DBInstanceIdentifier": res.Primary.ID,
+		}
+		_, err := client.krdsconn.DescribeDBInstances(&req)
+		if err != nil {
+			if err.(awserr.Error).Code() == "NOT_FOUND" {
+				return nil
+			}
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+const testAccSqlServerConfig = `
+
+variable "available_zone" {
+  default = "cn-shanghai-2a"
+}
+resource "ksyun_vpc" "default" {
+  vpc_name   = "ksyun-vpc-tf"
+  cidr_block = "10.7.0.0/21"
+}
+resource "ksyun_subnet" "foo" {
+  subnet_name      = "ksyun-subnet-tf"
+  cidr_block = "10.7.0.0/21"
+  subnet_type = "Reserve"
+  dhcp_ip_from = "10.7.0.2"
+  dhcp_ip_to = "10.7.0.253"
+  vpc_id  = "${ksyun_vpc.default.id}"
+  gateway_ip = "10.7.0.1"
+  dns1 = "198.18.254.41"
+  dns2 = "198.18.254.40"
+  availability_zone = "${var.available_zone}"
+}
+
+resource "ksyun_sqlserver" "ks-ss-233"{
+ output_file = "output_file"
+ db_instance_class= "db.ram.2|db.disk.100"
+ db_instance_name = "ksyun_sqlserver_1"
+ db_instance_type = "HRDS_SS"
+ engine = "SQLServer"
+ engine_version = "2008r2"
+ master_user_name = "admin"
+ master_user_password = "123qweASD"
+ vpc_id = "${ksyun_vpc.default.id}"
+ subnet_id = "${ksyun_subnet.foo.id}"
+ bill_type = "DAY"
+
 }
 `
-
-//version = "2008r2"
-
-//const testAccSqlserverConfigUpdate = `
-//resource "ksyun_vpc" "foo" {
-//	vpc_name        = "tf-acc-vpc-1"
-//    cidr_block      = "192.168.0.0/16"
-//}
-//`

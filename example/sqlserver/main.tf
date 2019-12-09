@@ -1,52 +1,42 @@
 provider "ksyun"{
-  region = "cn-shanghai-3"
+  region = "cn-shanghai-2"
   access_key = ""
   secret_key = ""
 }
 
-//resource "ksyun_sqlserver" "houbin-10"{
-//  output_file = "output_file"
-//  dbinstanceclass= "db.ram.2|db.disk.20"
-//  dbinstancename = "ksyun_sqlserver_9"
-//  dbinstancetype = "HRDS_SS"
-//  engine = "SQLServer"
-//  engineversion = "2008r2"
-//  masterusername = "admin"
-//  masteruserpassword = "123qweASD"
-//  vpcid = "cbfdbc08-912a-4ec1-972d-e80bc6fe8aae"
-//  subnetid = "87df0198-71e5-4c65-8b7f-a860fbdbeb47"
-//  billtype = "DAY"
-//}
 
-resource "ksyun_sqlserver" "houbin-1"{
-  output_file = "output_file"
-  dbinstanceclass= "db.ram.2|db.disk.22"
-  dbinstancename = "ksyun_sqlserver_1"
-  dbinstancetype = "HRDS_SS"
-  engine = "SQLServer"
-  engineversion = "2008r2"
-  masterusername = "admin"
-  masteruserpassword = "123qweASD"
-  vpcid = "cbfdbc08-912a-4ec1-972d-e80bc6fe8aae"
-  subnetid = "87df0198-71e5-4c65-8b7f-a860fbdbeb47"
-  billtype = "DAY"
+variable "available_zone" {
+  default = "cn-shanghai-2b"
+}
+resource "ksyun_vpc" "default" {
+  vpc_name   = "ksyun-vpc-tf"
+  cidr_block = "10.7.0.0/21"
+}
+resource "ksyun_subnet" "foo" {
+  subnet_name      = "ksyun-subnet-tf"
+  cidr_block = "10.7.0.0/21"
+  subnet_type = "Reserve"
+  dhcp_ip_from = "10.7.0.2"
+  dhcp_ip_to = "10.7.0.253"
+  vpc_id  = "${ksyun_vpc.default.id}"
+  gateway_ip = "10.7.0.1"
+  dns1 = "198.18.254.41"
+  dns2 = "198.18.254.40"
+  availability_zone = "${var.available_zone}"
 }
 
-//resource "ksyun_sqlserver" "houbin-11"{
-//  output_file = "output_file"
-//  dbinstanceclass= "db.ram.2|db.disk.20"
-//  dbinstancename = "ksyun_sqlserver_11"
-//  dbinstancetype = "HRDS_SS"
-//  engine = "SQLServer"
-//  engineversion = "2008r2"
-//  masterusername = "admin"
-//  masteruserpassword = "123qweASD"
-//  vpcid = "cbfdbc08-912a-4ec1-972d-e80bc6fe8aae"
-//  subnetid = "87df0198-71e5-4c65-8b7f-a860fbdbeb47"
-//  billtype = "DAY"
-//}
+resource "ksyun_sqlserver" "ks-ss-233"{
+  output_file = "output_file"
+  db_instance_class= "db.ram.2|db.disk.100"
+  db_instance_name = "ksyun_sqlserver_1"
+  db_instance_type = "HRDS_SS"
+  engine = "SQLServer"
+  engine_version = "2008r2"
+  master_user_name = "admin"
+  master_user_password = "123qweASD"
+  vpc_id = "${ksyun_vpc.default.id}"
+  subnet_id = "${ksyun_subnet.foo.id}"
+  bill_type = "DAY"
 
-//data "ksyun_sqlservers" "hou_desc" {
-//  dbinstancestatus="active"
-//  dbinstanceidentifier="0b0adac8-73c4-4d05-9b8b-982ca09dd313"
-//}
+}
+
