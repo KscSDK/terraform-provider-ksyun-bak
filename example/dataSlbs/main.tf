@@ -5,7 +5,7 @@ provider "ksyun" {
   region = "eu-east-1"
 }
 
-# Get  eips
+# Get  slbs
 data "ksyun_slbs" "default" {
   output_file="output_result"
 

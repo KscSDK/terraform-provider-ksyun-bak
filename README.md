@@ -255,7 +255,7 @@ _例：官网openapi里主机创建的接口里，可以同时创建eip和主机
 
 # 金山云业务对应Terraform的Resource和DataSource
 
-|  资源名  | terraform(Resource)    | terraform(Date) | 资源分类
+|  资源名  | terraform(Resource)    | terraform(Data) | 资源分类
 |  ----  | -------  | ---- | ----
 | 弹性IP  | ksyun_eip | ksyun_eips | eip
 | 链路  | Not_Support | ksyun_lines | eip
