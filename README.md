@@ -258,7 +258,7 @@ _例：官网openapi里主机创建的接口里，可以同时创建eip和主机
 |  资源名  | terraform(Resource)    | terraform(Date) | 资源分类
 |  ----  | -------  | ---- | ----
 | 弹性IP  | ksyun_eip | ksyun_eips | eip
-| 链路  | Not_Support | ksyun_eips | eip
+| 链路  | Not_Support | ksyun_lines | eip
 | 弹性IP绑定和解绑  | ksyun_eip\_associate | Not_Support | eip
 | 云物理机  | ksyun_epcs | ksyun_epcs | epc
 | 证书  | ksyun_certificate | ksyun_certificates | kcm
