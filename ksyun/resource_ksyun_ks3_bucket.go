@@ -29,11 +29,11 @@ func resourceKsyunKs3Bucket() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(3, 63),
 			},
-			"type": {
-				Type:     schema.TypeString,
-				Default:  "NORMAL", //NORMAL 普通 ARCHIVE 归档
-				Optional: true,
-			},
+			//"type": {
+			//	Type:     schema.TypeString,
+			//	Default:  "NORMAL", //NORMAL 普通 ARCHIVE 归档
+			//	Optional: true,
+			//},
 			"acl": {
 				Type:     schema.TypeString,
 				Default:  "private", //private public-read public-read-write
