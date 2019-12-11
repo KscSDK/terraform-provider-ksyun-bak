@@ -16,6 +16,9 @@ import (
 	"github.com/KscSDK/ksc-sdk-go/service/slb"
 	"github.com/KscSDK/ksc-sdk-go/service/sqlserver"
 	"github.com/KscSDK/ksc-sdk-go/service/vpc"
+	"github.com/ks3sdklib/aws-sdk-go/aws"
+	"github.com/ks3sdklib/aws-sdk-go/aws/credentials"
+	"github.com/ks3sdklib/aws-sdk-go/service/s3"
 )
 
 // Config is the configuration of ksyun meta data
@@ -52,5 +55,16 @@ func (c *Config) Client() (*KsyunClient, error) {
 	client.epcconn = epc.SdkNew(cli, cfg, url)
 	client.ebsconn = ebs.SdkNew(cli, cfg, url)
 	client.mongodbconn = mongodb.SdkNew(cli, cfg, url)
+
+	credentials := credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, "")
+	client.ks3conn = s3.New(&aws.Config{
+		Region:           "BEIJING",
+		Credentials:      credentials,
+		Endpoint:         c.Region,
+		DisableSSL:       true,
+		LogLevel:         1,
+		S3ForcePathStyle: true,
+		LogHTTPBody:      true,
+	})
 	return &client, nil
 }
