@@ -260,7 +260,7 @@ _例：官网openapi里主机创建的接口里，可以同时创建eip和主机
 | 弹性IP  | ksyun_eip | ksyun_eips | eip
 | 链路  | Not_Support | ksyun_lines | eip
 | 弹性IP绑定和解绑  | ksyun_eip\_associate | Not_Support | eip
-| 云物理机  | ksyun_epcs | ksyun_epcs | epc
+| 云物理机  | ksyun_epc | ksyun_epcs | epc
 | 证书  | ksyun_certificate | ksyun_certificates | kcm
 | 健康检查  | ksyun_lb\_healthcheck | ksyun_lb\_healthchecks | slb
 | 负载均衡 | ksyun_lb | ksyun_lbs | slb
