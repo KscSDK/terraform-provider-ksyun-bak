@@ -1,8 +1,12 @@
 package ksyun
 
 import (
+	"errors"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/hashicorp/terraform/helper/resource"
 	"strings"
+	"time"
 )
 
 const (
@@ -61,6 +65,31 @@ func inUseError(err error) bool {
 		strings.Contains(errMessage, "in use") ||
 		strings.Contains(errMessage, "used") {
 		return true
+	}
+	return false
+}
+
+func retryOnAwsCode(code string, f func() (interface{}, error)) (interface{}, error) {
+	var resp interface{}
+	err := resource.Retry(2*time.Minute, func() *resource.RetryError {
+		var err error
+		resp, err = f()
+		if err != nil {
+			awsErr, ok := err.(awserr.Error)
+			if ok && awsErr.Code() == code {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	return resp, err
+}
+
+func isAWSErr(err error, code string, message string) bool {
+	var awsErr awserr.Error
+	if errors.As(err, &awsErr) {
+		return awsErr.Code() == code && strings.Contains(awsErr.Message(), message)
 	}
 	return false
 }
