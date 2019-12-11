@@ -2,10 +2,10 @@ package ksyun
 
 import (
 	"fmt"
+	"github.com/KscSDK/ksc-sdk-go/service/epc"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	"github.com/ksc/ksc-sdk-go/service/epc"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 	"time"
 )
@@ -890,7 +890,7 @@ func operateEpcStatus(d *schema.ResourceData, hostStatus string, updateReq map[s
 //清除除HostId其他的属性
 func clearUpdateReq(updateReq *map[string]interface{}) {
 	if *updateReq != nil {
-		for k, _ := range *updateReq {
+		for k := range *updateReq {
 			if k != "HostId" {
 				delete(*updateReq, k)
 			}

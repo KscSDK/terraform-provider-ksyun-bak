@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/KscSDK/ksc-sdk-go/service/ebs"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/ksc/ksc-sdk-go/service/ebs"
 	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 )
 
