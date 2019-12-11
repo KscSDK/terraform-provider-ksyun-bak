@@ -292,3 +292,4 @@ _例：官网openapi里主机创建的接口里，可以同时创建eip和主机
 | 子网可用IP | Not_Support | ksyun_subnet\_available\_addresses | vpc
 | 虚拟私有网络 | ksyun_vpc | ksyun_vpcs | vpc
 | 登录SSHKEY  | ksyun_ssh\_key | ksyun_ssh\_keys | sks
+| 对象存储  | ksyun_ks3 | Not_Support | ks3
