@@ -14,6 +14,7 @@ import (
 	"github.com/KscSDK/ksc-sdk-go/service/slb"
 	"github.com/KscSDK/ksc-sdk-go/service/sqlserver"
 	"github.com/KscSDK/ksc-sdk-go/service/vpc"
+	"github.com/ks3sdklib/aws-sdk-go/service/s3"
 )
 
 type KsyunClient struct {
@@ -31,4 +32,5 @@ type KsyunClient struct {
 	epcconn       *epc.Epc
 	ebsconn       *ebs.Ebs
 	mongodbconn   *mongodb.Mongodb
+	ks3conn       *s3.S3
 }
