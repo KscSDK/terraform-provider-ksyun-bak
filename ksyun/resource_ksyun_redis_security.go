@@ -26,20 +26,10 @@ func resourceRedisSecurityRule() *schema.Resource {
 				Required: true,
 			},
 			"rules": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Required: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"security_rule_id": {
-							Type:     schema.TypeFloat,
-							Computed: true,
-						},
-						"cidr": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
+				Set:      schema.HashString,
 			},
 		},
 	}
@@ -47,10 +37,10 @@ func resourceRedisSecurityRule() *schema.Resource {
 
 func resourceRedisSecurityRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	var (
-		rules []interface{}
+		rules []string
 		resp  *map[string]interface{}
 		err   error
-		ok    bool
+		//ok    bool
 	)
 
 	conn := meta.(*KsyunClient).kcsv1conn
@@ -59,17 +49,12 @@ func resourceRedisSecurityRuleCreate(d *schema.ResourceData, meta interface{}) e
 	if az, ok := d.GetOk("available_zone"); ok {
 		createReq["AvailableZone"] = az
 	}
-	if rules, ok = d.Get("rules").([]interface{}); !ok {
-		return fmt.Errorf("type of security_rule.rules must be array map")
-	}
-	var i int
-	for _, rule := range rules {
-		i = i + 1
-		var r map[string]interface{}
-		if r, ok = rule.(map[string]interface{}); !ok {
-			return fmt.Errorf("type of security_group.rules.[%v] must be map", i)
-		}
-		createReq[fmt.Sprintf("%v%v", "SecurityRules.Cidr.", i)] = r["cidr"]
+	rules = SchemaSetToStringSlice(d.Get("rules"))
+	/*if rules, ok = d.Get("rules").([]interface{}); !ok {
+		return fmt.Errorf("type of security_rule.rules must be array string")
+	}*/
+	for i, rule := range rules {
+		createReq[fmt.Sprintf("%v%v", "SecurityRules.Cidr.", i+1)] = rule
 	}
 	action := "SetCacheSecurityRules"
 	logger.Debug(logger.ReqFormat, action, createReq)
@@ -88,16 +73,39 @@ func resourceRedisSecurityRuleDelete(d *schema.ResourceData, meta interface{}) e
 		err  error
 	)
 	conn := meta.(*KsyunClient).kcsv1conn
+	// query security rule
+	readReq := make(map[string]interface{})
+	readReq["CacheId"] = d.Get("cache_id")
+	if az, ok := d.GetOk("available_zone"); ok {
+		readReq["AvailableZone"] = az
+	}
+	action := "DescribeCacheSecurityRules"
+	logger.Debug(logger.ReqFormat, action, readReq)
+	if resp, err = conn.DescribeCacheSecurityRules(&readReq); err != nil {
+		return fmt.Errorf("error on reading instance security rule %q, %s", d.Id(), err)
+	}
+	logger.Debug(logger.RespFormat, action, readReq, *resp)
+	data := (*resp)["Data"].([]interface{})
+	if len(data) == 0 {
+		logger.Info("instance security rule result size : 0")
+		return nil
+	}
+
+	var rules []interface{}
+	for _, v := range data {
+		group := v.(map[string]interface{})
+		rules = append(rules, group["securityRuleId"])
+	}
+
+	// delete security rules
 	deleteReq := make(map[string]interface{})
 	deleteReq["CacheId"] = d.Get("cache_id")
 	if az, ok := d.GetOk("available_zone"); ok {
 		deleteReq["AvailableZone"] = az
 	}
-	rules := d.Get("rules").([]interface{})
-	action := "DeleteCacheSecurityRule"
+	action = "DeleteCacheSecurityRule"
 	for _, rule := range rules {
-		r := rule.(map[string]interface{})
-		deleteReq["SecurityRuleId"] = fmt.Sprintf("%v", r["security_rule_id"].(float64))
+		deleteReq["SecurityRuleId"] = fmt.Sprintf("%v", rule)
 		logger.Debug(logger.ReqFormat, action, deleteReq)
 		if resp, err = conn.DeleteCacheSecurityRule(&deleteReq); err != nil {
 			return fmt.Errorf("error on delete instance security rule: %s", err)
@@ -109,7 +117,7 @@ func resourceRedisSecurityRuleDelete(d *schema.ResourceData, meta interface{}) e
 
 func resourceRedisSecurityRuleUpdate(d *schema.ResourceData, meta interface{}) error {
 	var (
-		deleteRulesResults []float64
+		deleteRulesResults []string
 		addRulesResults    []string
 		resp               *map[string]interface{}
 		err                error
@@ -123,42 +131,41 @@ func resourceRedisSecurityRuleUpdate(d *schema.ResourceData, meta interface{}) e
 	}
 	if d.HasChange("rules") {
 		oldMc, newMc := d.GetChange("rules")
-		oldRules := oldMc.([]interface{})
-		newRules := newMc.([]interface{})
+		oldRules := SchemaSetToStringSlice(oldMc)
+		newRules := SchemaSetToStringSlice(newMc)
+		//oldRules := oldMc.([]interface{})
+		//newRules := newMc.([]interface{})
 		for _, oldRule := range oldRules {
-			oldR := oldRule.(map[string]interface{})
+			oldR := oldRule
 			exist := false
 			for _, newRule := range newRules {
-				newR := newRule.(map[string]interface{})
-				if newR["cidr"] == oldR["cidr"] {
+				newR := newRule
+				if newR == oldR {
 					exist = true
 				}
 			}
 			if !exist {
-				deleteRulesResults = append(deleteRulesResults, oldR["security_rule_id"].(float64))
+				deleteRulesResults = append(deleteRulesResults, oldR)
 			}
 		}
 
 		for _, newRule := range newRules {
-			newR := newRule.(map[string]interface{})
-			ip := newR["cidr"]
+			ip := newRule
 			exist := false
 			for _, oldRule := range oldRules {
-				oldR := oldRule.(map[string]interface{})
-				if oldR["cidr"] == ip {
+				oldR := oldRule
+				if oldR == ip {
 					exist = true
 				}
 			}
 			if !exist {
-				addRulesResults = append(addRulesResults, ip.(string))
+				addRulesResults = append(addRulesResults, ip)
 			}
 		}
 	}
 	if len(addRulesResults) > 0 {
-		var i int
-		for _, rule := range addRulesResults {
-			i = i + 1
-			updateReq[fmt.Sprintf("%v%v", "SecurityRules.Cidr.", i)] = rule
+		for i, rule := range addRulesResults {
+			updateReq[fmt.Sprintf("%v%v", "SecurityRules.Cidr.", i+1)] = rule
 		}
 		conn := meta.(*KsyunClient).kcsv1conn
 		action := "SetCacheSecurityRules"
@@ -169,20 +176,48 @@ func resourceRedisSecurityRuleUpdate(d *schema.ResourceData, meta interface{}) e
 		logger.Debug(logger.RespFormat, action, updateReq, *resp)
 	}
 	if len(deleteRulesResults) > 0 {
-		deleteRuleReq := make(map[string]interface{})
-		deleteRuleReq["CacheId"] = d.Get("cache_id")
-		for _, delRuleId := range deleteRulesResults {
-			conn := meta.(*KsyunClient).kcsv1conn
-			deleteRuleReq["SecurityRuleId"] = fmt.Sprintf("%v", delRuleId)
-			if az, ok := d.GetOk("available_zone"); ok {
-				deleteRuleReq["AvailableZone"] = az
+		conn := meta.(*KsyunClient).kcsv1conn
+		// query security rule
+		readReq := make(map[string]interface{})
+		readReq["CacheId"] = d.Get("cache_id")
+		if az, ok := d.GetOk("available_zone"); ok {
+			readReq["AvailableZone"] = az
+		}
+		action := "DescribeCacheSecurityRules"
+		logger.Debug(logger.ReqFormat, action, readReq)
+		if resp, err = conn.DescribeCacheSecurityRules(&readReq); err != nil {
+			return fmt.Errorf("error on reading instance security rule %q, %s", d.Id(), err)
+		}
+		logger.Debug(logger.RespFormat, action, readReq, *resp)
+		data := (*resp)["Data"].([]interface{})
+		if len(data) > 0 {
+			var rules []interface{}
+		X:
+			for _, v := range data {
+				group := v.(map[string]interface{})
+				for _, r := range deleteRulesResults {
+					if group["cidr"].(string) == r {
+						rules = append(rules, group["securityRuleId"])
+						continue X
+					}
+				}
 			}
-			action := "DeleteCacheSecurityRule"
-			logger.Debug(logger.ReqFormat, action, deleteRuleReq)
-			if resp, err = conn.DeleteCacheSecurityRule(&deleteRuleReq); err != nil {
-				return fmt.Errorf("error on delete instance security rule: %s", err)
+
+			deleteRuleReq := make(map[string]interface{})
+			deleteRuleReq["CacheId"] = d.Get("cache_id")
+			for _, delRuleId := range rules {
+				conn := meta.(*KsyunClient).kcsv1conn
+				deleteRuleReq["SecurityRuleId"] = fmt.Sprintf("%v", delRuleId)
+				if az, ok := d.GetOk("available_zone"); ok {
+					deleteRuleReq["AvailableZone"] = az
+				}
+				action := "DeleteCacheSecurityRule"
+				logger.Debug(logger.ReqFormat, action, deleteRuleReq)
+				if resp, err = conn.DeleteCacheSecurityRule(&deleteRuleReq); err != nil {
+					return fmt.Errorf("error on delete instance security rule: %s", err)
+				}
+				logger.Debug(logger.RespFormat, action, deleteRuleReq, *resp)
 			}
-			logger.Debug(logger.RespFormat, action, deleteRuleReq, *resp)
 		}
 	}
 	resourceRedisSecurityRuleRead(d, meta)
@@ -212,13 +247,10 @@ func resourceRedisSecurityRuleRead(d *schema.ResourceData, meta interface{}) err
 		return nil
 	}
 	result := make(map[string]interface{})
-	var rulesTemp []map[string]interface{}
+	var rulesTemp []string
 	for _, v := range data {
 		group := v.(map[string]interface{})
-		rule := make(map[string]interface{})
-		rule[Hump2Downline("securityRuleId")] = group["securityRuleId"]
-		rule[Hump2Downline("cidr")] = group["cidr"]
-		rulesTemp = append(rulesTemp, rule)
+		rulesTemp = append(rulesTemp, group["cidr"].(string))
 	}
 	result["rules"] = rulesTemp
 	for k, v := range result {
