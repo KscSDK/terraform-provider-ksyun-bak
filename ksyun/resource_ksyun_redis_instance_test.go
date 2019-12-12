@@ -104,6 +104,7 @@ resource "ksyun_redis_instance" "default" {
   duration_unit         = ""
   pass_word             = "Shiwo1101"
   iam_project_id        = "0"
+  slave_num             = 0  
   protocol              = "${var.protocol}"
   reset_all_parameters  = false
   parameters = {
