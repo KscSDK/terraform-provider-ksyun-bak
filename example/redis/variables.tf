@@ -1,5 +1,5 @@
 variable "available_zone" {
-  default = "cn-shanghai-3a"
+  default = "cn-beijing-6a"
 }
 
 variable "subnet_name" {
