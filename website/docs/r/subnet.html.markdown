@@ -36,9 +36,16 @@ resource "ksyun_subnet" "example" {
 
 The following arguments are supported:
 
-* `cidr_block` - (Required) The cidr block of the desired subnet, format in "0.0.0.0/0", such as: `192.168.0.0/24`.
-* `vpc_id` - (Required) The id of the VPC that the desired subnet belongs to.
-* `subnet_name` - (Optional) The name of the desired subnet. If not specified, terraform will autogenerate a name beginning with `tf-subnet`.
+* `subnet_name` - (Required) The name of the subnet.
+* `cidr_block` - (Required) The CIDR block assigned to the subnet.
+* `subnet_type ` - (Required) The type of subnet.Valid Values:'Reserve', 'Normal', 'Physical'.
+* `dhcp_ip_from` - (Required) DHCP start IP.
+* `dhcp_ip_to` - (Required) DHCP end IP.
+* `gateway_ip` - (Required) The IP of gateway.
+* `vpc_id` - (Required) The id of the vpc.
+* `dns1` - (Optional) The dns of the subnet.
+* `dns2` - (Optional) The dns of the subnet.
+* `availability_zone` - (Optional) The name of the availability zone. 
 
 ## Attributes Reference
 

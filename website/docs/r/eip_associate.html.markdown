@@ -17,7 +17,6 @@ resource "ksyun_eip_associate" "slb" {
   allocation_id="419782b7-6766-4743-afb7-7c7081214092"
   instance_type="Slb"
   instance_id="7fae85e4-ab1a-415c-aef9-03a402c79d97"
-  network_interface_id=""
 }
 resource "ksyun_eip_associate" "server" {
   allocation_id="419782b7-6766-4743-afb7-7c7081214092"
@@ -32,4 +31,7 @@ resource "ksyun_eip_associate" "server" {
 The following arguments are supported:
 
 * `allocation_id` - (Required) The ID of EIP.
-* `instance_id` - (Required) The ID of resource with EIP attached.
+* `instance_type` - (Required) The type of the instance.Valid Values:'Ipfwd', 'Slb'.
+* `instance_id` - (Required) The id of the instance.
+* `network_interface_id` - (Optional) The id of the network interface.
+

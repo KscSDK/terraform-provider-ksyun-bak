@@ -39,11 +39,18 @@ resource "ksyun_lb_listener" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-
+* `listener_name` - (Optional) The name of listener.
+* `listener_port` - (Required) The protocol port of listener.
+* `listener_protocol` - (Required) The protocol of listener.Valid Values:'TCP', 'UDP', 'HTTP', 'HTTPS'.
+* `listener_state` - (Required) The state of listener.Valid Values:'start', 'stop'.
 * `load_balancer_id` - (Required) The ID of load balancer instance.
-* `protocol` - (Required) Listener protocol. Possible values: `http`, `https`, `tcp` , `udp` .
-* `listener_name` - (Optional) The name of the listener. If not specified, terraform will autogenerate a name beginning with `tf-lb-listener`.
-* `method` - (Optional) The load balancer method in which the listener is. Possible values are: `roundrobin`, `source`, `consistent_hash`, `source_port` , `consistent_hash_port`, `weight_roundrobin` and `leastconn`. (Default: `roundrobin`).
+* `method` - (Required) Forwarding mode of listener.Valid Values:'RoundRobin', 'LeastConnections'.
+* `certificate_id` - (Optional) The ID of certificate.
+* `session_state` - (Required) The state of session.Valid Values:'start', 'stop'.
+* `session_persistence_period` - (Optional) Session hold timeout.Valid Values:1-86400
+* `cookie_type` - (Optional) The type of the cookie.Valid Values:'ImplantCookie', 'RewriteCookie'.
+* `cookie_name` - (Optional) The name of the cookie.
+
 
 ## Import
 

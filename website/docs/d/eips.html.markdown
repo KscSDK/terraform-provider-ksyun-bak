@@ -18,8 +18,8 @@ data "ksyun_eips" "default" {
   output_file="output_result"
 
   ids=[]
-  project_id=["0"]
-  instance_type=["Ipfwd"]
+  project_id=[]
+  instance_type=[]
   network_interface_id=[]
   internet_gateway_id=[]
   band_width_share_id=[]
@@ -33,6 +33,7 @@ data "ksyun_eips" "default" {
 The following arguments are supported:
 
 * `ids` - (Optional)  A list of Elastic IP IDs, all the EIPs belong to this region will be retrieved if the ID is `""`.
+* `project_id` - (Optional) One or more project IDs.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
