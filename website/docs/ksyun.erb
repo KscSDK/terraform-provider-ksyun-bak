@@ -18,6 +18,10 @@
             <a href="/docs/providers/ksyun/d/availability_zones.html">ksyun_availability_zones</a>
             </li>
 
+            <li<%= sidebar_current("docs-ksyun-datasource-ebs_volumes") %>>
+            <a href="/docs/providers/ksyun/d/ebs_volumes.html">ksyun_ebs_volumes</a>
+            </li>
+
             <li<%= sidebar_current("docs-ksyun-datasource-eips") %>>
             <a href="/docs/providers/ksyun/d/eips.html">ksyun_eips</a>
             </li>
@@ -34,6 +38,14 @@
             <a href="/docs/providers/ksyun/d/instances.html">ksyun_instances</a>
             </li>
 
+            <li<%= sidebar_current("docs-ksyun-datasource-krds.html.mdown") %>>
+            <a href="/docs/providers/ksyun/d/krds.html.mdown.html">ksyun_krds.html.mdown</a>
+            </li>
+
+            <li<%= sidebar_current("docs-ksyun-datasource-krds_security_groups.html.mdown") %>>
+            <a href="/docs/providers/ksyun/d/krds_security_groups.html.mdown.html">ksyun_krds_security_groups.html.mdown</a>
+            </li>
+
             <li<%= sidebar_current("docs-ksyun-datasource-lb_acls.htm.markdown") %>>
             <a href="/docs/providers/ksyun/d/lb_acls.htm.markdown.html">ksyun_lb_acls.htm.markdown</a>
             </li>
@@ -46,6 +58,22 @@
             <a href="/docs/providers/ksyun/d/lines.html">ksyun_lines</a>
             </li>
 
+            <li<%= sidebar_current("docs-ksyun-datasource-listener_servers") %>>
+            <a href="/docs/providers/ksyun/d/listener_servers.html">ksyun_listener_servers</a>
+            </li>
+
+            <li<%= sidebar_current("docs-ksyun-datasource-mongodbs") %>>
+            <a href="/docs/providers/ksyun/d/mongodbs.html">ksyun_mongodbs</a>
+            </li>
+
+            <li<%= sidebar_current("docs-ksyun-datasource-network_interface") %>>
+            <a href="/docs/providers/ksyun/d/network_interface.html">ksyun_network_interface</a>
+            </li>
+
+            <li<%= sidebar_current("docs-ksyun-datasource-redis_instances") %>>
+            <a href="/docs/providers/ksyun/d/redis_instances.html">ksyun_redis_instances</a>
+            </li>
+
             <li<%= sidebar_current("docs-ksyun-datasource-security_groups") %>>
             <a href="/docs/providers/ksyun/d/security_groups.html">ksyun_security_groups</a>
             </li>
@@ -54,12 +82,26 @@
             <a href="/docs/providers/ksyun/d/slbs.html">ksyun_slbs</a>
             </li>
 
+            <li<%= sidebar_current("docs-ksyun-datasource-sqlservers.html.mdown") %>>
+            <a href="/docs/providers/ksyun/d/sqlservers.html.mdown.html">ksyun_sqlservers.html.mdown</a>
+            </li>
+
             <li<%= sidebar_current("docs-ksyun-datasource-subnets") %>>
             <a href="/docs/providers/ksyun/d/subnets.html">ksyun_subnets</a>
             </li>
 
             <li<%= sidebar_current("docs-ksyun-datasource-vpcs") %>>
             <a href="/docs/providers/ksyun/d/vpcs.html">ksyun_vpcs</a>
+            </li>
+
+        </ul>
+        </li>
+        <li<%= sidebar_current("docs-ksyun-resource-kkcs") %>>
+        <a href="#">KKCS Resources</a>
+        <ul class="nav nav-visible">
+
+            <li<%= sidebar_current("docs-ksyun-resource-redis_instance") %>>
+            <a href="/docs/providers/ksyun/r/redis_instance.html">ksyun_redis_instance</a>
             </li>
 
         </ul>
@@ -138,6 +180,10 @@
             <a href="/docs/providers/ksyun/r/lb_listener_associate_acl.html">ksyun_lb_listener_associate_acl</a>
             </li>
 
+            <li<%= sidebar_current("docs-ksyun-resource-lb_listener_server") %>>
+            <a href="/docs/providers/ksyun/r/lb_listener_server.html">ksyun_lb_listener_server</a>
+            </li>
+
         </ul>
         </li>
         <li<%= sidebar_current("docs-ksyun-resource-kkec") %>>
@@ -146,6 +192,38 @@
 
             <li<%= sidebar_current("docs-ksyun-resource-instance") %>>
             <a href="/docs/providers/ksyun/r/instance.html">ksyun_instance</a>
+            </li>
+
+        </ul>
+        </li>
+        <li<%= sidebar_current("docs-ksyun-resource-kkrds") %>>
+        <a href="#">KKRDS Resources</a>
+        <ul class="nav nav-visible">
+
+            <li<%= sidebar_current("docs-ksyun-resource-krds") %>>
+            <a href="/docs/providers/ksyun/r/krds.html">ksyun_krds</a>
+            </li>
+
+            <li<%= sidebar_current("docs-ksyun-resource-krds_read_replica") %>>
+            <a href="/docs/providers/ksyun/r/krds_read_replica.html">ksyun_krds_read_replica</a>
+            </li>
+
+            <li<%= sidebar_current("docs-ksyun-resource-krds_security_group") %>>
+            <a href="/docs/providers/ksyun/r/krds_security_group.html">ksyun_krds_security_group</a>
+            </li>
+
+            <li<%= sidebar_current("docs-ksyun-resource-sqlserver") %>>
+            <a href="/docs/providers/ksyun/r/sqlserver.html">ksyun_sqlserver</a>
+            </li>
+
+        </ul>
+        </li>
+        <li<%= sidebar_current("docs-ksyun-resource-kmongodb") %>>
+        <a href="#">KMONGODB Resources</a>
+        <ul class="nav nav-visible">
+
+            <li<%= sidebar_current("docs-ksyun-resource-mongodb_shard_instance") %>>
+            <a href="/docs/providers/ksyun/r/mongodb_shard_instance.html">ksyun_mongodb_shard_instance</a>
             </li>
 
         </ul>

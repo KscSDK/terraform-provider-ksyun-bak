@@ -27,3 +27,8 @@ resource "ksyun_lb_acl_entry" "default" {
 The following arguments are supported:
 
 * `load_balancer_acl_id` - (Required) The ID of a load balancer acl.
+* `load_balancer_acl_id` - (Required) The id of the load balancer acl.
+* `cidr_block` - (Required) The information of  load balancer Acl's cidr block.
+* `rule_number` - (Required) The information of  load balancer Acl's rule priority.Valid Values:1-32766.
+* `rule_action` - (Required) The action of load balancer Acl rule.Valid Values:'allow', 'deny'.
+* `protocol` - (Required) protocol.Valid Values:'ip'.
