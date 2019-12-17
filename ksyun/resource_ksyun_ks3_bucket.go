@@ -11,6 +11,7 @@ import (
 	"github.com/ks3sdklib/aws-sdk-go/aws"
 	"github.com/ks3sdklib/aws-sdk-go/service/s3"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -27,6 +28,7 @@ func resourceKsyunKs3Bucket() *schema.Resource {
 			"bucket": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(3, 63),
 			},
 			//"type": {
@@ -44,12 +46,12 @@ func resourceKsyunKs3Bucket() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"affect": {
-							Type:         schema.TypeString,
-							Default:      "disable", //enable disable
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"enable", "disable"}, true),
-						},
+						//"affect": {
+						//	Type:         schema.TypeString,
+						//	Default:      "disable", //enable disable
+						//	Optional:     true,
+						//	ValidateFunc: validation.StringInSlice([]string{"enable", "disable"}, true),
+						//},
 						"target_bucket": {
 							Type:     schema.TypeString,
 							Required: true,
@@ -77,9 +79,9 @@ func resourceKsyunKs3Bucket() *schema.Resource {
 							Required: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
-						"allowed_header": { //指定head enable disable
+						"allowed_header": { //指定head
 							Type:     schema.TypeList,
-							Optional: true,
+							Required: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"allowed_method": { //访问域名 GET PUT POST DELETE HEAD
@@ -476,6 +478,9 @@ func resourceKsyunKs3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) err
 					case "allowed_header":
 						r.AllowedHeaders = vMap
 					case "allowed_method":
+						for _, iv := range vMap { //兼容现有sdk
+							*iv = strings.ToUpper(*iv)
+						}
 						r.AllowedMethods = vMap
 					case "allowed_origin":
 						r.AllowedOrigins = vMap
