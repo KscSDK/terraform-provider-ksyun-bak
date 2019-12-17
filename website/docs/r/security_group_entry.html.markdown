@@ -14,15 +14,10 @@ Provides a Security Group resource.
 
 ```hcl
 resource "ksyun_security_group_entry" "default" {
-  description = ""
   security_group_id="7385c8ea-79f7-4e9c-b99f-517fc3726256"
   cidr_block="10.0.0.1/32"
   direction="in"
   protocol="ip"
-  icmp_type=0
-  icmp_code=0
-  port_range_from=0
-  port_range_to=0
 }
 
 ```
@@ -31,11 +26,18 @@ resource "ksyun_security_group_entry" "default" {
 
 The following arguments are supported:
 
-* `name` - (Optional) The name of the security group which contains 1-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. If not specified, terraform will autogenerate a name beginning with `tf-security-group`.
-* `port_range_from` - (Optional) The start of port numbers.
-* `port_range_to` - (Optional) The end of port numbers.
-* `cidr_block` - (Optional) The cidr block of source.
-* `protocol` - (Optional) The protocol. Possible values are: `tcp`, `udp`, `icmp`, `ip`.
+
+* `description` - (Optional) The description of the security group .
+* `security_group_id` - (Required) The ID of the security group.
+* `cidr_block` - (Required) The cidr block of security group rules.
+* `direction` - (Required) .Valid Values:'in', 'out'.
+* `protocol` - (Required) protocol.Valid Values:'ip', 'tcp', 'udp', 'icmp'.
+* `icmp_type` - (Optional) ICMP protocol.The required if protocol type is 'icmp'.
+* `icmp_code` - (Optional) ICMP protocol.The required if protocol type is 'icmp'.
+* `port_range_from` - (Optional) Port rule start port for TCP or UDP protocol.The required if protocol type is 'tcp' or 'udp'.
+* `port_range_to` - (Optional) Port rule start port for TCP or UDP protocol.The required if protocol type is 'tcp' or 'udp'.
+ 
+
 
 ## Attributes Reference
 

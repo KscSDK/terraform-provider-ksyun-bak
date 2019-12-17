@@ -25,7 +25,7 @@ resource "ksyun_vpc" "example" {
 The following arguments are supported:
 
 * `cidr_block` - (Required) The CIDR blocks of VPC.
-* `vpc_name` - (Optional) The name of VPC. If not specified, terraform will autogenerate a name beginning with `tf-vpc`.
+* `vpc_name` - (Optional) The name of the vpc.
 
 ## Attributes Reference
 

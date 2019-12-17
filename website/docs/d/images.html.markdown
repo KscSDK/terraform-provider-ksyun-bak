@@ -12,12 +12,10 @@ This data source providers a list of available image resources according to thei
 
 ## Example Usage
 
-```hcl
+```h
 # Get  ksyun_images
 data "ksyun_images" "default" {
   output_file="output_result"
-  ids=[]
-  name_regex="centos-7.0-20180927115228"
   is_public=true
   image_source="system"
 }
@@ -27,15 +25,22 @@ data "ksyun_images" "default" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) The ID of image.
+* `ids` - (Optional) A list of image IDs
 * `name_regex` - (Optional) A regex string to filter resulting images by name. (Such as: `^CentOS 7.[1-2] 64` means CentOS 7.1 of 64-bit operating system or CentOS 7.2 of 64-bit operating system, "^Ubuntu 16.04 64" means Ubuntu 16.04 of 64-bit operating system).
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `most_recent` - (Optional, type: bool) If more than one result are returned, select the most recent one.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `images` - It is a nested type which documented below.
-* `total_count` - Total number of images that satisfy the condition.
-
+* `creation_date` - Time of creation.
+* `image_id` -  The ID of image.
+* `image_source` -  Valid values are import, copy, share, extend, system.
+* `image_state` - Status of the image.
+* `is_public` - If ksyun provide the image. 
+* `name` - Display name of the image.
+* `platform` -  Platform type of the image system.
+* `progress` - Progress of image creation.
+* `sys_disk` - Size of the created disk.
 

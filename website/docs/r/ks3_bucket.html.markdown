@@ -6,11 +6,12 @@ description: |-
   Provides a KS3 resource.
 ---
 
-# ksyun_ks3
+# ks3_bucket_html
 
 Provides a resource to create a KS3 bucket and set its attribution.
 
-~> **Note**  The bucket namespace is shared by all users of the KS3 system. Please set bucket name as unique as possible.
+> **Note**  The bucket namespace is shared by all users of the KS3 system. Please set bucket name as unique as possible.
+
 ## Example Usage
 
 Create Bucket

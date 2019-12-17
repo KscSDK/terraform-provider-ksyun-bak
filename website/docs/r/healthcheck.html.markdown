@@ -30,6 +30,11 @@ resource "ksyun_healthcheck" "default" {
 
 The following arguments are supported:
 
-* `listener_id` - (Optional) The Id of the listener.
-* `health_check_state` - (Optional) The state of the healthcheck.
-
+* `listener_id` - (Required) The id of the listener.
+* `health_check_state` - (Required) Status maintained by health examination.Valid Values:'start', 'stop'.
+* `healthy_threshold` - (Required) Health threshold.Valid Values:1-10.
+* `interval` - (Required) Interval of health examination.Valid Values:1-3600.
+* `timeout` - (Required) Health check timeout.Valid Values:1-3600.
+* `unhealthy_threshold` - (Required) Unhealthy threshold.Valid Values:1-10.
+* `url_path ` - (Optional) Link to HTTP type listener health check.
+* `host_name` - (Optional) Domain name of HTTP type health check.
