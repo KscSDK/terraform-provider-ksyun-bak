@@ -12,7 +12,7 @@ This data source provides a list of available zones in the current region.
 
 ## Example Usage
 
-```hcl
+```h
 data "ksyun_availability_zones" "default" {
   output_file=""
   ids=[]
@@ -29,9 +29,4 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `availability_zones` - All zones that satisfy the condition.
-* `total_count` - Total number of zones that satisfy the condition.
-
-The attribute (`availability_zones`) support the following:
-
-* `id` -  The ID of availability zone.
+* `availability_zone_name` - Name of the zone.

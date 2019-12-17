@@ -6,19 +6,21 @@ description: |-
   Provides an Host Instance resource.
 ---
 
+
 # ksyun_instance
 
-Provides an Host Instance resource.
+Provides a KEC instance resource.
 
-~> **Note** The instance will reboot automatically to make the change take effect when update `instance_type`, `root_password`, `boot_disk_size`, `data_disk_size`.
+**Note**  At present, 'Monthly' instance cannot be deleted and must wait it to be outdated and released automatically.
 
 ## Example Usage
 
-```hcl
+```h
 data "ksyun_availability_zones" "default" {
   output_file=""
   ids=[]
 }
+
 data "ksyun_lines" "default" {
   output_file=""
   line_name="BGP"
@@ -28,6 +30,7 @@ resource "ksyun_vpc" "default" {
   vpc_name   = "${var.vpc_name}"
   cidr_block = "${var.vpc_cidr}"
 }
+
 resource "ksyun_subnet" "default" {
   subnet_name      = "${var.subnet_name}"
   cidr_block = "10.1.0.0/21"
@@ -45,6 +48,7 @@ resource "ksyun_security_group" "default" {
   vpc_id = "${ksyun_vpc.default.id}"
   security_group_name="${var.security_group_name}"
 }
+
 resource "ksyun_security_group_entry" "default" {
   description = "test1"
   security_group_id="${ksyun_security_group.default.id}"
@@ -61,6 +65,7 @@ resource "ksyun_ssh_key" "default" {
   key_name="ssh_key_tf"
   public_key=""
 }
+
 resource "ksyun_instance" "default" {
   image_id="${data.ksyun_images.centos-7_5.images.0.image_id}"
   instance_type="N3.2B"
@@ -97,29 +102,35 @@ resource "ksyun_instance" "default" {
 
 The following arguments are supported:
 
-* `availability_zone` - (Required) Availability zone where instance is located.
 * `image_id` - (Required) The ID for the image to use for the instance.
-* `data_disk_type` - (Optional) The type of local data disk. Possible values are: `local_normal` and `local_ssd` for local data disk. (Default: `local_normal`). The `local_ssd` is not supported in all regions as data disk type, please proceed to Ksyun console for more details.
-* `data_disk_size` - (Optional) The size of local data disk, measured in GB (GigaByte), range: 0-8000 (Default: `20`), 0-8000 for cloud disk, 0-2000 for local sata disk and 100-1000 for local ssd disk (all the GPU type instances are included). The volume adjustment must be a multiple of 10 GB. In addition, any reduction of data disk size is not supported. 
-* `name` - (Optional) The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'. If not specified, terraform will autogenerate a name beginning with `tf-instance`.
-* `security_group` - (Optional) The ID of the associated security group.
-* `subnet_id` - (Optional) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
-* `vpc_id` - (Optional) The ID of VPC linked to the instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
+* `instance_type` -  (Required) The type of instance to start.
+* `system_disk` - (Required) System disk parameters.
+    - `disk_type` - System disk type. `Local_SSD`, Local SSD disk. `SSD3.0`, The SSD cloud disk. `EHDD`, The EHDD cloud disk.
+    - `disk_size` - The size of the data disk.
+* `data_disk_gb` - (Optional) The local SSD disk.
+* `data_disk` - (Optional) The list of data disks created with instance.
+    - `type` - Data disk type. `SSD3.0`, The SSD cloud disk. `EHDD`, The EHDD cloud disk.
+    - `size` - Data disk type size.
+    - `delete_with_instance` -  Delete this data disk when the instance is destroyed. It only works on SSD3.0, EHDD, disk.
+* `subnet_id` - (Required) The ID of subnet. the instance will use the subnet in the current region.
+* `security_group_id` - (Required) Security Group to associate with.
+* `instance_password` - (Optional) Password to an instance is a string of 8 to 32 characters. 
+* `instance_name` - (Optional) The name of instance, which contains 2-64 characters and only support Chinese, English, numbers.
+* `keep_image_login` - (Optional) Keep the initial settings of the custom image.
+* `charge_type` - (Required) Valid values are Monthly, Daily, HourlyInstantSettlement.
+* `purchase_time` - (Optional) The duration that you will buy the resource.
+* `private_ip_address` - (Optional) Instance private IP address can be specified when you creating new instance.
+* `sriov_net_support` (Optional) Network enhancement.
+* `project_id` - (Optional) The project instance belongs to.
+* `user_data` - (Optional) The user data to be specified into this instance. Must be encrypted in base64 format and limited in 16 KB.
+
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `create_time` - The time of creation for instance, formatted in RFC3339 time string.
-* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail`, `ResizeFail` and `Rebooting`.
-* `private_ip` - The private IP address assigned to the instance.
-* `disk_set` - It is a nested type which documented below.
-
-The attribute (`disk_set`) supports the following:
-
-* `id` - The ID of disk.
-* `size` - The size of disk, measured in GB (Gigabyte).
-* `type` - The type of disk.
+* `creation_date` - The time of creation for instance, formatted in ISO8601 time string.
+* `instance_state` - Instance current status. Possible values are `active`, `building`, `stopped`, `deleting`.
 
 
 ## Import
@@ -127,5 +138,5 @@ The attribute (`disk_set`) supports the following:
 Instance can be imported using the `id`, e.g.
 
 ```
-$ terraform import ksyun_instance.example uhost-abcdefg
+$ terraform import 
 ```
