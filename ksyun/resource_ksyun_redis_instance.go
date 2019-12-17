@@ -59,9 +59,10 @@ func resourceRedisInstance() *schema.Resource {
 				Required: true,
 			},
 			"slave_num": {
-				Type: schema.TypeInt,
+				Type:     schema.TypeInt,
+				Required: true,
 				//Optional: true,
-				Computed: true,
+				//Computed: true,
 				//ValidateFunc: validation.IntBetween(0,8),
 			},
 			"net_type": {
@@ -458,69 +459,66 @@ func resourceRedisInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 	resourceRedisInstanceRead(d, meta)
+
 	// update parameter
-	if d.HasChange("reset_all_parameters") {
-		updateReq := make(map[string]interface{})
-		updateReq["CacheId"] = d.Get("cache_id")
-		updateReq["protocol"] = d.Get("protocol")
-		if az, ok := d.GetOk("available_zone"); ok {
-			updateReq["AvailableZone"] = az
-		}
-		updateReq["ResetAllParameters"] = fmt.Sprintf("%v", d.Get("reset_all_parameters"))
-		reset := d.Get("reset_all_parameters").(bool)
-		// not reset param
-		if !reset {
-			// parameters no change
-			if !d.HasChange("parameters") {
-				logger.Info("instance parameters have not changed")
-				return nil
-			}
-			if params, ok = d.GetOk("parameters"); !ok {
-				logger.Info("instance parameters do not exist")
-				return nil
-			}
-			param, ok1 := params.(map[string]interface{})
-			if !ok1 {
-				logger.Info("type of instance parameters must be map")
-				return nil
-			}
-			if len(param) == 0 {
-				logger.Info("instance parameters size : 0")
-				return nil
-			}
-			if err := validParam(d); err != nil {
-				return err
-			}
-			var i int
-			for k, v := range param {
-				i = i + 1
-				updateReq[fmt.Sprintf("%v%v", "Parameters.ParameterName.", i)] = fmt.Sprintf("%v", k)
-				updateReq[fmt.Sprintf("%v%v", "Parameters.ParameterValue.", i)] = fmt.Sprintf("%v", v)
-			}
-		}
-		action := "SetCacheParameters"
-		logger.Debug(logger.ReqFormat, action, updateReq)
-		if resp, err = conn.SetCacheParameters(&updateReq); err != nil {
-			return fmt.Errorf("error on set instance parameter: %s", err)
-		}
-		logger.Debug(logger.RespFormat, action, updateReq, *resp)
-		if updateReq["AvailableZone"] != nil {
-			az = updateReq["AvailableZone"].(string)
-		}
-		stateConf := &resource.StateChangeConf{
-			Pending:    []string{statusPending},
-			Target:     []string{"2"},
-			Refresh:    stateRefreshForOperateFunc(conn, az, d.Id(), []string{"2"}),
-			Timeout:    d.Timeout(schema.TimeoutCreate),
-			Delay:      10 * time.Second,
-			MinTimeout: 1 * time.Minute,
-		}
-		_, err = stateConf.WaitForState()
-		resourceRedisInstanceParamRead(d, meta)
-		if err != nil {
-			return fmt.Errorf("error on set instance parameter: %s", err)
-		}
+	// parameters no change
+	if !d.HasChange("reset_all_parameters") && !d.HasChange("parameters") {
+		logger.Info("instance parameters have not changed")
 		return nil
+	}
+
+	updateReq := make(map[string]interface{})
+	updateReq["CacheId"] = d.Get("cache_id")
+	updateReq["protocol"] = d.Get("protocol")
+	if az, ok := d.GetOk("available_zone"); ok {
+		updateReq["AvailableZone"] = az
+	}
+
+	updateReq["ResetAllParameters"] = fmt.Sprintf("%v", d.Get("reset_all_parameters"))
+	if params, ok = d.GetOk("parameters"); !ok {
+		logger.Info("instance parameters do not exist")
+		return nil
+	}
+	param, ok1 := params.(map[string]interface{})
+	if !ok1 {
+		logger.Info("type of instance parameters must be map")
+		return nil
+	}
+	if len(param) == 0 {
+		logger.Info("instance parameters size : 0")
+		return nil
+	}
+	if err := validParam(d); err != nil {
+		return err
+	}
+	var i int
+	for k, v := range param {
+		i = i + 1
+		updateReq[fmt.Sprintf("%v%v", "Parameters.ParameterName.", i)] = fmt.Sprintf("%v", k)
+		updateReq[fmt.Sprintf("%v%v", "Parameters.ParameterValue.", i)] = fmt.Sprintf("%v", v)
+	}
+
+	action := "SetCacheParameters"
+	logger.Debug(logger.ReqFormat, action, updateReq)
+	if resp, err = conn.SetCacheParameters(&updateReq); err != nil {
+		return fmt.Errorf("error on set instance parameter: %s", err)
+	}
+	logger.Debug(logger.RespFormat, action, updateReq, *resp)
+	if updateReq["AvailableZone"] != nil {
+		az = updateReq["AvailableZone"].(string)
+	}
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{statusPending},
+		Target:     []string{"2"},
+		Refresh:    stateRefreshForOperateFunc(conn, az, d.Id(), []string{"2"}),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 1 * time.Minute,
+	}
+	_, err = stateConf.WaitForState()
+	resourceRedisInstanceParamRead(d, meta)
+	if err != nil {
+		return fmt.Errorf("error on set instance parameter: %s", err)
 	}
 	return nil
 }
@@ -550,7 +548,7 @@ func resourceRedisInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	result := make(map[string]interface{})
 	for k, v := range item {
-		if k == "protocol" || !redisInstanceKeys[k] {
+		if k == "protocol" || k == "slaveNum" || !redisInstanceKeys[k] {
 			continue
 		}
 		result[Hump2Downline(k)] = v
@@ -561,7 +559,7 @@ func resourceRedisInstanceRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	resourceRedisInstanceParamRead(d, meta)
+	//resourceRedisInstanceParamRead(d, meta)
 	return nil
 }
 
@@ -693,7 +691,7 @@ func validParam(d *schema.ResourceData) error {
 		return fmt.Errorf("expected type of parameter to not be map")
 	}
 	var filter map[string]*ValidatorParam
-	if protocol == "4.0" {
+	if protocol == "4.0" || protocol == "5.0" {
 		filter = GetValidatorParamForProto4()
 	} else {
 		filter = GetValidatorParamForProto()

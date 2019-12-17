@@ -272,12 +272,12 @@ _例：官网openapi里主机创建的接口里，可以同时创建eip和主机
 | 监听器绑定访问控制列表  | ksyun_lb\_listener\_associate\_acl | Not_Support | slb
 | 云主机  | ksyun_instance | ksyun_instances | kec
 | 云主机镜像  | Not_Support | ksyun_images | kec
-| 云盘 | ksyun_volume | ksyun_volume | ebs
+| 云盘 | ksyun_volume | ksyun_volumes | ebs
 | 云盘绑定 | ksyun_volume_attach | Not_Support | ebs
 | RDS  | ksyun_krds | ksyun_krds | krds
-| RDS只读实例  | ksyun_krds\_read\_replica | Not_Support | krds
-| RDS安全组  | ksyun_krds\_security\_group | ksyun_krds\_security\_group | krds
-| SqlServer  | ksyun_sqlserver | ksyun_sqlserver | krds
+| RDS只读实例  | ksyun_krds\_read\_replica | ksyun_krds | krds
+| RDS安全组  | ksyun_krds\_security\_group | ksyun_krds\_security\_groups | krds
+| SqlServer  | ksyun_sqlserver | ksyun_sqlservers | krds
 | MongoDB实例  | ksyun_mongodb\_instance | ksyun_mongodb | mongodb
 | MongoDB安全组  | ksyun_mongodb\_security\_rule | ksyun_mongodb | mongodb
 | MongoDB实例分片  | ksyun_mongodb\_shard\_instance | ksyun_mongodb | mongodb
