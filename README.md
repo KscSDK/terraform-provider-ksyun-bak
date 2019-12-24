@@ -283,7 +283,7 @@ _例：官网openapi里主机创建的接口里，可以同时创建eip和主机
 | MongoDB实例分片  | ksyun_mongodb\_shard\_instance | ksyun_mongodb | mongodb
 | Redis实例  | ksyun_redis\_instance | ksyun_redis | kcs
 | Redis节点  | ksyun_redis\_instance\_node | ksyun_redis | kcs
-| Redis安全组  | ksyun_redis\_security | ksyun_redis | kcs
+| Redis安全组规则  | ksyun_redis\_sec\_rule | ksyun_redis | kcs
 | 安全组  | ksyun_security\_group | ksyun_security\_groups | vpc
 | 安全组规则  | ksyun_security\_group\_entry | ksyun_security\_groups | vpc
 | 虚拟网卡  | Not_Support | ksyun_network\_interface | vpc
