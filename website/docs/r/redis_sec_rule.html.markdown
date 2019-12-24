@@ -1,14 +1,14 @@
 ---
 layout: "ksyun"
-page_title: "Ksyun: ksyun_security_group"
-sidebar_current: "docs-ksyun-resource-redis-security-group"
+page_title: "Ksyun: ksyun_redis_sec_rule"
+sidebar_current: "docs-ksyun-resource-redis-sec-rule"
 description: |-
-  Provides an redis security group resource.
+  Provides an redis security rule resource.
 ---
 
-# ksyun_redis_security_group
+# ksyun_redis_sec_rule
 
-Provides an redis security group resource.
+Provides an redis security rule resource.
 
 ## Example Usage
 

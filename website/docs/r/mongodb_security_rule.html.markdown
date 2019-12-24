@@ -1,14 +1,14 @@
 ---
 layout: "ksyun"
-page_title: "Ksyun: ksyun_mongodb_security_group"
-sidebar_current: "docs-ksyun-resource-mongodb-security-group"
+page_title: "Ksyun: ksyun_mongodb_security_rule"
+sidebar_current: "docs-ksyun-resource-mongodb-security-rule"
 description: |-
-  Provides an MongoDB Security Group resource.
+  Provides an MongoDB Security Rule resource.
 ---
 
-# ksyun_mongodb_security_group
+# ksyun_mongodb_security_rule
 
-Provides an MongoDB Security Group resource.
+Provides an MongoDB Security Rule resource.
 
 ## Example Usage
 

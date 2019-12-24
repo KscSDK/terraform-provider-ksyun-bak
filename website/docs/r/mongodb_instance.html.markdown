@@ -1,7 +1,7 @@
 ---
 layout: "ksyun"
-page_title: "Ksyun: ksyun_mongodb_repset_instance"
-sidebar_current: "docs-ksyun-resource-mongodb-repset-instance"
+page_title: "Ksyun: ksyun_mongodb_instance"
+sidebar_current: "docs-ksyun-resource-mongodb-instance"
 description: |-
   Provides an replica set MongoDB resource.
 ---
