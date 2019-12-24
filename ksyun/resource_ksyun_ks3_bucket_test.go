@@ -94,31 +94,6 @@ func TestAccKsyunKs3Bucket_Cors_Update(t *testing.T) {
 				),
 				ExpectNonEmptyPlan: true,
 			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"force_destroy", "acl"},
-			},
-			{
-				Config: testAccKsyunKs3BucketConfigWithCORS(rInt),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKsyunKs3BucketExists(resourceName),
-					testAccCheckKsyunKs3BucketCors(
-						resourceName,
-						[]*s3.CORSRule{
-							{
-								AllowedHeaders: []*string{aws.String("*")},
-								AllowedMethods: []*string{aws.String("PUT"), aws.String("POST")},
-								AllowedOrigins: []*string{aws.String("https://www.example.com")},
-								ExposeHeaders:  []*string{aws.String("x-amz-server-side-encryption"), aws.String("ETag")},
-								MaxAgeSeconds:  Int64(3000),
-							},
-						},
-					),
-				),
-			},
 		},
 	})
 }
