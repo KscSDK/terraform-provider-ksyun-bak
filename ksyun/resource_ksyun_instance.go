@@ -83,14 +83,14 @@ func resourceKsyunInstance() *schema.Resource {
 				},
 			},
 			/*
-				"max_count": {
-					Type:     schema.TypeInt,
-					Required: true,
-				},
-				"min_count": {
-					Type:     schema.TypeInt,
-					Required: true,
-				},
+			   "max_count": {
+			      Type:     schema.TypeInt,
+			      Required: true,
+			   },
+			   "min_count": {
+			      Type:     schema.TypeInt,
+			      Required: true,
+			   },
 			*/
 			"instance_password": {
 				Type:     schema.TypeString,
@@ -159,6 +159,16 @@ func resourceKsyunInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"host_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"user_data": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"instance_configure": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -182,14 +192,14 @@ func resourceKsyunInstance() *schema.Resource {
 							Computed: true,
 						},
 						/*
-							"root_disk_gb": {
-								Type:     schema.TypeInt,
-								Computed: true,
-							},
-							"data_disk_type": {
-								Type:     schema.TypeString,
-								Computed: true,
-							},
+						   "root_disk_gb": {
+						      Type:     schema.TypeInt,
+						      Computed: true,
+						   },
+						   "data_disk_type": {
+						      Type:     schema.TypeString,
+						      Computed: true,
+						   },
 						*/
 					},
 				},
@@ -306,13 +316,13 @@ func resourceKsyunInstanceCreate(d *schema.ResourceData, meta interface{}) error
 	creates := []string{
 		"image_id",
 		"instance_type",
-		//	"system_disk",
+		// "system_disk",
 		"data_disk_gb",
-		//	"data_disk",
+		// "data_disk",
 		//"max_count",=1
 		//"min_count",=1
 		"subnet_id",
-		"instance_password",
+		//"instance_password",于keyid冲突
 		"keep_image_login",
 		"charge_type",
 		"purchase_time",
@@ -328,6 +338,8 @@ func resourceKsyunInstanceCreate(d *schema.ResourceData, meta interface{}) error
 		"address_charge_type",
 		"address_purchase_time",
 		"address_project_id",
+		"host_name",
+		"user_data",
 	}
 	for _, v := range creates {
 		if v1, ok := d.GetOk(v); ok {
@@ -336,12 +348,26 @@ func resourceKsyunInstanceCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 	keyIds, ok := d.GetOk("key_id")
+	var keyset bool
 	if ok {
 		keys := SchemaSetToStringSlice(keyIds)
 		for k, v := range keys {
 			key := fmt.Sprintf("KeyId.%d", k+1)
 			createReq[key] = fmt.Sprintf("%v", v)
 		}
+		if len(keys) > 0 {
+			keyset = true
+		}
+	}
+	keepImageLogin := d.Get("keep_image_login")
+	var keepImage bool
+	if ok {
+		keepImage = keepImageLogin.(bool)
+	}
+	if (!keepImage) && (!keyset) {
+		createReq["InstancePassword"] = d.Get("instance_password")
+	} else {
+		d.Set("instance_password", "")
 	}
 	securityGroupIds, ok := d.GetOk("security_group_id")
 	if !ok {
@@ -427,10 +453,10 @@ func resourceKsyunInstanceRead(d *schema.ResourceData, meta interface{}) error {
 		"KeySet":              true,
 	}
 	excludes := SetDByResp(d, items[0], instanceKeys, excludesKeys)
-	//	if excludes["KeySet"] != nil {
+	// if excludes["KeySet"] != nil {
 	d.Set("key_id", excludes["KeySet"])
 	//log.Println("key_id:%v", excludes["KeySet"])
-	//	}
+	// }
 	if excludes["InstanceConfigure"] != nil {
 		itemSet := GetSubDByRep(excludes["InstanceConfigure"], instanceConfigureKeys, map[string]bool{})
 		if len(itemSet) > 0 {
@@ -486,14 +512,14 @@ func resourceKsyunInstanceRead(d *schema.ResourceData, meta interface{}) error {
 		//SecurityGroupSet instance interface only support one ,so should get from network interface.
 
 		/*if sg, ok := v["security_group_set"]; ok {
-			itemSetSub := GetSubSliceDByRep(sg.([]interface{}), kecSecurityGroupKeys)
-			itemSet[k]["security_group_set"] = itemSetSub
-			if len(itemSetSub) == 1 {
-				if sgIdnew, ok := itemSetSub[0]["security_group_id"]; ok {
-					d.Set("security_group_id", sgIdnew)
-				}
-			}
-		}
+		     itemSetSub := GetSubSliceDByRep(sg.([]interface{}), kecSecurityGroupKeys)
+		     itemSet[k]["security_group_set"] = itemSetSub
+		     if len(itemSetSub) == 1 {
+		        if sgIdnew, ok := itemSetSub[0]["security_group_id"]; ok {
+		           d.Set("security_group_id", sgIdnew)
+		        }
+		     }
+		  }
 		*/
 		vpcConn := meta.(*KsyunClient).vpcconn
 		readReq := make(map[string]interface{})
@@ -577,7 +603,7 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 	//ModifyInstanceImage
 	updateImages := []string{
 		"image_id",
-		//	"system_disk",
+		// "system_disk",
 		//"instance_password",
 		"keep_image_login",
 	}
@@ -596,21 +622,9 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 	var initState string
 	var needStart bool
-	if imageUpdate || d.HasChange("key_id") {
-		/*
-			passwordUpdate := false
-			updatePassword := []string{
-				"instance_password",
-			}
-			var updatedAttributePassword []string
-			for _, v := range updatePassword {
-				if d.HasChange(v) && !d.IsNewResource() && !imageUpdate {
-					updateReq3[Downline2Hump(v)] = fmt.Sprintf("%v", d.Get(v))
-					passwordUpdate = true
-					updatedAttributePassword = append(updatedAttributePassword, v)
-				}
-			}
-		*/
+	//stop instance
+	if imageUpdate || d.HasChange("key_id") || d.HasChange("instance_password") || d.HasChange("host_name") {
+
 		//TODO judge init state of the instance
 		readReq := make(map[string]interface{})
 		readReq["InstanceId.1"] = d.Id()
@@ -654,7 +668,7 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 	if imageUpdate {
-		//not support modify password only ,because can't judge modify status.
+		var keyset bool
 		keyIds, ok := d.GetOk("key_id")
 		if ok {
 			keys := SchemaSetToStringSlice(keyIds)
@@ -662,8 +676,18 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 				key := fmt.Sprintf("KeyId.%d", k+1)
 				updateReq[key] = fmt.Sprintf("%v", v)
 			}
+			if len(keys) > 0 {
+				keyset = true
+			}
 		}
-		updateReq["InstancePassword"] = fmt.Sprintf("%v", d.Get("instance_password"))
+		keepImageLogin := d.Get("keep_image_login")
+		var keepImage bool
+		if ok {
+			keepImage = keepImageLogin.(bool)
+		}
+		if (!keepImage) && (!keyset) {
+			updateReq["InstancePassword"] = fmt.Sprintf("%v", d.Get("instance_password"))
+		}
 		action := "ModifyInstanceImage"
 		logger.Debug(logger.ReqFormat, action, updateReq)
 		resp, err := conn.ModifyInstanceImage(&updateReq)
@@ -707,7 +731,6 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 			if err != nil {
 				return fmt.Errorf("error instnceDetachKey when ModifyInstanceKey %q, %s", d.Id(), err)
 			}
-			d.SetPartial("key_id")
 			time.Sleep(time.Second * 10)
 			stateConf := &resource.StateChangeConf{
 				Pending:    []string{statusPending},
@@ -727,7 +750,6 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 			if err != nil {
 				return fmt.Errorf("error instnceAttachKey when ModifyInstanceKey %q, %s", d.Id(), err)
 			}
-			d.SetPartial("key_id")
 			time.Sleep(time.Second * 10)
 			stateConf := &resource.StateChangeConf{
 				Pending:    []string{statusPending},
@@ -740,6 +762,80 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 			if _, err = stateConf.WaitForState(); err != nil {
 				return fmt.Errorf("error on waiting  when updateing %q, %s", d.Id(), err)
 			}
+			d.SetPartial("key_id")
+		}
+		if initState == "active" {
+			needStart = true
+		}
+	}
+
+	if !imageUpdate && d.HasChange("instance_password") && !d.IsNewResource() {
+		updatedAttributePassword := []string{
+			"instance_password",
+		}
+		updateReq3 := make(map[string]interface{})
+		updateReq3["InstanceId"] = d.Id()
+		for _, v := range updatedAttributePassword {
+			if d.HasChange(v) && !d.IsNewResource() {
+				updateReq3[Downline2Hump(v)] = fmt.Sprintf("%v", d.Get(v))
+			}
+		}
+		action := "ModifyInstanceAttribute"
+		logger.Debug(logger.ReqFormat, action, updateReq3)
+		resp, err := conn.ModifyInstanceAttribute(&updateReq3)
+		if err != nil {
+			return fmt.Errorf("error on updating  instance password, %s", err)
+		}
+		logger.Debug(logger.RespFormat, action, updateReq3, *resp)
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{statusPending},
+			Target:     []string{"updating_password"},
+			Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"updating_password"}),
+			Timeout:    *schema.DefaultTimeout(3 * time.Minute),
+			Delay:      1 * time.Second,
+			MinTimeout: 1 * time.Second,
+		}
+		if _, err = stateConf.WaitForState(); err != nil {
+			return fmt.Errorf("error on waiting for starting instance when update password %q, %s", d.Id(), err)
+		}
+		stateConf = &resource.StateChangeConf{
+			Pending:    []string{statusPending},
+			Target:     []string{"stopped"},
+			Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"stopped"}),
+			Timeout:    *schema.DefaultTimeout(5 * time.Minute),
+			Delay:      3 * time.Second,
+			MinTimeout: 2 * time.Second,
+		}
+		if _, err = stateConf.WaitForState(); err != nil {
+			return fmt.Errorf("error on waiting for starting instance when update password%q, %s", d.Id(), err)
+		}
+		for _, v := range updatedAttributePassword {
+			d.SetPartial(v)
+		}
+		if initState == "active" {
+			needStart = true
+		}
+	}
+	if d.HasChange("host_name") && !d.IsNewResource() {
+		updatedAttributeHostName := []string{
+			"host_name",
+		}
+		updateReq4 := make(map[string]interface{})
+		updateReq4["InstanceId"] = d.Id()
+		for _, v := range updatedAttributeHostName {
+			if d.HasChange(v) && !d.IsNewResource() {
+				updateReq4[Downline2Hump(v)] = fmt.Sprintf("%v", d.Get(v))
+			}
+		}
+		action := "ModifyInstanceAttribute"
+		logger.Debug(logger.ReqFormat, action, updateReq4)
+		resp, err := conn.ModifyInstanceAttribute(&updateReq4)
+		if err != nil {
+			return fmt.Errorf("error on updating  instance host_name, %s", err)
+		}
+		logger.Debug(logger.RespFormat, action, updateReq4, *resp)
+		for _, v := range updatedAttributeHostName {
+			d.SetPartial(v)
 		}
 		if initState == "active" {
 			needStart = true
@@ -768,68 +864,68 @@ func resourceKsyunInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 	//ModifyInstanceType //need reboot
-	/*	typeUpdate := false
-			updateInstanceTypes := []string{
-				"instance_type",
-				"data_disk_gb",
-			}
-			var typeUpdated []string
-			for _, v := range updateInstanceTypes {
-				if d.HasChange(v) && !d.IsNewResource() {
-					updateReq[Downline2Hump(v)] = fmt.Sprintf("%v", d.Get(v))
-					typeUpdate = true
-					typeUpdated = append(typeUpdated, v)
-				}
-			}
-			if typeUpdate {
-				action := "ModifyInstanceType"
-				logger.Debug(logger.ReqFormat, action, updateReq)
-				resp, err := conn.ModifyInstanceType(&updateReq)
-				if err != nil {
-					return fmt.Errorf("error on updating  instance type, %s", err)
-				}
-				logger.Debug(logger.RespFormat, action, updateReq, *resp)
-				for _, v := range typeUpdated {
-					d.SetPartial(v)
-				}
-			}
+	/* typeUpdate := false
+	      updateInstanceTypes := []string{
+	         "instance_type",
+	         "data_disk_gb",
+	      }
+	      var typeUpdated []string
+	      for _, v := range updateInstanceTypes {
+	         if d.HasChange(v) && !d.IsNewResource() {
+	            updateReq[Downline2Hump(v)] = fmt.Sprintf("%v", d.Get(v))
+	            typeUpdate = true
+	            typeUpdated = append(typeUpdated, v)
+	         }
+	      }
+	      if typeUpdate {
+	         action := "ModifyInstanceType"
+	         logger.Debug(logger.ReqFormat, action, updateReq)
+	         resp, err := conn.ModifyInstanceType(&updateReq)
+	         if err != nil {
+	            return fmt.Errorf("error on updating  instance type, %s", err)
+	         }
+	         logger.Debug(logger.RespFormat, action, updateReq, *resp)
+	         for _, v := range typeUpdated {
+	            d.SetPartial(v)
+	         }
+	      }
 
 
-		//need shutdown later
-		//StopInstances
-		  if d.HasChange("force_stop") && !d.IsNewResource() {
-		  	if d.Get("force_stop").(bool) {
-		  		_, err := conn.StopInstances(&updateReq1)
-		  		if err != nil {
-		  			return fmt.Errorf("error on stop instance , %s", err)
-		  		}
-		  	}
-		  }
+	   //need shutdown later
+	   //StopInstances
+	     if d.HasChange("force_stop") && !d.IsNewResource() {
+	      if d.Get("force_stop").(bool) {
+	         _, err := conn.StopInstances(&updateReq1)
+	         if err != nil {
+	            return fmt.Errorf("error on stop instance , %s", err)
+	         }
+	      }
+	     }
 
 
-				if passwordUpdate {
-					action := "ModifyInstanceType"
-					logger.Debug(logger.ReqFormat, action, updateReq3)
-					resp, err := conn.ModifyInstanceType(&updateReq3)
-					if err != nil {
-						return fmt.Errorf("error on updating  instance type, %s", err)
-					}
-					logger.Debug(logger.RespFormat, action, updateReq3, *resp)
-					for _, v := range updatedAttributePassword {
-						d.SetPartial(v)
-					}
-				}
+	         if passwordUpdate {
+	            action := "ModifyInstanceType"
+	            logger.Debug(logger.ReqFormat, action, updateReq3)
+	            resp, err := conn.ModifyInstanceType(&updateReq3)
+	            if err != nil {
+	               return fmt.Errorf("error on updating  instance type, %s", err)
+	            }
+	            logger.Debug(logger.RespFormat, action, updateReq3, *resp)
+	            for _, v := range updatedAttributePassword {
+	               d.SetPartial(v)
+	            }
+	         }
 
-			if initState == "active" {
-				//judge init state,and need start if active
-				action := "RebootInstances"
-				logger.Debug(logger.ReqFormat, action, updateReq1)
-				resp, err := conn.RebootInstances(&updateReq1) //sync
-				if err != nil {
-					return fmt.Errorf("error on updating instance type, %s", err)
-				}
-				logger.Debug(logger.RespFormat, action, updateReq1, *resp)
-			}
+	      if initState == "active" {
+	         //judge init state,and need start if active
+	         action := "RebootInstances"
+	         logger.Debug(logger.ReqFormat, action, updateReq1)
+	         resp, err := conn.RebootInstances(&updateReq1) //sync
+	         if err != nil {
+	            return fmt.Errorf("error on updating instance type, %s", err)
+	         }
+	         logger.Debug(logger.RespFormat, action, updateReq1, *resp)
+	      }
 	*/
 	//modify network interface information
 	var networkUpdate bool
@@ -902,12 +998,12 @@ func resourceKsyunInstanceDelete(d *schema.ResourceData, meta interface{}) error
 		resp, err1 := conn.DescribeInstances(&readReq)
 		logger.Debug(logger.AllFormat, action, readReq, *resp, err1)
 		/*
-			{
-			    "Marker": 0,
-			    "InstanceCount": 0,
-			    "RequestId": "7c34a18b-b562-44f3-8ea9-a350e3afe649",
-			    "InstancesSet": []
-			}
+		   {
+		       "Marker": 0,
+		       "InstanceCount": 0,
+		       "RequestId": "7c34a18b-b562-44f3-8ea9-a350e3afe649",
+		       "InstancesSet": []
+		   }
 		*/
 		if err1 != nil && notFoundError(err1) {
 			return nil
@@ -922,10 +1018,10 @@ func resourceKsyunInstanceDelete(d *schema.ResourceData, meta interface{}) error
 		}
 		//recycling will cant't delete security group
 		/*else { //recycling will cant't delete security group
-			if err2 == nil || notFoundError(err2) {
-				return nil
-			}
-		}
+		     if err2 == nil || notFoundError(err2) {
+		        return nil
+		     }
+		  }
 		*/
 		itemset, ok := (*resp)["InstancesSet"]
 		if !ok {
@@ -946,31 +1042,31 @@ func resourceKsyunInstanceDelete(d *schema.ResourceData, meta interface{}) error
 		}
 
 		/*
-			if strings.ToLower(initState) != "stopped" &&
-				strings.ToLower(initState) != "error" &&
-				strings.ToLower(initState) != "recycling" {
-				action = "StopInstances"
-				logger.Debug(logger.ReqFormat, action, readReq)
-				resp, err := conn.StopInstances(&readReq) //sync
-				logger.Debug(logger.AllFormat, action, readReq, *resp, err)
-				if err1 != nil && notFoundError(err1) {
-					return nil
-				}
-				if err != nil {
-					return resource.RetryableError(err)
-				}
-				stateConf := &resource.StateChangeConf{
-					Pending:    []string{statusPending},
-					Target:     []string{"stopped"},
-					Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"stopped"}),
-					Timeout:    d.Timeout(schema.TimeoutUpdate),
-					Delay:      3 * time.Second,
-					MinTimeout: 2 * time.Second,
-				}
-				if _, err = stateConf.WaitForState(); err != nil {
-					return resource.RetryableError(err)
-				}
-			}
+		   if strings.ToLower(initState) != "stopped" &&
+		      strings.ToLower(initState) != "error" &&
+		      strings.ToLower(initState) != "recycling" {
+		      action = "StopInstances"
+		      logger.Debug(logger.ReqFormat, action, readReq)
+		      resp, err := conn.StopInstances(&readReq) //sync
+		      logger.Debug(logger.AllFormat, action, readReq, *resp, err)
+		      if err1 != nil && notFoundError(err1) {
+		         return nil
+		      }
+		      if err != nil {
+		         return resource.RetryableError(err)
+		      }
+		      stateConf := &resource.StateChangeConf{
+		         Pending:    []string{statusPending},
+		         Target:     []string{"stopped"},
+		         Refresh:    instanceStateRefreshFunc(conn, d.Id(), []string{"stopped"}),
+		         Timeout:    d.Timeout(schema.TimeoutUpdate),
+		         Delay:      3 * time.Second,
+		         MinTimeout: 2 * time.Second,
+		      }
+		      if _, err = stateConf.WaitForState(); err != nil {
+		         return resource.RetryableError(err)
+		      }
+		   }
 
 		*/
 
@@ -1036,10 +1132,13 @@ func resourceKsyunInstanceDelete(d *schema.ResourceData, meta interface{}) error
 func instanceStateRefreshFunc(client *kec.Kec, instanceId string, target []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		req := map[string]interface{}{"InstanceId.1": instanceId}
+		action := "DescribeInstances"
+		logger.Debug(logger.ReqFormat, action, req)
 		resp, err := client.DescribeInstances(&req)
 		if err != nil {
 			return nil, "", err
 		}
+		logger.Debug(logger.AllFormat, action, req, *resp, err)
 		itemset, ok := (*resp)["InstancesSet"]
 		items, ok := itemset.([]interface{})
 		if !ok || len(items) == 0 {

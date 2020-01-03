@@ -4,7 +4,7 @@ provider "ksyun" {
 }
 
 resource "ksyun_instance" "default" {
-  image_id="d3290df6-3597-4f83-b5ae-48356e91ad46"
+  image_id="6e37ed46-61a2-4f0a-9f4a-dcdd0817917c"
   instance_type="N3.2B"
   system_disk{
     disk_type="SSD3.0"
@@ -19,20 +19,22 @@ resource "ksyun_instance" "default" {
       delete_with_instance=true
    }
  ]
-  subnet_id="9a9ac083-cd22-4e75-af56-593a91463972"
+  subnet_id="2ea4195d-8111-4cd8-91da-6a34bb06663b"
   instance_password="Xuan663222"
   keep_image_login=false
   charge_type="Daily"
   purchase_time=1
-  security_group_id=["b8591529-2741-4f09-af3c-49a954e3e4fa"]
+  security_group_id=["6e3dee9c-291c-4647-bfc2-4c1eaa93fb80"]
   private_ip_address=""
-  instance_name="xuan-tf-update"
+  instance_name="xuan-tf"
   instance_name_suffix=""
   sriov_net_support=false
   project_id=0
   data_guard_id=""
-  key_id=["6ae00afe-7daa-4dd9-a668-b6bcb175120f","76ad3eca-a3e4-4d73-a05d-b715933ef605"]
-  "d_n_s1"=""
-  "d_n_s2"=""
-  "force_delete"=true
+  key_id=[]
+  d_n_s1 =""
+  d_n_s2 =""
+  force_delete =true
+  user_data=""
+  host_name="xuan-tf"
 }
