@@ -37,11 +37,11 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"ksyun_lines":                         dataSourceKsyunLines(),
 			"ksyun_eips":                          dataSourceKsyunEips(),
-			"ksyun_slbs":                          dataSourceKsyunSlbs(),
+			"ksyun_slbs":                          dataSourceKsyunLbs(),
 			"ksyun_lbs":                           dataSourceKsyunLbs(),
 			"ksyun_listeners":                     dataSourceKsyunListeners(),
 			"ksyun_health_checks":                 dataSourceKsyunHealthChecks(),
-			"ksyun_listener_servers":              dataSourceKsyunListenerServers(),
+			"ksyun_listener_servers":              dataSourceKsyunLbListenerServers(),
 			"ksyun_lb_listener_servers":           dataSourceKsyunLbListenerServers(),
 			"ksyun_lb_acls":                       dataSourceKsyunSlbAcls(),
 			"ksyun_availability_zones":            dataSourceKsyunAvailabilityZones(),
