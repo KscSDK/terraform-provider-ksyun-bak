@@ -1,5 +1,6 @@
 # Specify the provider and access details
 provider "ksyun" {
+  region = "cn-beijing-6"
 }
 
 # Get  instances

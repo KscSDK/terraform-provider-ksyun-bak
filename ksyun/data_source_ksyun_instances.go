@@ -335,6 +335,13 @@ func dataSourceKsyunInstances() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"key_id": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 					},
 				},
 			},
@@ -482,6 +489,9 @@ func dealInstanceData(datas []map[string]interface{}) {
 				datas[k]["monitoring"] = GetSubDByRep(v1, monitoringKeys, map[string]bool{})
 			case "instance_state":
 				datas[k]["instance_state"] = GetSubDByRep(v1, instanceStateKeys, map[string]bool{})
+			case "key_set":
+				datas[k]["key_id"] = v1
+				delete(datas[k], "key_set")
 			case "network_interface_set":
 				vv := v1.([]interface{})
 				networkSet := GetSubSliceDByRep(vv, kecNetworkInterfaceSetKeys)
