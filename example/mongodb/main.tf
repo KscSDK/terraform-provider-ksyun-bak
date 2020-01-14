@@ -10,11 +10,11 @@ data "ksyun_availability_zones" "default" {
   ids = []
 }
 resource "ksyun_vpc" "default" {
-  vpc_name = "ksyun-vpc-tf"
+  vpc_name = "ksyun-vpc-mongodb-tf"
   cidr_block = "10.1.0.0/23"
 }
 resource "ksyun_subnet" "default" {
-  subnet_name = "ksyun-subnet-tf"
+  subnet_name = "ksyun-subnet-mongodb-tf"
   cidr_block = "10.1.0.0/23"
   subnet_type = "Reserve"
   dhcp_ip_from = "10.1.0.2"
@@ -27,7 +27,7 @@ resource "ksyun_subnet" "default" {
 }
 
 resource "ksyun_mongodb_instance" "repset" {
-  name = "mongodb_repset"
+  name = "mongodb_repset_tf"
   instance_account = "root"
   instance_password = "admin"
   instance_class = "1C2G"
@@ -42,7 +42,7 @@ resource "ksyun_mongodb_instance" "repset" {
 }
 
 resource "ksyun_mongodb_shard_instance" "shard" {
-  name = "mongodb_shard"
+  name = "mongodb_shard_tf"
   instance_account = "root"
   instance_password = "admin"
   mongos_class = "1C2G"

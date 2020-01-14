@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/terraform-providers/terraform-provider-ksyun/logger"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestAccKsyunMongodbInstance_basic(t *testing.T) {
@@ -37,6 +39,20 @@ func testAccCheckMongodbInstanceExists(n string) resource.TestCheckFunc {
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("mongodb instance create failure")
 		}
+
+		client := testAccProvider.Meta().(*KsyunClient)
+		readReq := make(map[string]interface{})
+		readReq["InstanceId"] = rs.Primary.ID
+
+		logger.Debug(logger.ReqFormat, "DescribeMongoDBInstance", readReq)
+		_, err := client.mongodbconn.DescribeMongoDBInstance(&readReq)
+		if err != nil {
+			return fmt.Errorf("error on reading instance %q, %s", rs.Primary.ID, err)
+		}
+
+		//wait for update
+		time.Sleep(90 * time.Second)
+
 		return nil
 	}
 }
@@ -72,11 +88,11 @@ data "ksyun_availability_zones" "default" {
   ids=[]
 }
 resource "ksyun_vpc" "default" {
-  vpc_name = "ksyun-vpc-tf"
+  vpc_name = "ksyun-vpc-mongodb-tf"
   cidr_block = "10.1.0.0/23"
 }
 resource "ksyun_subnet" "default" {
-  subnet_name = "ksyun-subnet-tf"
+  subnet_name = "ksyun-subnet-mongodb-tf"
   cidr_block = "10.1.0.0/23"
   subnet_type = "Reserve"
   dhcp_ip_from = "10.1.0.2"
@@ -88,7 +104,7 @@ resource "ksyun_subnet" "default" {
   availability_zone = "${data.ksyun_availability_zones.default.availability_zones.0.availability_zone_name}"
 }
 resource "ksyun_mongodb_instance" "default" {
-  name = "mongodb_repset"
+  name = "mongodb_repset_tf"
   instance_account = "root"
   instance_password = "admin"
   instance_class = "1C2G"

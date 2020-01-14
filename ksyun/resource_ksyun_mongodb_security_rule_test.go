@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestAccKsyunMongodbSecurityRule_basic(t *testing.T) {
@@ -49,6 +50,9 @@ func testAccCheckMongodbSecurityRuleExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("mongodb instance security rule is not exist")
 		}
 
+		//wait for update
+		time.Sleep(90 * time.Second)
+
 		return nil
 	}
 }
@@ -86,11 +90,11 @@ data "ksyun_availability_zones" "default" {
   ids=[]
 }
 resource "ksyun_vpc" "default" {
-  vpc_name = "ksyun-vpc-tf"
+  vpc_name = "ksyun-vpc-mongodb-tf"
   cidr_block = "10.1.0.0/23"
 }
 resource "ksyun_subnet" "default" {
-  subnet_name = "ksyun-subnet-tf"
+  subnet_name = "ksyun-subnet-mongodb-tf"
   cidr_block = "10.1.0.0/23"
   subnet_type = "Reserve"
   dhcp_ip_from = "10.1.0.2"
@@ -102,7 +106,7 @@ resource "ksyun_subnet" "default" {
   availability_zone = "${data.ksyun_availability_zones.default.availability_zones.0.availability_zone_name}"
 }
 resource "ksyun_mongodb_instance" "default" {
-  name = "mongodb_repset"
+  name = "mongodb_repset_tf"
   instance_account = "root"
   instance_password = "admin"
   instance_class = "1C2G"
